@@ -1,6 +1,11 @@
 buildscript {
-  ext.getExtOrDefault = {name ->
+  ext.getExtOrDefault = { name ->
     return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties['YamapLite_' + name]
+  }
+
+  ext {
+    minSdkVersion = 26
+    compileSdkVersion = 34
   }
 
   repositories {
@@ -10,24 +15,21 @@ buildscript {
 
   dependencies {
     classpath "com.android.tools.build:gradle:8.7.2"
-    // noinspection DifferentKotlinGradleVersion
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${getExtOrDefault('kotlinVersion')}"
   }
 }
 
-
 apply plugin: "com.android.library"
-apply plugin: "kotlin-android"
-
-apply plugin: "com.facebook.react"
+apply plugin: "org.jetbrains.kotlin.android"
 
 def getExtOrIntegerDefault(name) {
-  return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties["YamapLite_" + name]).toInteger()
+  return rootProject.ext.has(name)
+    ? rootProject.ext.get(name)
+    : (project.properties["YamapLite_" + name]).toInteger()
 }
 
 android {
   namespace "com.yamaplite"
-
   compileSdkVersion getExtOrIntegerDefault("compileSdkVersion")
 
   defaultConfig {
@@ -45,13 +47,17 @@ android {
     }
   }
 
-  lintOptions {
-    disable "GradleCompatible"
+  lint {
+    disable 'GradleCompatible'
   }
 
   compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
+    sourceCompatibility JavaVersion.VERSION_17
+    targetCompatibility JavaVersion.VERSION_17
+  }
+
+  kotlinOptions {
+    jvmTarget = "17"
   }
 
   sourceSets {
@@ -65,19 +71,21 @@ android {
 }
 
 repositories {
-  mavenCentral()
   google()
+  mavenCentral()
 }
 
 def kotlin_version = getExtOrDefault("kotlinVersion")
 
 dependencies {
-  implementation "com.facebook.react:react-android"
+  implementation "com.facebook.react:react-android:0.79.2"
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+  implementation 'com.yandex.android:maps.mobile:4.24.0-lite'
 }
 
-react {
-  jsRootDir = file("../src/")
-  libraryName = "YamapLiteView"
-  codegenJavaPackageName = "com.yamaplite"
+afterEvaluate {
+  def react = rootProject.ext.has("react") ? rootProject.ext.get("react") : null
+  if (react != null && react.hasProperty("registerReactNativeModule")) {
+    react.registerReactNativeModule(project)
+  }
 }
