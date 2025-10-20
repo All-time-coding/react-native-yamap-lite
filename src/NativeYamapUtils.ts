@@ -3,8 +3,7 @@ import type { Double } from 'react-native/Libraries/Types/CodegenTypes';
 import type { Point, ScreenPoint } from './@types';
 
 export interface Spec extends TurboModule {
-  multiply(a: number, b: number): Promise<number>;
-
+  initWithKey(key: string): Promise<void>;
   getCameraPosition(viewId: Double): Promise<{
     latitude: Double;
     longitude: Double;
@@ -12,7 +11,6 @@ export interface Spec extends TurboModule {
     azimuth: Double;
     tilt: Double;
   }>;
-
   getScreenPoints(viewId: Double, points: Point[]): Promise<ScreenPoint>;
   getVisibleRegion(viewId: Double): Promise<unknown>;
 }

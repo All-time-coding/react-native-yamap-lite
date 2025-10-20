@@ -291,11 +291,6 @@ public class YamapView: UIView {
         return result
     }
 
-    @objc func initWithKey(_ apiKey: String) {
-        YMKMapKit.setApiKey(apiKey)
-        YMKMapKit.sharedInstance()
-    }
-
     @objc public func move(_ latitude: Double, _ longitude: Double, _ zoom: Float, _ azimuth: Float, _ tilt: Float) {
         guard let m = mapView?.mapWindow?.map else { return }
         m.move(with: YMKCameraPosition(

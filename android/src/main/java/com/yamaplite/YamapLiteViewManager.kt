@@ -1,41 +1,160 @@
 package com.yamaplite
 
-import android.graphics.Color
+import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.module.annotations.ReactModule
-import com.facebook.react.uimanager.SimpleViewManager
 import com.facebook.react.uimanager.ThemedReactContext
-import com.facebook.react.uimanager.ViewManagerDelegate
+import com.facebook.react.uimanager.SimpleViewManager
 import com.facebook.react.uimanager.annotations.ReactProp
+import com.facebook.react.uimanager.ViewManagerDelegate
 import com.facebook.react.viewmanagers.YamapLiteViewManagerInterface
 import com.facebook.react.viewmanagers.YamapLiteViewManagerDelegate
 
-@ReactModule(name = YamapLiteViewManager.NAME)
-class YamapLiteViewManager : SimpleViewManager<YamapLiteView>(),
-  YamapLiteViewManagerInterface<YamapLiteView> {
+
+class YamapLiteViewManager : SimpleViewManager<YamapLiteView>(), YamapLiteViewManagerInterface<YamapLiteView> {
   private val mDelegate: ViewManagerDelegate<YamapLiteView>
 
   init {
     mDelegate = YamapLiteViewManagerDelegate(this)
   }
 
-  override fun getDelegate(): ViewManagerDelegate<YamapLiteView>? {
-    return mDelegate
-  }
-
-  override fun getName(): String {
-    return NAME
-  }
+  override fun getDelegate(): ViewManagerDelegate<YamapLiteView> = mDelegate
 
   public override fun createViewInstance(context: ThemedReactContext): YamapLiteView {
     return YamapLiteView(context)
   }
 
-  @ReactProp(name = "color")
-  override fun setColor(view: YamapLiteView?, color: String?) {
-    view?.setBackgroundColor(Color.parseColor(color))
+  override fun getName() = "YamapLiteView"
+
+  @ReactProp(name = "setUserLocationIcon")
+  override fun setUserLocationIcon(view: YamapLiteView, value: String?) {
+    view.setUserLocationIcon(value)
   }
 
-  companion object {
-    const val NAME = "YamapLiteView"
+  @ReactProp(name = "setUserLocationIconScale")
+  override fun setUserLocationIconScale(view: YamapLiteView, value: Float) {
+    view.setUserLocationIconScale(value)
+  }
+
+  @ReactProp(name = "setShowUserPosition")
+  override fun setShowUserPosition(view: YamapLiteView, value: Boolean) {
+    view.setShowUserPosition(value)
+  }
+
+  @ReactProp(name = "setNightMode")
+  override fun setNightMode(view: YamapLiteView, value: Boolean) {
+    view.setNightMode(value)
+  }
+
+  @ReactProp(name = "setMapStyle")
+  override fun setMapStyle(view: YamapLiteView, value: String?) {
+    view.setMapStyle(value)
+  }
+
+  @ReactProp(name = "setUserLocationAccuracyFillColor")
+  override fun setUserLocationAccuracyFillColor(view: YamapLiteView, value: String?) {
+    view.setUserLocationAccuracyFillColor(value)
+  }
+
+  @ReactProp(name = "setUserLocationAccuracyStrokeColor")
+  override fun setUserLocationAccuracyStrokeColor(view: YamapLiteView, value: String?) {
+    view.setUserLocationAccuracyStrokeColor(value)
+  }
+
+  @ReactProp(name = "setUserLocationAccuracyStrokeWidth")
+  override fun setUserLocationAccuracyStrokeWidth(view: YamapLiteView, value: Float) {
+    view.setUserLocationAccuracyStrokeWidth(value)
+  }
+
+  @ReactProp(name = "setScrollGesturesEnabled")
+  override fun setScrollGesturesEnabled(view: YamapLiteView, value: Boolean) {
+    view.setScrollGesturesEnabled(value)
+  }
+
+  @ReactProp(name = "setZoomGesturesEnabled")
+  override fun setZoomGesturesEnabled(view: YamapLiteView, value: Boolean) {
+    view.setZoomGesturesEnabled(value)
+  }
+
+  @ReactProp(name = "setTiltGesturesEnabled")
+  override fun setTiltGesturesEnabled(view: YamapLiteView, value: Boolean) {
+    view.setTiltGesturesEnabled(value)
+  }
+
+  @ReactProp(name = "setRotateGesturesEnabled")
+  override fun setRotateGesturesEnabled(view: YamapLiteView, value: Boolean) {
+    view.setRotateGesturesEnabled(value)
+  }
+
+  @ReactProp(name = "setFastTapEnabled")
+  override fun setFastTapEnabled(view: YamapLiteView, value: Boolean) {
+    view.setFastTapEnabled(value)
+  }
+
+  @ReactProp(name = "setInitialRegion")
+  override fun setInitialRegion(view: YamapLiteView, value: ReadableMap?) {
+    if (value != null) {
+      val region = mutableMapOf<String, Any>()
+      if (value.hasKey("latitude")) region["latitude"] = value.getDouble("latitude")
+      if (value.hasKey("longitude")) region["longitude"] = value.getDouble("longitude")
+      if (value.hasKey("zoom")) region["zoom"] = value.getDouble("zoom")
+      if (value.hasKey("azimuth")) region["azimuth"] = value.getDouble("azimuth")
+      if (value.hasKey("tilt")) region["tilt"] = value.getDouble("tilt")
+      view.setInitialRegion(region)
+    }
+  }
+
+  @ReactProp(name = "setMaxFps")
+  override fun setMaxFps(view: YamapLiteView, value: Float) {
+    view.setMaxFps(value)
+  }
+
+  @ReactProp(name = "setMapType")
+  override fun setMapType(view: YamapLiteView, value: String?) {
+    view.setMapType(value)
+  }
+
+  @ReactProp(name = "setFollowUser")
+  override fun setFollowUser(view: YamapLiteView, value: Boolean) {
+    view.setFollowUser(value)
+  }
+
+  @ReactProp(name = "setLogoPosition")
+  override fun setLogoPosition(view: YamapLiteView, value: ReadableMap?) {
+    if (value != null) {
+      val position = mutableMapOf<String, Any>()
+      if (value.hasKey("vertical")) position["vertical"] = value.getString("vertical") ?: "bottom"
+      if (value.hasKey("horizontal")) position["horizontal"] = value.getString("horizontal") ?: "left"
+      view.setLogoPosition(position)
+    }
+  }
+
+  @ReactProp(name = "setLogoPadding")
+  override fun setLogoPadding(view: YamapLiteView, value: ReadableMap?) {
+    if (value != null) {
+      val padding = mutableMapOf<String, Any>()
+      if (value.hasKey("vertical")) padding["vertical"] = value.getDouble("vertical")
+      if (value.hasKey("horizontal")) padding["horizontal"] = value.getDouble("horizontal")
+      view.setLogoPadding(padding)
+    }
+  }
+
+  override fun getCameraPosition(view: YamapLiteView) {
+    // Этот метод вызывается как команда, результат отправляется через YamapUtils
+  }
+
+  override fun reload(view: YamapLiteView) {
+    view.reload()
+  }
+
+  override fun setCenter(view: YamapLiteView, latitude: Double, longitude: Double, zoom: Float, azimuth: Float, tilt: Float, duration: Float) {
+    view.setCenter(latitude, longitude, zoom, azimuth, tilt, duration)
+  }
+
+  override fun setZoom(view: YamapLiteView, zoom: Float) {
+    view.setZoom(zoom)
+  }
+
+  override fun fitAllMarkers(view: YamapLiteView) {
+    view.fitAllMarkers()
   }
 }

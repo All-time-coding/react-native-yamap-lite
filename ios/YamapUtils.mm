@@ -8,6 +8,7 @@
 #import <React/RCTUIManager.h>
 
 #import "YamapLite-Swift.h"
+#import <YandexMapsMobile/YMKMapKitFactory.h>
 
 @implementation YamapUtils
 
@@ -50,10 +51,24 @@ RCT_EXPORT_MODULE()
 });
 }
 
-- (void)getVisibleRegion:(double)viewId{
+- (void)getVisibleRegion:(double)viewId
+{
     RCTExecuteOnMainQueue(^{
         YamapView* view = [self getView:viewId];
         //TODO:
+    });
+}
+
+- (void)initWithKey:(NSString *)key resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject
+{
+      dispatch_async(dispatch_get_main_queue(), ^{
+        if (key.length == 0) {
+            reject(@"initWithKey", @"API key is empty", nil);
+            return;
+        }
+        [YMKMapKit setApiKey:key];
+        [YMKMapKit initialize];
+        resolve(@(YES));
     });
 }
 

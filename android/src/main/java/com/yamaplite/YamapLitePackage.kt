@@ -8,12 +8,13 @@ import java.util.ArrayList
 
 class YamapLiteViewPackage : ReactPackage {
   override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> {
-    val viewManagers: MutableList<ViewManager<*, *>> = ArrayList()
-    viewManagers.add(YamapLiteViewManager())
-    return viewManagers
+    return listOf(
+      YamapLiteViewManager() as ViewManager<*, *>,
+      YamapLiteCircleViewManager() as ViewManager<*, *>
+    )
   }
 
   override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> {
-    return emptyList()
+    return listOf(YamapUtils(reactContext) as NativeModule)
   }
 }

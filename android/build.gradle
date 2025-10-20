@@ -29,21 +29,21 @@ def getExtOrIntegerDefault(name) {
 }
 
 android {
-  namespace "com.yamaplite"
-  compileSdkVersion getExtOrIntegerDefault("compileSdkVersion")
+  namespace = "com.yamaplite"
+  compileSdk = getExtOrIntegerDefault("compileSdkVersion")
 
   defaultConfig {
-    minSdkVersion getExtOrIntegerDefault("minSdkVersion")
-    targetSdkVersion getExtOrIntegerDefault("targetSdkVersion")
+    minSdk = getExtOrIntegerDefault("minSdkVersion")
+    targetSdk = getExtOrIntegerDefault("targetSdkVersion")
   }
 
   buildFeatures {
-    buildConfig true
+    buildConfig = true
   }
 
   buildTypes {
     release {
-      minifyEnabled false
+      minifyEnabled = false
     }
   }
 
@@ -52,8 +52,8 @@ android {
   }
 
   compileOptions {
-    sourceCompatibility JavaVersion.VERSION_17
-    targetCompatibility JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
   }
 
   kotlinOptions {
@@ -63,6 +63,8 @@ android {
   sourceSets {
     main {
       java.srcDirs += [
+        "app/build/generated/source/codegen/java",
+        "build/generated/source/codegen/java",
         "generated/java",
         "generated/jni"
       ]

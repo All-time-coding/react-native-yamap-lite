@@ -5,32 +5,26 @@ import {
   type ForwardedRef,
 } from 'react';
 import type { NativeProps } from '../YamapLiteViewNativeComponent';
-import {
-  Alert,
-  findNodeHandle,
-  Image,
-  type ImageSourcePropType,
-} from 'react-native';
+import { Image, type ImageSourcePropType } from 'react-native';
 import type { YamapRef } from '../@types';
-import YamapLiteView, { Commands } from '../YamapLiteViewNativeComponent';
-import { YamapLiteUtils } from 'react-native-yamap-lite';
-const Yamap = (rest: NativeProps, ref: ForwardedRef<YamapRef>) => {
+import YamapLiteView from '../YamapLiteViewNativeComponent';
+import { YamapUtils } from '../Utils/YamapUtils';
+
+const Yamap = (props: NativeProps, ref: ForwardedRef<YamapRef>) => {
   const nativeRef = useRef(null);
+  const { userLocationIcon, ...otherProps } = props;
 
   useImperativeHandle(
     ref,
     () => ({
       getCameraPosition: async () => {
-        const handler = findNodeHandle(nativeRef.current) ?? -1;
-        Alert.alert('111');
-
-        return YamapLiteUtils.getCameraPosition(handler);
+        return YamapUtils.getCameraPosition(nativeRef.current!);
       },
       setZoom: (zoom: number) => {
-        return Commands.setZoom(nativeRef.current!, zoom);
+        return YamapUtils.setZoom(nativeRef.current!, zoom);
       },
       setCenter(center, zoom, azimuth, tilt, animation) {
-        return Commands.setCenter(
+        return YamapUtils.setCenter(
           nativeRef.current!,
           center.lat,
           center.lon,
@@ -44,11 +38,16 @@ const Yamap = (rest: NativeProps, ref: ForwardedRef<YamapRef>) => {
     []
   );
 
-  const userIcon = rest.userLocationIcon
-    ? Image.resolveAssetSource(rest.userLocationIcon as ImageSourcePropType).uri
+  const userIcon = userLocationIcon
+    ? Image.resolveAssetSource(userLocationIcon as ImageSourcePropType).uri
     : '';
+
   return (
-    <YamapLiteView ref={nativeRef} {...rest} userLocationIcon={userIcon} />
+    <YamapLiteView
+      ref={nativeRef}
+      {...otherProps}
+      userLocationIcon={userIcon}
+    />
   );
 };
 
