@@ -10,7 +10,6 @@ class YamapLiteViewPackage : ReactPackage {
   override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> {
     return listOf(
       YamapLiteViewManager() as ViewManager<*, *>,
-      YamapLiteCircleViewManager() as ViewManager<*, *>
     )
   }
 
