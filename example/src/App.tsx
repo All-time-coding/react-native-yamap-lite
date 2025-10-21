@@ -1,10 +1,23 @@
-import { View, StyleSheet } from 'react-native';
-import { YamapLiteView } from 'react-native-yamap-lite';
+import React from 'react';
+import { View, StyleSheet, ActivityIndicator } from 'react-native';
+import { YamapLiteView, YamapUtils } from 'react-native-yamap-lite';
 
 export default function App() {
+  const [isInitialized, setIsInitialized] = React.useState(false);
+
+  React.useEffect(() => {
+    YamapUtils.initWithKey('API_KEY').then(() => {
+      setIsInitialized(true);
+    });
+  }, []);
+
   return (
     <View style={styles.container}>
-      <YamapLiteView color="#32a852" style={styles.box} />
+      {isInitialized ? (
+        <YamapLiteView style={styles.box} />
+      ) : (
+        <ActivityIndicator size="large" color="#0000ff" />
+      )}
     </View>
   );
 }
@@ -16,8 +29,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   box: {
-    width: 60,
-    height: 60,
-    marginVertical: 20,
+    width: '100%',
+    height: '100%',
   },
 });
