@@ -16,9 +16,11 @@ import com.yandex.mapkit.map.*
 import com.yandex.mapkit.mapview.MapView
 import com.yandex.mapkit.user_location.UserLocationLayer
 import com.yandex.runtime.image.ImageProvider
+import android.view.View
 
 class YamapLiteView(context: Context) : FrameLayout(context) {
   private val mapView: MapView = MapView(context)
+  private val reactChildren = mutableListOf<View>()
 
   private var userLocationLayer: UserLocationLayer? = null
   private var isUserLocationEnabled = false
@@ -187,6 +189,33 @@ class YamapLiteView(context: Context) : FrameLayout(context) {
       }
       
       return BoundingBox(Point(minLat, minLon), Point(maxLat, maxLon))
+  }
+
+  fun addReactChild(child: View, index: Int) {
+    if (index < 0 || index > reactChildren.size) {
+      reactChildren.add(child)
+    } else {
+      reactChildren.add(index, child)
+    }
+    if (child is YamapLiteMarkerView) {
+      child.addToMap(mapView)
+    }
+  }
+
+  fun removeReactChildAt(index: Int) {
+    if (index < 0 || index >= reactChildren.size) return
+    val child = reactChildren.removeAt(index)
+    if (child is YamapLiteMarkerView) {
+      child.removeFromMap(mapView)
+    }
+  }
+
+  fun getReactChildAt(index: Int): View {
+    return reactChildren[index]
+  }
+
+  fun getReactChildCount(): Int {
+    return reactChildren.size
   }
 
   override fun onAttachedToWindow() {

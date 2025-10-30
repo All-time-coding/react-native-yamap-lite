@@ -1,6 +1,10 @@
 import React from 'react';
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
-import { YamapLiteView, YamapUtils } from 'react-native-yamap-lite';
+import {
+  YamapLiteView,
+  YamapUtils,
+  YamapLiteMarker,
+} from 'react-native-yamap-lite';
 
 export default function App() {
   const [isInitialized, setIsInitialized] = React.useState(false);
@@ -14,7 +18,9 @@ export default function App() {
   return (
     <View style={styles.container}>
       {isInitialized ? (
-        <YamapLiteView style={styles.box} />
+        <YamapLiteView style={styles.box}>
+          <YamapLiteMarker point={{ lat: 55.551244, lon: 36.518423 }} />
+        </YamapLiteView>
       ) : (
         <ActivityIndicator size="large" color="#0000ff" />
       )}

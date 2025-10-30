@@ -6,11 +6,15 @@ const LINKING_ERROR =
   '- You rebuilt the app after installing the package\n' +
   '- You are not using Expo managed workflow\n';
 
+interface IYamapUtilsModule {
+  initWithKey(key: string): Promise<void>;
+}
+
 const YamapUtilsModule = true
   ? require('../NativeYamapUtils').default
   : NativeModules.TurboExample;
 
-export const YamapUtils = YamapUtilsModule
+export const YamapUtils: IYamapUtilsModule = YamapUtilsModule
   ? YamapUtilsModule
   : new Proxy(
       {},
