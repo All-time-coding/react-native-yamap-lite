@@ -43,7 +43,7 @@ class YamapLiteMarkerViewManager : SimpleViewManager<YamapLiteMarkerView>(), Yam
 
   @ReactProp(name = "zInd")
   override fun setZInd(view: YamapLiteMarkerView, value: Int) {
-    view.setZIndex(value)
+    view.setZInd(value)
   }
 
   @ReactProp(name = "visible")
@@ -58,8 +58,19 @@ class YamapLiteMarkerViewManager : SimpleViewManager<YamapLiteMarkerView>(), Yam
     val y = if (value.hasKey("y")) value.getDouble("y") else 0.5
     view.setAnchor(x, y)
   }
+  
+  @ReactProp(name = "rotated")
+  override fun setRotated(view: YamapLiteMarkerView, value: Boolean) {
+    view.setRotated(value)
+  }
+  
+  @ReactProp(name = "handled")
+  override fun setHandled(view: YamapLiteMarkerView, value: Boolean) {
+    view.setHandled(value)
+  }
 
-  override fun setRotated(p0: YamapLiteMarkerView, p1: Boolean) { }
-
-  override fun setHandled(view: YamapLiteMarkerView, value: Boolean) {}
+  @ReactProp(name = "size")
+  override fun setSize(view: YamapLiteMarkerView, size: Int) {
+    view.setSize(size)
+  }
 }

@@ -70,6 +70,9 @@ using namespace facebook::react;
     if(oldViewProps.rotated != newViewProps.rotated){
         _view.rotated = newViewProps.rotated;
     }
+    if(oldViewProps.size != newViewProps.size){
+        _view.size = newViewProps.size;
+    }
     
     [super updateProps:props oldProps:oldProps];
 }

@@ -1,7 +1,7 @@
 import codegenNativeComponent from 'react-native/Libraries/Utilities/codegenNativeComponent';
 import type { HostComponent, ViewProps } from 'react-native';
 import type {
-  BubblingEventHandler,
+  DirectEventHandler,
   Double,
   Int32,
 } from 'react-native/Libraries/Types/CodegenTypes';
@@ -16,7 +16,7 @@ export interface NativeProps extends ViewProps {
   zInd?: Int32;
   scale?: Double;
   rotated?: boolean;
-  onMarkerPress?: BubblingEventHandler<Point>;
+  onMarkerPress?: DirectEventHandler<Readonly<Point>>;
   source?: string; // ImageSourcePropType
   anchor?: {
     x: Double;
@@ -24,6 +24,7 @@ export interface NativeProps extends ViewProps {
   };
   visible?: boolean;
   handled?: boolean;
+  size?: Int32;
 }
 
 export type YamapLiteMarkerViewComponent = HostComponent<NativeProps>;

@@ -1,29 +1,20 @@
 import React from 'react';
-import { View, StyleSheet, ActivityIndicator } from 'react-native';
-import {
-  YamapLiteView,
-  YamapUtils,
-  YamapLiteMarker,
-} from 'react-native-yamap-lite';
+import { View, StyleSheet } from 'react-native';
+import { YaMap, YaMapMarker } from 'react-native-yamap-lite';
 
 export default function App() {
-  const [isInitialized, setIsInitialized] = React.useState(false);
-
-  React.useEffect(() => {
-    YamapUtils.initWithKey('API_KEY').then(() => {
-      setIsInitialized(true);
-    });
-  }, []);
-
   return (
     <View style={styles.container}>
-      {isInitialized ? (
-        <YamapLiteView style={styles.box}>
-          <YamapLiteMarker point={{ lat: 55.551244, lon: 36.518423 }} />
-        </YamapLiteView>
-      ) : (
-        <ActivityIndicator size="large" color="#0000ff" />
-      )}
+      <YaMap style={styles.box}>
+        <YaMapMarker
+          point={{ lat: 55.551244, lon: 36.518423 }}
+          source={'https://cdn-icons-png.flaticon.com/512/64/64113.png'}
+          size={50}
+          onMarkerPress={(event) => {
+            console.log('Marker pressed', event.lat, event.lon);
+          }}
+        />
+      </YaMap>
     </View>
   );
 }

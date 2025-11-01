@@ -34,7 +34,7 @@ class YamapLiteCircleViewManager : SimpleViewManager<Circle>() {
     }
 
     @ReactProp(name = "zInd", defaultInt = 0)
-    fun setZInd(view: Circle, zIndex: Int) {
+    fun setZInd(view: Circle, zInd: Int) {
         // Z-index handling can be implemented here if needed
     }
 

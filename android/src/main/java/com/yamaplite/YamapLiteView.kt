@@ -119,7 +119,16 @@ class YamapLiteView(context: Context) : FrameLayout(context) {
   }
   
   fun setInitialRegion(region: Map<String, Any>?) {
-
+    if (region == null) return
+    val latitude = region["latitude"] as? Double ?: return
+    val longitude = region["longitude"] as? Double ?: return
+    val zoom = (region["zoom"] as? Double ?: 10.0).toFloat()
+    val azimuth = (region["azimuth"] as? Double ?: 0.0).toFloat()
+    val tilt = (region["tilt"] as? Double ?: 0.0).toFloat()
+    
+    val point = Point(latitude, longitude)
+    val cameraPosition = CameraPosition(point, zoom, azimuth, tilt)
+    mapView.getMapWindow().map.move(cameraPosition)
   }
   
   fun setMaxFps(fps: Float) {
