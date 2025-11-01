@@ -1,2 +1,2 @@
+export * from './Marker';
 export * from './YaMap';
-export * from './YaMapMarker';

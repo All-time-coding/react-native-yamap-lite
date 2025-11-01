@@ -153,24 +153,4 @@ class YamapLiteViewManager : ViewGroupManager<YamapLiteView>(), YamapLiteViewMan
       view.setLogoPadding(padding)
     }
   }
-
-  override fun getCameraPosition(view: YamapLiteView) {
-    // Этот метод вызывается как команда, результат отправляется через YamapUtils
-  }
-
-  override fun reload(view: YamapLiteView) {
-    view.reload()
-  }
-
-  override fun setCenter(view: YamapLiteView, latitude: Double, longitude: Double, zoom: Float, azimuth: Float, tilt: Float, duration: Float) {
-    view.setCenter(latitude, longitude, zoom, azimuth, tilt, duration)
-  }
-
-  override fun setZoom(view: YamapLiteView, zoom: Float) {
-    view.setZoom(zoom)
-  }
-
-  override fun fitAllMarkers(view: YamapLiteView) {
-    view.fitAllMarkers()
-  }
 }

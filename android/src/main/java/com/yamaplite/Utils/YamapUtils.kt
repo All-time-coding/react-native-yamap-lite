@@ -1,4 +1,4 @@
-package com.yamaplite
+package com.yamaplite.utils
 
 import com.facebook.react.module.annotations.ReactModule
 import com.facebook.react.bridge.ReactApplicationContext
@@ -7,7 +7,7 @@ import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.bridge.UiThreadUtil
 import com.facebook.react.uimanager.UIManagerModule
 import com.facebook.fbreact.specs.NativeYamapUtilsSpec
-import com.yandex.mapkit.MapKitFactory
+import com.yamaplite.YamapLiteView
 
 @ReactModule(name = NativeYamapUtilsSpec.NAME)
 class YamapUtils(reactContext: ReactApplicationContext): NativeYamapUtilsSpec(reactContext) {
@@ -41,19 +41,7 @@ class YamapUtils(reactContext: ReactApplicationContext): NativeYamapUtilsSpec(re
         promise.reject("YamapLite", "getVisibleRegion not implemented")
     }
 
-    override fun initWithKey(key: String, promise: Promise) {
-        UiThreadUtil.runOnUiThread {
-            if(key.length <= 0) {
-                promise.reject("YamapLite", "key is empty")
-            }
-            try {
-                MapKitFactory.setApiKey(key)
-                MapKitFactory.initialize(reactApplicationContext)
-                promise.resolve(null)
-            }
-            catch (e: Exception) {
-                promise.reject("YamapLite", "failed to initialize key", e)
-            }
-        }
+    override fun fitAllMarkers(viewId: Double, points: ReadableArray, promise: Promise) {
+        promise.reject("YamapLite", "fitAllMarkers not implemented")
     }
 }

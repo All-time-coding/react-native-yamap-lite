@@ -6,7 +6,6 @@ import type {
   Float,
   WithDefault,
 } from 'react-native/Libraries/Types/CodegenTypes';
-import codegenNativeCommands from 'react-native/Libraries/Utilities/codegenNativeCommands';
 
 interface YandexLogoPosition {
   vertical?: WithDefault<'top' | 'bottom', 'bottom'>;
@@ -38,11 +37,13 @@ interface InitialRegion {
   tilt?: Double;
 }
 interface CameraPosition {
+  finished: boolean;
   latitude: Double;
   longitude: Double;
   zoom: Double;
   azimuth: Double;
   tilt: Double;
+  target: Double;
 }
 
 export interface NativeProps extends ViewProps {
@@ -74,38 +75,5 @@ export interface NativeProps extends ViewProps {
 }
 
 export type YamapViewComponent = HostComponent<NativeProps>;
-export interface YamapViewNativeCommands {
-  getCameraPosition: (
-    viewRef: React.ElementRef<YamapViewComponent>
-  ) => Readonly<CameraPosition>;
-  reload: (viewRef: React.ElementRef<HostComponent<NativeProps>>) => void;
-  setCenter: (
-    viewRef: React.ElementRef<YamapViewComponent>,
-    latitude: Double,
-    longitude: Double,
-    zoom: Float,
-    azimuth: Float,
-    tilt: Float,
-    duration: Float
-    // animation: string
-  ) => void;
-  setZoom: (
-    viewRef: React.ElementRef<YamapViewComponent>,
-    zoom?: Float
-    // duration?: Float,
-    // type?: string
-  ) => void;
-  fitAllMarkers: (viewRef: React.ElementRef<YamapViewComponent>) => void;
-}
-
-export const Commands = codegenNativeCommands<YamapViewNativeCommands>({
-  supportedCommands: [
-    'reload',
-    'getCameraPosition',
-    'setCenter',
-    'setZoom',
-    'fitAllMarkers',
-  ],
-});
 
 export default codegenNativeComponent<NativeProps>('YamapLiteView');

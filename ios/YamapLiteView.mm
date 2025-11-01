@@ -111,13 +111,18 @@ using namespace facebook::react;
     [super updateProps:props oldProps:oldProps];
 }
 
-- (void)handleCommand:(const NSString *)commandName args:(const NSArray *)args{
-    RCTYamapLiteViewHandleCommand(self, commandName, args);
-}
-
-- (void)setZoom:(float)zoom
-{
-    [_view setZoomWithZoom:zoom];
+- (void)handleCommand:(NSString *)commandName args:(NSArray *)args{
+    if ([commandName isEqualToString:@"setCenter"]) {
+        if ([args count] >= 6) {
+            double latitude = [[args objectAtIndex:0] doubleValue];
+            double longitude = [[args objectAtIndex:1] doubleValue];
+            float zoom = [[args objectAtIndex:2] floatValue];
+            float azimuth = [[args objectAtIndex:3] floatValue];
+            float tilt = [[args objectAtIndex:4] floatValue];
+            float duration = [[args objectAtIndex:5] floatValue];
+            [self setCenter:latitude longitude:longitude zoom:zoom azimuth:azimuth tilt:tilt duration:duration];
+        }
+    }
 }
 
 - (void)setCenter:(double)latitude longitude:(double)longitude zoom:(float)zoom azimuth:(float)azimuth tilt:(float)tilt duration:(float)duration{
@@ -127,14 +132,15 @@ using namespace facebook::react;
 - (void)handleOnMapLoadedWithResult:(NSDictionary *)obj{
     if (_eventEmitter != nil) {
         YamapLiteViewEventEmitter::OnMapLoaded event = {};
-        event.curZoomGeometryLoaded = [[obj objectForKey:@"curZoomGeometryLoaded"] boolValue];
-        event.curZoomModelsLoaded = [[obj objectForKey:@"curZoomModelsLoaded"] boolValue];
-        event.curZoomLabelsLoaded = [[obj objectForKey:@"curZoomLabelsLoaded"] boolValue];
-        event.curZoomPlacemarksLoaded = [[obj objectForKey:@"curZoomPlacemarksLoaded"] boolValue];
-        event.fullyLoaded = [[obj objectForKey:@"fullyLoaded"] boolValue];
-        event.renderObjectCount = [[obj objectForKey:@"renderObjectCount"] intValue];
+        event.curZoomGeometryLoaded = [[obj objectForKey:@"curZoomGeometryLoaded"] doubleValue];
+        event.curZoomModelsLoaded = [[obj objectForKey:@"curZoomModelsLoaded"] doubleValue];
+        event.curZoomLabelsLoaded = [[obj objectForKey:@"curZoomLabelsLoaded"] doubleValue];
+        event.curZoomPlacemarksLoaded = [[obj objectForKey:@"curZoomPlacemarksLoaded"] doubleValue];
+        event.fullyLoaded = [[obj objectForKey:@"fullyLoaded"] doubleValue];
+        event.renderObjectCount = [[obj objectForKey:@"renderObjectCount"] doubleValue];
         event.tileMemoryUsage = [[obj objectForKey:@"tileMemoryUsage"] doubleValue];
-        event.delayedGeometryLoaded = [[obj objectForKey:@"delayedGeometryLoaded"] boolValue];
+        event.delayedGeometryLoaded = [[obj objectForKey:@"delayedGeometryLoaded"] doubleValue];
+        event.fullyAppeared = [[obj objectForKey:@"fullyAppeared"] doubleValue];
         std::dynamic_pointer_cast<const YamapLiteViewEventEmitter>(_eventEmitter)
         ->onMapLoaded(event);
     }
@@ -149,6 +155,8 @@ using namespace facebook::react;
         event.zoom = [[coords objectForKey:@"zoom"] doubleValue];
         event.azimuth = [[coords objectForKey:@"azimuth"] doubleValue];
         event.tilt = [[coords objectForKey:@"tilt"] doubleValue];
+        event.finished = [[coords objectForKey:@"finished"] boolValue];
+        event.target = [[coords objectForKey:@"target"] doubleValue];
         
         std::dynamic_pointer_cast<const YamapLiteViewEventEmitter>(_eventEmitter)
         ->onCameraPositionChange(event);
@@ -163,29 +171,12 @@ using namespace facebook::react;
         event.zoom = [[coords objectForKey:@"zoom"] doubleValue];
         event.azimuth = [[coords objectForKey:@"azimuth"] doubleValue];
         event.tilt = [[coords objectForKey:@"tilt"] doubleValue];
+        event.finished = [[coords objectForKey:@"finished"] boolValue];
+        event.target = [[coords objectForKey:@"target"] doubleValue];
         
         std::dynamic_pointer_cast<const YamapLiteViewEventEmitter>(_eventEmitter)
         ->onCameraPositionChangeEnd(event);
     }
-}
-
-- (NSMutableDictionary *)getCameraPosition {
-    NSDictionary *position = [_view getCameraPosition];
-    NSLog(@"getCameraPosition: %@", position);
-    if (position) {
-        NSLog(@"Camera position: %@", position);
-        NSMutableDictionary *result = [NSMutableDictionary dictionary];
-        result[@"latitude"] = position[@"latitude"];
-        result[@"longitude"] = position[@"longitude"];
-        result[@"zoom"] = position[@"zoom"];
-        result[@"azimuth"] = position[@"azimuth"];
-        result[@"tilt"] = position[@"tilt"];
-
-        return result;
-    } else {
-        NSLog(@"Failed to get camera position");
-    }
-    return position;
 }
 
 - (void)mountChildComponentView:(nonnull UIView<RCTComponentViewProtocol> *)childComponentView index:(NSInteger)index { 

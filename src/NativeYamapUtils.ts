@@ -3,7 +3,6 @@ import type { Double } from 'react-native/Libraries/Types/CodegenTypes';
 import type { Point, ScreenPoint } from './@types';
 
 export interface Spec extends TurboModule {
-  initWithKey(key: string): Promise<void>;
   getCameraPosition(viewId: Double): Promise<{
     latitude: Double;
     longitude: Double;
@@ -13,6 +12,7 @@ export interface Spec extends TurboModule {
   }>;
   getScreenPoints(viewId: Double, points: Point[]): Promise<ScreenPoint>;
   getVisibleRegion(viewId: Double): Promise<unknown>;
+  fitAllMarkers(viewId: Double, points: Point[]): Promise<void>;
 }
 
 export default TurboModuleRegistry.getEnforcing<Spec>('YamapUtils');

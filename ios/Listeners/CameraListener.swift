@@ -25,6 +25,7 @@ class CameraListener: NSObject, YMKMapCameraListener {
             "azimuth": Double(cameraPosition.azimuth),
             "tilt": Double(cameraPosition.tilt),
             "finished": finished,
+            "target": 0.0
         ]
 
         DispatchQueue.main.async { [weak self] in
@@ -33,10 +34,10 @@ class CameraListener: NSObject, YMKMapCameraListener {
                 callback(params)
                 return
             } else if let delegate = self.delegate {
+                delegate.handleOnCameraPositionChange(coords: params)
                 if finished {
                     delegate.handleOnCameraPositionChangeEnd(coords: params)
                 }
-                delegate.handleOnCameraPositionChange(coords: params)
             }
         }
     }

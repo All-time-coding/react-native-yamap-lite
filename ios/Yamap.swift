@@ -10,9 +10,15 @@ public protocol YamapViewComponentDelegate {
     func handleOnCameraPositionChangeEnd(coords: [String: Any])
 }
 
-@objc(YamapView)
-public class YamapView: UIView {
-    @objc public weak var delegate: YamapViewComponentDelegate? = nil
+    @objc(YamapView)
+    public class YamapView: UIView {
+        @objc public weak var delegate: YamapViewComponentDelegate? = nil {
+            didSet {
+                if delegate != nil && mapView != nil {
+                    setupListeners()
+                }
+            }
+        }
 
     @objc private var mapObjects: [YamapLiteMarker] = []
 
@@ -71,7 +77,7 @@ public class YamapView: UIView {
         }
     }
 
-    @objc public var scrollGesturesEnabled: Bool = false {
+    @objc public var scrollGesturesEnabled: Bool = true {
         didSet {
             guard let map = mapView?.mapWindow?.map else { return }
             map.isScrollGesturesEnabled = scrollGesturesEnabled
@@ -80,7 +86,7 @@ public class YamapView: UIView {
 
     @objc public var userLocationIconScale: Float = 1.0
     @objc public var showUserPosition = false
-    @objc public var zoomGesturesEnabled: Bool = false {
+    @objc public var zoomGesturesEnabled: Bool = true {
         didSet {
             guard let map = mapView?.mapWindow?.map else { return }
             map.isZoomGesturesEnabled = zoomGesturesEnabled
@@ -132,10 +138,35 @@ public class YamapView: UIView {
         insertSubview(mapView, at: 0)
     }
 
-    private func applyProperties() {
-        if delegate == nil {
-            return
+    @objc private func setupListeners() {
+        guard let delegate = delegate, let map = mapView?.mapWindow?.map else { return }
+        
+        if loadListener == nil {
+            loadListener = MapLoadListener(callback: nil, mapDelegate: delegate)
+            map.setMapLoadedListenerWith(loadListener!)
         }
+
+        if cameraListener == nil {
+            let cameraDelegate = CameraListener(callback: nil, delegate: delegate)
+            cameraListener = cameraDelegate
+            map.addCameraListener(with: cameraDelegate)
+        }
+        
+        if userLocationListener == nil {
+            userLocationListener = UserLocationObjectListener(callback: updateUserIcon)
+        }
+        
+        if userLocationLayer == nil {
+            userLocationLayer = YMKMapKit.sharedInstance().createUserLocationLayer(with: mapView.mapWindow)
+            userLocationLayer.setObjectListenerWith(userLocationListener)
+        }
+        
+        if userLocationLayer != nil {
+            userLocationLayer.setVisibleWithOn(showUserPosition)
+        }
+    }
+    
+    @objc private func applyProperties() {
         guard let map = mapView?.mapWindow?.map else { return }
         switch mapType {
         case "satellite": map.mapType = .satellite
@@ -146,25 +177,6 @@ public class YamapView: UIView {
         map.isNightModeEnabled = nightMode
         map.isScrollGesturesEnabled = scrollGesturesEnabled
         map.isZoomGesturesEnabled = zoomGesturesEnabled
-
-        if loadListener == nil && delegate != nil {
-            loadListener = MapLoadListener(callback: onMapLoaded, mapDelegate: delegate)
-            map.setMapLoadedListenerWith(loadListener!)
-        }
-
-        if cameraListener == nil && delegate != nil {
-            let cameraDelegate = CameraListener(callback: onCameraPositionChangeCallback, delegate: delegate)
-            cameraListener = cameraDelegate
-            map.addCameraListener(with: cameraDelegate)
-        }
-        if userLocationListener == nil && delegate != nil {
-            userLocationListener = UserLocationObjectListener(callback: updateUserIcon)
-        }
-        if userLocationLayer == nil && delegate != nil {
-            userLocationLayer = YMKMapKit.sharedInstance().createUserLocationLayer(with: mapView.mapWindow)
-            userLocationLayer.setObjectListenerWith(userLocationListener)
-        }
-        userLocationLayer.setVisibleWithOn(showUserPosition)
     }
 
     ////////////////////////
@@ -241,17 +253,6 @@ public class YamapView: UIView {
         resolve(nil)
     }
 
-    @objc func fitAllMarkers(_: RCTPromiseResolveBlock, reject _: RCTPromiseRejectBlock) {
-        // TODO:
-        guard let map = mapView?.mapWindow?.map else { return }
-        var markers: [YMKPoint] = []
-
-        for subview in mapView.subviews {
-            if let markerView = subview as? YamapLiteMarker {}
-        }
-        fitMakers(markers)
-    }
-
     @objc func fitMakers(_ markers: [YMKPoint]) {
         guard let map = mapView?.mapWindow?.map else { return }
         if markers.isEmpty {
@@ -304,12 +305,6 @@ public class YamapView: UIView {
 
     static func isM1Simulator() -> Bool {
         return (TARGET_IPHONE_SIMULATOR & TARGET_CPU_ARM64) != 0
-    }
-
-    @objc public func setZoom(zoom: Float) {
-        guard let map = mapView?.mapWindow?.map else { return }
-        let position = map.cameraPosition
-        move(position.target.latitude, position.target.longitude, zoom, position.azimuth, position.tilt)
     }
 
     @objc public func setCenter(

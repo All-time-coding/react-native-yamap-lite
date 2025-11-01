@@ -8,6 +8,7 @@ export type YamapRef = {
     tilt: number,
     animation: number
   ) => void;
+  fitAllMarkers: (points: Point[]) => void;
 };
 
 export interface Point {
@@ -96,9 +97,10 @@ export interface CameraPosition {
   zoom: number;
   tilt: number;
   azimuth: number;
-  point: Point;
-  reason: 'GESTURES' | 'APPLICATION';
+  latitude: number;
+  longitude: number;
   finished: boolean;
+  target: number;
 }
 
 export type VisibleRegion = {

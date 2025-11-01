@@ -14,6 +14,4 @@ RCT_EXPORT_MODULE(YamapLiteView)
   return [[UIView alloc] init];
 }
 
-RCT_EXPORT_VIEW_PROPERTY(color, NSString)
-
 @end

@@ -5777,7 +5777,14 @@ __metadata:
     react-native: 0.79.2
     react-native-builder-bob: ^0.40.11
     react-native-monorepo-config: ^0.1.9
+    react-native-yamap-lite: "link:.."
   languageName: unknown
+  linkType: soft
+
+"react-native-yamap-lite@link:..::locator=react-native-yamap-lite-example%40workspace%3A.":
+  version: 0.0.0-use.local
+  resolution: "react-native-yamap-lite@link:..::locator=react-native-yamap-lite-example%40workspace%3A."
+  languageName: node
   linkType: soft
 
 "react-native@npm:0.79.2":

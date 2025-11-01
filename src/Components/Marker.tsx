@@ -8,7 +8,7 @@ export interface YaMapMarkerProps extends Omit<NativeProps, 'onMarkerPress'> {
   onMarkerPress?: (event: Point) => void;
 }
 
-export const YaMapMarker: React.FC<YaMapMarkerProps> = ({
+export const Marker: React.FC<YaMapMarkerProps> = ({
   onMarkerPress,
   ...props
 }) => {

@@ -51,6 +51,13 @@ RCT_EXPORT_MODULE()
 });
 }
 
+- (void)fitAllMarkers:(double)viewId points:(NSArray<NSDictionary<NSString *,id> *> *)points resolve:(nonnull RCTPromiseResolveBlock)resolve reject:(nonnull RCTPromiseRejectBlock)reject{
+    RCTExecuteOnMainQueue(^{
+        YamapView* view = [self getView:viewId];
+        //TODO:
+    });
+}
+
 - (void)getVisibleRegion:(double)viewId
 {
     RCTExecuteOnMainQueue(^{
@@ -59,17 +66,10 @@ RCT_EXPORT_MODULE()
     });
 }
 
-- (void)initWithKey:(NSString *)key resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject
-{
-      dispatch_async(dispatch_get_main_queue(), ^{
-        if (key.length == 0) {
-            reject(@"initWithKey", @"API key is empty", nil);
-            return;
-        }
-        [YMKMapKit setApiKey:key];
-        [YMKMapKit initialize];
-        resolve(@(YES));
+- (void)getScreenPoints:(double)viewId points:(NSArray<NSDictionary<NSString *,id> *> *)points resolve:(nonnull RCTPromiseResolveBlock)resolve reject:(nonnull RCTPromiseRejectBlock)reject{
+    RCTExecuteOnMainQueue(^{
+        YamapView* view = [self getView:viewId];
+        //TODO:
     });
 }
-
 @end

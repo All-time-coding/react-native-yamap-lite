@@ -21,7 +21,7 @@ class MapLoadListener: NSObject, YMKMapLoadedListener {
             "tileMemoryUsage": statistics.tileMemoryUsage,
             "delayedGeometryLoaded": statistics.delayedGeometryLoaded,
             "fullyAppeared": statistics.fullyAppeared,
-            "fullyLoaded": statistics.fullyAppeared,
+            "fullyLoaded": statistics.fullyLoaded,
         ]
 
         DispatchQueue.main.async { [weak self] in
