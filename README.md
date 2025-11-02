@@ -16,7 +16,7 @@ import { YamapLiteView } from "react-native-yamap-lite";
 
 // ...
 
-<YamapLiteView color="tomato" />
+<YaMap style={{ width: '100%', height: '100%' }} />
 ```
 
 

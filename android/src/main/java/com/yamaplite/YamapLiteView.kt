@@ -174,6 +174,88 @@ class YamapLiteView(context: Context) : FrameLayout(context), MapLoadedListener,
     }
   }
   
+  fun setCenter(
+    latitude: Double,
+    longitude: Double,
+    zoom: Float,
+    azimuth: Float,
+    tilt: Float,
+    duration: Int,
+    animation: String
+  ) {
+    try {
+      val map = mapView.mapWindow.map
+      val point = Point(latitude, longitude)
+      val cameraPosition = CameraPosition(point, zoom, azimuth, tilt)
+      if (duration > 0) {
+        val animType: Animation.Type
+        when (animation) {
+          "LINEAR" -> animType = Animation.Type.LINEAR
+          "SMOOTH" -> animType = Animation.Type.SMOOTH
+          else -> animType = Animation.Type.SMOOTH
+        }
+        val anim = Animation(animType, duration.toFloat() / 1000.0f)
+        map.move(cameraPosition, anim, null)
+      } else {
+        map.move(cameraPosition)
+      }
+    } catch (e: Exception) {
+      Log.e("YamapLiteView", "Failed to set center", e)
+    }
+  }
+  
+  fun setZoom(zoom: Float, duration: Int, animation: String) {
+    try {
+      val map = mapView.mapWindow.map
+      val currentPosition = map.cameraPosition
+      val cameraPosition = CameraPosition(
+        currentPosition.target,
+        zoom,
+        currentPosition.azimuth,
+        currentPosition.tilt
+      )
+      if (duration > 0) {
+        val animType: Animation.Type
+        when (animation) {
+          "LINEAR" -> animType = Animation.Type.LINEAR
+          "SMOOTH" -> animType = Animation.Type.SMOOTH
+          else -> animType = Animation.Type.SMOOTH
+        }
+        val anim = Animation(animType, duration.toFloat() / 1000.0f)
+        map.move(cameraPosition, anim, null)
+      } else {
+        map.move(cameraPosition)
+      }
+    } catch (e: Exception) {
+      Log.e("YamapLiteView", "Failed to set zoom", e)
+    }
+  }
+  
+  fun fitAllMarkers() {
+    try {
+      val map = mapView.mapWindow.map
+      val markerPoints = mutableListOf<Point>()
+      
+      for (i in 0 until reactChildren.size) {
+        val child = reactChildren[i]
+        if (child is YamapLiteMarkerView) {
+          markerPoints.add(Point(child.latitude, child.longitude))
+        }
+      }
+      
+      if (markerPoints.size == 0) {
+        return
+      }
+      
+      val boundingBox = calculateBoundingBox(ArrayList(markerPoints.map { it as Point? }))
+      val geometry = Geometry.fromBoundingBox(boundingBox)
+      val cameraPosition = map.cameraPosition(geometry)
+      map.move(cameraPosition, Animation(Animation.Type.SMOOTH, 0.7f), null)
+    } catch (e: Exception) {
+      Log.e("YamapLiteView", "Failed to fit all markers", e)
+    }
+  }
+  
   private fun calculateBoundingBox(points: ArrayList<Point?>): BoundingBox {
       var minLat = Double.MAX_VALUE
       var maxLat = -Double.MAX_VALUE
@@ -276,13 +358,16 @@ class YamapLiteView(context: Context) : FrameLayout(context), MapLoadedListener,
     }
 
     val data = Arguments.createMap()
-    data.putDouble("latitude", cameraPosition.target.latitude)
-    data.putDouble("longitude", cameraPosition.target.longitude)
+    data.putMap("point", Arguments.createMap().apply {
+      putDouble("lat", cameraPosition.target.latitude)
+      putDouble("lon", cameraPosition.target.longitude)
+    })
     data.putDouble("zoom", cameraPosition.zoom.toDouble())
     data.putDouble("azimuth", cameraPosition.azimuth.toDouble())
     data.putDouble("tilt", cameraPosition.tilt.toDouble())
     data.putBoolean("finished", finished)
     data.putDouble("target", 0.0)
+    data.putString("reason", reason.toString())
     
     val viewId = getId()
     
@@ -296,16 +381,20 @@ class YamapLiteView(context: Context) : FrameLayout(context), MapLoadedListener,
         } catch (e: Exception) {
           Log.e("YamapLiteView", "Error dispatching CameraPositionChangeEvent event", e)
         }
-        
+
         if (finished) {
           val endData  = Arguments.createMap()
-          endData.putDouble("latitude", cameraPosition.target.latitude)
-          endData.putDouble("longitude", cameraPosition.target.longitude)
+          endData.putMap("point", Arguments.createMap().apply {
+            putDouble("lat", cameraPosition.target.latitude)
+            putDouble("lon", cameraPosition.target.longitude)
+          })
           endData.putDouble("zoom", cameraPosition.zoom.toDouble())
           endData.putDouble("azimuth", cameraPosition.azimuth.toDouble())
           endData.putDouble("tilt", cameraPosition.tilt.toDouble())
           endData.putBoolean("finished", finished)
           endData.putDouble("target", 0.0)
+          endData.putString("reason", reason.toString())
+
           try {
             val endEvent = CameraPositionChangeEndEvent(viewId, endData)
             eventDispatcher.dispatchEvent(endEvent)

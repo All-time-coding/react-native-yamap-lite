@@ -24,9 +24,11 @@ RCT_EXPORT_MODULE()
 
 
 - (YamapView*)getView:(double)viewId {
-  return static_cast<YamapView*>(
-      [self.bridge.uiManager viewForReactTag:[NSNumber numberWithDouble:viewId]]);
-  ;
+  YamapLiteView* liteView = (YamapLiteView*)[self.bridge.uiManager viewForReactTag:[NSNumber numberWithDouble:viewId]];
+  if (liteView && [liteView.contentView isKindOfClass:[YamapView class]]) {
+    return (YamapView*)liteView.contentView;
+  }
+  return nil;
 }
 
 - (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
@@ -38,38 +40,61 @@ RCT_EXPORT_MODULE()
 
 - (void)getCameraPosition:(double)viewId resolve:(nonnull RCTPromiseResolveBlock)resolve reject:(nonnull RCTPromiseRejectBlock)reject{
     RCTExecuteOnMainQueue(^{    
-    YamapView* view = [self getView:viewId];
-    NSObject *coords = [view getCameraPosition];
-
-    if(coords){
-        resolve(coords);
-    }
-
-    else{
-        [self rejecter:reject name:@"no coords found"];
-    }
-});
-}
-
-- (void)fitAllMarkers:(double)viewId points:(NSArray<NSDictionary<NSString *,id> *> *)points resolve:(nonnull RCTPromiseResolveBlock)resolve reject:(nonnull RCTPromiseRejectBlock)reject{
-    RCTExecuteOnMainQueue(^{
         YamapView* view = [self getView:viewId];
-        //TODO:
+        NSObject *coords = [view getCameraPosition];
+
+        if(coords){
+            resolve(coords);
+        }
+
+        else{
+            [self rejecter:reject name:@"no coords found"];
+        }
     });
 }
 
-- (void)getVisibleRegion:(double)viewId
-{
+- (void)setZoom:(double)viewId zoom:(double)zoom duration:(double)duration animation:(NSString *)animation resolve:(nonnull RCTPromiseResolveBlock)resolve reject:(nonnull RCTPromiseRejectBlock)reject {
     RCTExecuteOnMainQueue(^{
         YamapView* view = [self getView:viewId];
-        //TODO:
+        if (view) {
+          [view setZoomWithZoom:zoom duration:duration animation:animation];
+            resolve(nil);
+        } else {
+            [self rejecter:reject name:@"setZoom"];
+        }
+    });
+}
+
+- (void)setCenter:(double)viewId latitude:(double)latitude longitude:(double)longitude zoom:(double)zoom azimuth:(double)azimuth tilt:(double)tilt duration:(double)duration animation:(NSString *)animation resolve:(nonnull RCTPromiseResolveBlock)resolve reject:(nonnull RCTPromiseRejectBlock)reject {
+    RCTExecuteOnMainQueue(^{
+        YamapView* view = [self getView:viewId];
+        if (view) {
+          [view setCenterWithLatitude:latitude longitude:longitude zoom:(float)zoom azimuth:(float)azimuth tilt:(float)tilt duration:(int)duration animation:animation];
+            resolve(nil);
+        } else {
+            [self rejecter:reject name:@"setCenter"];
+        }
+    });
+}
+
+- (void)fitAllMarkers:(double)viewId resolve:(nonnull RCTPromiseResolveBlock)resolve reject:(nonnull RCTPromiseRejectBlock)reject{
+    RCTExecuteOnMainQueue(^{
+        YamapView* view = [self getView:viewId];
+        if (view) {
+            [view fitAllMarkers];
+            resolve(nil);
+        } else {
+            [self rejecter:reject name:@"fitAllMarkers"];
+        }
     });
 }
 
 - (void)getScreenPoints:(double)viewId points:(NSArray<NSDictionary<NSString *,id> *> *)points resolve:(nonnull RCTPromiseResolveBlock)resolve reject:(nonnull RCTPromiseRejectBlock)reject{
-    RCTExecuteOnMainQueue(^{
-        YamapView* view = [self getView:viewId];
-        //TODO:
-    });
+        // TODO:
 }
+
+- (void)getVisibleRegion:(double)viewId resolve:(nonnull RCTPromiseResolveBlock)resolve reject:(nonnull RCTPromiseRejectBlock)reject { 
+  // TODO:
+}
+
 @end

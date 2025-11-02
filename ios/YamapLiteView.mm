@@ -90,8 +90,8 @@ using namespace facebook::react;
         [_view setUserLocationIconWithPath:RCTNSStringFromString(newViewProps.userLocationIcon)];
     }
 
-    if(oldViewProps.initialRegion.latitude != newViewProps.initialRegion.latitude){
-        [_view move:newViewProps.initialRegion.latitude :newViewProps.initialRegion.longitude :newViewProps.initialRegion.zoom :newViewProps.initialRegion.azimuth :newViewProps.initialRegion.tilt];
+    if(oldViewProps.initialRegion.lat != newViewProps.initialRegion.lat){
+        [_view move:newViewProps.initialRegion.lat :newViewProps.initialRegion.lon :newViewProps.initialRegion.zoom :newViewProps.initialRegion.azimuth :newViewProps.initialRegion.tilt];
     }
     if(oldViewProps.logoPosition.horizontal != newViewProps.logoPosition.horizontal || oldViewProps.logoPosition.vertical != newViewProps.logoPosition.vertical){
         NSDictionary *logoPositionDict = @{
@@ -112,21 +112,27 @@ using namespace facebook::react;
 }
 
 - (void)handleCommand:(NSString *)commandName args:(NSArray *)args{
-    if ([commandName isEqualToString:@"setCenter"]) {
-        if ([args count] >= 6) {
-            double latitude = [[args objectAtIndex:0] doubleValue];
-            double longitude = [[args objectAtIndex:1] doubleValue];
-            float zoom = [[args objectAtIndex:2] floatValue];
-            float azimuth = [[args objectAtIndex:3] floatValue];
-            float tilt = [[args objectAtIndex:4] floatValue];
-            float duration = [[args objectAtIndex:5] floatValue];
-            [self setCenter:latitude longitude:longitude zoom:zoom azimuth:azimuth tilt:tilt duration:duration];
-        }
+
+}
+
+- (void)setCenter:(double)latitude longitude:(double)longitude zoom:(float)zoom azimuth:(float)azimuth tilt:(float)tilt duration:(float)duration animation:(NSString*)animation{
+    [_view setCenterWithLatitude:latitude longitude:longitude zoom:zoom azimuth:azimuth tilt:tilt duration:duration animation:animation];
+}
+
+- (void)setZoom:(float)zoom duration:(float)duration animation:(NSString*)animation {
+  if (_view != nil) {
+      [_view setZoomWithZoom:zoom duration:duration animation:animation];
+    } else {
+        NSLog(@"ERROR: _view is nil");
     }
 }
 
-- (void)setCenter:(double)latitude longitude:(double)longitude zoom:(float)zoom azimuth:(float)azimuth tilt:(float)tilt duration:(float)duration{
-    [_view setCenterWithLatitude:latitude longitude:longitude zoom:zoom azimuth:azimuth tilt:tilt duration:duration];
+- (void)fitAllMarkers {
+  if (_view != nil) {
+    [_view fitAllMarkers];
+  } else {
+    NSLog(@"ERROR: _view is nil");
+  }
 }
 
 - (void)handleOnMapLoadedWithResult:(NSDictionary *)obj{
@@ -150,14 +156,29 @@ using namespace facebook::react;
 - (void)handleOnCameraPositionChangeWithCoords:(NSDictionary *)coords {
     if (_eventEmitter != nil) {
         YamapLiteViewEventEmitter::OnCameraPositionChange event = {};
-        event.latitude = [[coords objectForKey:@"latitude"] doubleValue];
-        event.longitude = [[coords objectForKey:@"longitude"] doubleValue];
+        event.point.lat = [[coords objectForKey:@"lat"] doubleValue];
+        event.point.lon = [[coords objectForKey:@"lon"] doubleValue];
         event.zoom = [[coords objectForKey:@"zoom"] doubleValue];
         event.azimuth = [[coords objectForKey:@"azimuth"] doubleValue];
         event.tilt = [[coords objectForKey:@"tilt"] doubleValue];
         event.finished = [[coords objectForKey:@"finished"] boolValue];
         event.target = [[coords objectForKey:@"target"] doubleValue];
-        
+
+        // Handle reason string - Swift strings bridge to NSString
+        id reasonObj = [coords objectForKey:@"reason"];
+        NSString *reasonString = @"GESTURES"; // default fallback
+        if ([reasonObj isKindOfClass:[NSString class]]) {
+            reasonString = (NSString *)reasonObj;
+        } else if (reasonObj != nil) {
+            // Fallback: try to get string representation
+            reasonString = [NSString stringWithFormat:@"%@", reasonObj];
+        }
+        if ([reasonString isEqualToString:@"APPLICATION"]) {
+            event.reason = YamapLiteViewEventEmitter::OnCameraPositionChangeReason::APPLICATION;
+        } else {
+            event.reason = YamapLiteViewEventEmitter::OnCameraPositionChangeReason::GESTURES;
+        }
+
         std::dynamic_pointer_cast<const YamapLiteViewEventEmitter>(_eventEmitter)
         ->onCameraPositionChange(event);
     }
@@ -166,14 +187,29 @@ using namespace facebook::react;
 - (void)handleOnCameraPositionChangeEndWithCoords:(NSDictionary<NSString *,id> *)coords {
     if (_eventEmitter != nil) {
         YamapLiteViewEventEmitter::OnCameraPositionChangeEnd event = {};
-        event.latitude = [[coords objectForKey:@"latitude"] doubleValue];
-        event.longitude = [[coords objectForKey:@"longitude"] doubleValue];
+        event.point.lat = [[coords objectForKey:@"lat"] doubleValue];
+        event.point.lon = [[coords objectForKey:@"lon"] doubleValue];
         event.zoom = [[coords objectForKey:@"zoom"] doubleValue];
         event.azimuth = [[coords objectForKey:@"azimuth"] doubleValue];
         event.tilt = [[coords objectForKey:@"tilt"] doubleValue];
         event.finished = [[coords objectForKey:@"finished"] boolValue];
         event.target = [[coords objectForKey:@"target"] doubleValue];
-        
+
+        // Handle reason string - Swift strings bridge to NSString
+        id reasonObj = [coords objectForKey:@"reason"];
+        NSString *reasonString = @"GESTURES"; // default fallback
+        if ([reasonObj isKindOfClass:[NSString class]]) {
+            reasonString = (NSString *)reasonObj;
+        } else if (reasonObj != nil) {
+            // Fallback: try to get string representation
+            reasonString = [NSString stringWithFormat:@"%@", reasonObj];
+        }
+        if ([reasonString isEqualToString:@"APPLICATION"]) {
+          event.reason = YamapLiteViewEventEmitter::OnCameraPositionChangeEndReason::APPLICATION;
+        } else {
+            event.reason = YamapLiteViewEventEmitter::OnCameraPositionChangeEndReason::GESTURES;
+        }
+
         std::dynamic_pointer_cast<const YamapLiteViewEventEmitter>(_eventEmitter)
         ->onCameraPositionChangeEnd(event);
     }

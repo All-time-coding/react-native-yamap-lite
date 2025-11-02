@@ -1,14 +1,19 @@
 export type YamapRef = {
   getCameraPosition: () => Promise<any>;
-  setZoom: (zoom: number) => void;
+  setZoom: (
+    zoom: number,
+    duration?: number,
+    animation?: 'LINEAR' | 'SMOOTH'
+  ) => void;
   setCenter: (
     center: { lat: number; lon: number },
-    zoom: number,
-    azimuth: number,
-    tilt: number,
-    animation: number
+    zoom?: number,
+    azimuth?: number,
+    tilt?: number,
+    duration?: number,
+    animation?: 'LINEAR' | 'SMOOTH'
   ) => void;
-  fitAllMarkers: (points: Point[]) => void;
+  fitAllMarkers: () => void;
 };
 
 export interface Point {

@@ -30,20 +30,21 @@ interface MapLoad {
 }
 
 interface InitialRegion {
-  latitude: Double;
-  longitude: Double;
+  lat: Double;
+  lon: Double;
   zoom?: Double;
   azimuth?: Double;
   tilt?: Double;
 }
+
 interface CameraPosition {
   finished: boolean;
-  latitude: Double;
-  longitude: Double;
+  point: { lat: Double; lon: Double };
   zoom: Double;
   azimuth: Double;
   tilt: Double;
   target: Double;
+  reason: 'GESTURES' | 'APPLICATION';
 }
 
 export interface NativeProps extends ViewProps {

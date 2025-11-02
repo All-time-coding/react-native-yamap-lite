@@ -12,7 +12,23 @@ export interface Spec extends TurboModule {
   }>;
   getScreenPoints(viewId: Double, points: Point[]): Promise<ScreenPoint>;
   getVisibleRegion(viewId: Double): Promise<unknown>;
-  fitAllMarkers(viewId: Double, points: Point[]): Promise<void>;
+  fitAllMarkers(viewId: Double): Promise<void>;
+  setZoom(
+    viewId: Double,
+    zoom: Double,
+    duration: Double,
+    animation: string
+  ): Promise<void>;
+  setCenter(
+    viewId: Double,
+    latitude: Double,
+    longitude: Double,
+    zoom: Double,
+    azimuth: Double,
+    tilt: Double,
+    duration: Double,
+    animation: string
+  ): Promise<void>;
 }
 
 export default TurboModuleRegistry.getEnforcing<Spec>('YamapUtils');

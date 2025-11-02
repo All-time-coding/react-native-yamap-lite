@@ -271,12 +271,9 @@ public protocol YamapViewComponentDelegate {
         let northEast = YMKPoint(latitude: maxLatitude, longitude: maxLongitude)
         let box = YMKBoundingBox(southWest: southWest, northEast: northEast)
         let camera = map.cameraPosition(with: YMKGeometry(boundingBox: box))
-        map.move(with: YMKCameraPosition(
-            target: camera.target,
-            zoom: camera.zoom - 0.8,
-            azimuth: camera.azimuth,
-            tilt: camera.tilt
-        ))
+
+        let anim = YMKAnimation(type: .smooth, duration: 0.7)
+        map.move(with: camera, animation: anim)
     }
 
     @objc public func getCameraPosition() -> [String: Any]? {
@@ -310,18 +307,70 @@ public protocol YamapViewComponentDelegate {
     @objc public func setCenter(
         latitude: Double,
         longitude: Double,
-        zoom: Float = 10.0,
-        azimuth: Float = 0.0,
-        tilt: Float = 0.0,
-        duration _: Int = 500
+        zoom: Float,
+        azimuth: Float,
+        tilt: Float,
+        duration: Float,
+        animation: String
+    ) {
+      guard let map = mapView?.mapWindow?.map else { return }
+      let animType: YMKAnimationType
+      switch animation {
+        case "LINEAR":
+          animType = .linear
+        default:
+          animType = .smooth
+      }
+      let newPosition = YMKCameraPosition(target: YMKPoint(latitude: latitude, longitude: longitude), zoom: Float(zoom), azimuth: azimuth, tilt: tilt)
+      if(duration > 0){
+        let anim = YMKAnimation(type: animType, duration: Float(duration) / 1000.0)
+        map.move(with: newPosition, animation: anim)
+      } else {
+        map.move(with: newPosition)
+      }
+    }
+
+    @objc(setZoomWithZoom:duration:animation:)
+    public func setZoom(
+        zoom: Float,
+        duration: Float,
+        animation: String
     ) {
         guard let map = mapView?.mapWindow?.map else { return }
-        map.move(with: YMKCameraPosition(
-            target: YMKPoint(latitude: latitude, longitude: longitude),
-            zoom: zoom,
-            azimuth: azimuth,
-            tilt: tilt
-        ))
+        let animType: YMKAnimationType
+        switch animation {
+          case "LINEAR":
+            animType = .linear
+          default:
+            animType = .smooth
+        }
+        let prevPosition = map.cameraPosition
+        let newPosition = YMKCameraPosition(target: prevPosition.target, zoom: Float(zoom), azimuth: prevPosition.azimuth, tilt: prevPosition.tilt)
+      if(duration > 0){
+        let anim = YMKAnimation(type: animType, duration: Float(duration) / 1000.0)
+        map.move(with: newPosition, animation: anim)
+      } else {
+        map.move(with: newPosition)
+      }
+    }
+
+    @objc public func fitAllMarkers() {
+        var markerPoints: [YMKPoint] = []
+        
+        for subview in subviews {
+          // TODO: FIX CRASH
+//            if let markerContainer = subview as? UIView,
+//               let markerView = markerContainer.value(forKey: "contentView") as? YamapLiteMarker,
+//               let point = markerView.point {
+//                markerPoints.append(YMKPoint(latitude: point.lat, longitude: point.lon))
+//            }
+        }
+        
+        if markerPoints.isEmpty {
+            return
+        }
+        
+        fitMakers(markerPoints)
     }
 
     @objc func cleanMap() {

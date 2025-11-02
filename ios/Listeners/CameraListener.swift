@@ -14,18 +14,28 @@ class CameraListener: NSObject, YMKMapCameraListener {
 
     func onCameraPositionChanged(with _: YMKMap,
                                  cameraPosition: YMKCameraPosition,
-                                 cameraUpdateReason _: YMKCameraUpdateReason,
+                                 cameraUpdateReason : YMKCameraUpdateReason,
                                  finished: Bool)
     {
         let target = cameraPosition.target
+        let reasonString: String
+        switch cameraUpdateReason {
+        case .gestures:
+            reasonString = "GESTURES"
+        case .application:
+            reasonString = "APPLICATION"
+        @unknown default:
+            reasonString = "GESTURES"
+        }
         let params: [String: Any] = [
-            "latitude": target.latitude,
-            "longitude": target.longitude,
+            "lat": target.latitude,
+            "lon": target.longitude,
             "zoom": Double(cameraPosition.zoom),
             "azimuth": Double(cameraPosition.azimuth),
             "tilt": Double(cameraPosition.tilt),
             "finished": finished,
-            "target": 0.0
+            "target": 0.0,
+            "reason": reasonString
         ]
 
         DispatchQueue.main.async { [weak self] in

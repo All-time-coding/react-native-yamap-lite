@@ -1,5 +1,5 @@
 import { Platform, NativeModules } from 'react-native';
-import type { CameraPosition, Point } from '../@types';
+import type { CameraPosition } from '../@types';
 
 const LINKING_ERROR =
   `The package 'react-native-yamap-lite' doesn't seem to be linked. Make sure: \n\n` +
@@ -9,7 +9,12 @@ const LINKING_ERROR =
 
 interface IYamapUtilsModule {
   getCameraPosition(viewId: number): Promise<CameraPosition>;
-  setZoom(viewId: number, zoom: number): Promise<void>;
+  setZoom(
+    viewId: number,
+    zoom: number,
+    duration: number,
+    animation: 'LINEAR' | 'SMOOTH'
+  ): Promise<void>;
   setCenter(
     viewId: number,
     latitude: number,
@@ -17,9 +22,10 @@ interface IYamapUtilsModule {
     zoom: number,
     azimuth: number,
     tilt: number,
-    animationDuration: number
+    duration: number,
+    animation: 'LINEAR' | 'SMOOTH'
   ): Promise<void>;
-  fitAllMarkers(viewId: number, points: Point[]): Promise<void>;
+  fitAllMarkers(viewId: number): Promise<void>;
 }
 
 const YamapUtilsModule = true

@@ -106,12 +106,12 @@ class YamapLiteViewManager : ViewGroupManager<YamapLiteView>(), YamapLiteViewMan
     view.setFastTapEnabled(value)
   }
 
-  @ReactProp(name = "setInitialRegion")
+  @ReactProp(name = "initialRegion")
   override fun setInitialRegion(view: YamapLiteView, value: ReadableMap?) {
     if (value != null) {
       val region = mutableMapOf<String, Any>()
-      if (value.hasKey("latitude")) region["latitude"] = value.getDouble("latitude")
-      if (value.hasKey("longitude")) region["longitude"] = value.getDouble("longitude")
+      if (value.hasKey("lat")) region["lat"] = value.getDouble("lat")
+      if (value.hasKey("lon")) region["lon"] = value.getDouble("lon")
       if (value.hasKey("zoom")) region["zoom"] = value.getDouble("zoom")
       if (value.hasKey("azimuth")) region["azimuth"] = value.getDouble("azimuth")
       if (value.hasKey("tilt")) region["tilt"] = value.getDouble("tilt")
