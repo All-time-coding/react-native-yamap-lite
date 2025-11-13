@@ -78,55 +78,43 @@ class YamapLiteView(context: Context) : FrameLayout(context), MapLoadedListener,
   }
   
   fun setUserLocationIcon(icon: String?) {
-
+    userLocationIcon = icon
   }
   
   fun setUserLocationIconScale(scale: Float) {
-
+    userLocationIconScale = scale
   }
   
   fun setShowUserPosition(show: Boolean) {
-
+    isUserLocationEnabled = show
   }
   
   fun setNightMode(nightMode: Boolean) {
-
+    mapView.mapWindow.map.isNightModeEnabled = nightMode
   }
   
   fun setMapStyle(style: String?) {
-
-  }
-  
-  fun setUserLocationAccuracyFillColor(color: String?) {
-
-  }
-  
-  fun setUserLocationAccuracyStrokeColor(color: String?) {
-
-  }
-  
-  fun setUserLocationAccuracyStrokeWidth(width: Float) {
-
+    mapStyle = style
   }
   
   fun setScrollGesturesEnabled(enabled: Boolean) {
-
+    mapView.mapWindow.map.isScrollGesturesEnabled = enabled
   }
-  
+
   fun setZoomGesturesEnabled(enabled: Boolean) {
-
+    mapView.mapWindow.map.isZoomGesturesEnabled = enabled
   }
-  
-  fun setTiltGesturesEnabled(enabled: Boolean) {
 
+  fun setTiltGesturesEnabled(enabled: Boolean) {
+    mapView.mapWindow.map.isTiltGesturesEnabled = enabled
   }
   
   fun setRotateGesturesEnabled(enabled: Boolean) {
-
+    mapView.mapWindow.map.isRotateGesturesEnabled = enabled
   }
   
   fun setFastTapEnabled(enabled: Boolean) {
-
+    mapView.mapWindow.map.isFastTapEnabled = enabled
   }
   
   fun setInitialRegion(region: Map<String, Any>?) {
@@ -143,18 +131,25 @@ class YamapLiteView(context: Context) : FrameLayout(context), MapLoadedListener,
   }
   
   fun setMaxFps(fps: Float) {
+    maxFps = fps
   }
   
   fun setMapType(type: String?) {
+    mapType = type ?: "map"
+  }
+
+  fun setLogoPosition(position: Map<String, Any>) {
+    val vertical = position["vertical"] as? String
+    val horizontal = position["horizontal"] as? String
+    if (vertical == null || horizontal == null) return
+    logoPosition = mapOf("vertical" to vertical, "horizontal" to horizontal)
   }
   
-  fun setFollowUser(follow: Boolean) {
-  }
-  
-  fun setLogoPosition(position: Map<String, Any>?) {
-  }
-  
-  fun setLogoPadding(padding: Map<String, Any>?) {
+  fun setLogoPadding(padding: Map<String, Any>) {
+    val vertical = padding["vertical"] as? Double
+    val horizontal = padding["horizontal"] as? Double
+    if (vertical == null || horizontal == null) return
+    logoPadding = mapOf("vertical" to vertical.toInt(), "horizontal" to horizontal.toInt())
   }
   
   fun getCameraPosition(): WritableMap? {
@@ -162,8 +157,8 @@ class YamapLiteView(context: Context) : FrameLayout(context), MapLoadedListener,
       val map = mapView.mapWindow.map
       val cameraPosition = map.cameraPosition
       val result = Arguments.createMap()
-      result.putDouble("latitude", cameraPosition.target.latitude)
-      result.putDouble("longitude", cameraPosition.target.longitude)
+      result.putDouble("lat", cameraPosition.target.latitude)
+      result.putDouble("lon", cameraPosition.target.longitude)
       result.putDouble("zoom", cameraPosition.zoom.toDouble())
       result.putDouble("azimuth", cameraPosition.azimuth.toDouble())
       result.putDouble("tilt", cameraPosition.tilt.toDouble())

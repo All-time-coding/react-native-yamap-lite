@@ -52,61 +52,57 @@ using namespace facebook::react;
     const auto &oldViewProps = *std::static_pointer_cast<YamapLiteViewProps const>(_props);
     const auto &newViewProps = *std::static_pointer_cast<YamapLiteViewProps const>(props);
     
-    if(oldViewProps.mapType != newViewProps.mapType){
-        NSString *sampleRate = RCTNSStringFromStringNilIfEmpty(toString(newViewProps.mapType));
-        _view.mapType = sampleRate;
-    }
+    // Ensure all map property updates happen on the main thread
+    // React Native Fabric can call updateProps from a background thread
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if(oldViewProps.mapType != newViewProps.mapType){
+            NSString *sampleRate = RCTNSStringFromStringNilIfEmpty(toString(newViewProps.mapType));
+            self->_view.mapType = sampleRate;
+        }
 
-    if(oldViewProps.nightMode != newViewProps.nightMode){
-        _view.nightMode = newViewProps.nightMode;
-    }
-    
-    if(oldViewProps.zoomGesturesEnabled != newViewProps.zoomGesturesEnabled){
-        _view.zoomGesturesEnabled = newViewProps.zoomGesturesEnabled;
-    }
-    if(oldViewProps.scrollGesturesEnabled != newViewProps.scrollGesturesEnabled){
-        _view.scrollGesturesEnabled = newViewProps.scrollGesturesEnabled;
-    }
-    if(oldViewProps.rotateGesturesEnabled != newViewProps.rotateGesturesEnabled){
-        _view.rotateGesturesEnabled = newViewProps.rotateGesturesEnabled;
-    }
-    if(oldViewProps.tiltGesturesEnabled != newViewProps.tiltGesturesEnabled){
-        _view.tiltGesturesEnabled = newViewProps.tiltGesturesEnabled;
-    }
-    if(oldViewProps.fastTapEnabled != newViewProps.fastTapEnabled){
-        _view.fastTapEnabled = newViewProps.fastTapEnabled;
-    }
-    
-    if(oldViewProps.showUserPosition != newViewProps.showUserPosition){
-        _view.showUserPosition = newViewProps.showUserPosition;
-        [_view setShowUserPositionState:newViewProps.showUserPosition];
-    }
-      
-    if(oldViewProps.userLocationIconScale != newViewProps.userLocationIconScale){
-        _view.userLocationIconScale = newViewProps.userLocationIconScale;
-        [_view updateUserIcon];
-    }
-    if(RCTNSStringFromString(oldViewProps.userLocationIcon) != RCTNSStringFromString(newViewProps.userLocationIcon)){
-        [_view setUserLocationIconWithPath:RCTNSStringFromString(newViewProps.userLocationIcon)];
-    }
+        if(oldViewProps.nightMode != newViewProps.nightMode){
+            self->_view.nightMode = newViewProps.nightMode;
+        }
+        
+        self->_view.zoomGesturesEnabled = newViewProps.zoomGesturesEnabled;
+        self->_view.scrollGesturesEnabled = newViewProps.scrollGesturesEnabled;
+        self->_view.rotateGesturesEnabled = newViewProps.rotateGesturesEnabled;
+        self->_view.tiltGesturesEnabled = newViewProps.tiltGesturesEnabled;
+        self->_view.fastTapEnabled = newViewProps.fastTapEnabled;
+        
+        [self->_view applyProperties];
+        
+        if(oldViewProps.showUserPosition != newViewProps.showUserPosition){
+            self->_view.showUserPosition = newViewProps.showUserPosition;
+            [self->_view setShowUserPositionState:newViewProps.showUserPosition];
+        }
+          
+        if(oldViewProps.userLocationIconScale != newViewProps.userLocationIconScale){
+            self->_view.userLocationIconScale = newViewProps.userLocationIconScale;
+            [self->_view updateUserIcon];
+        }
+        if(RCTNSStringFromString(oldViewProps.userLocationIcon) != RCTNSStringFromString(newViewProps.userLocationIcon)){
+            [self->_view setUserLocationIconWithPath:RCTNSStringFromString(newViewProps.userLocationIcon)];
+        }
 
-    if(oldViewProps.initialRegion.lat != newViewProps.initialRegion.lat){
-        [_view move:newViewProps.initialRegion.lat :newViewProps.initialRegion.lon :newViewProps.initialRegion.zoom :newViewProps.initialRegion.azimuth :newViewProps.initialRegion.tilt];
-    }
-    if(oldViewProps.logoPosition.horizontal != newViewProps.logoPosition.horizontal || oldViewProps.logoPosition.vertical != newViewProps.logoPosition.vertical){
-        NSDictionary *logoPositionDict = @{
-            @"horizontal": RCTNSStringFromString(toString(newViewProps.logoPosition.horizontal)),
-            @"vertical": RCTNSStringFromString(toString(newViewProps.logoPosition.vertical))
-        };
-        [_view setLogoPositionWithPosition:logoPositionDict];
-    }
-    if(oldViewProps.logoPadding.horizontal !=newViewProps.logoPadding.horizontal || oldViewProps.logoPadding.vertical != newViewProps.logoPadding.vertical){
-        [_view setLogoPaddingWithVertical:newViewProps.logoPadding.vertical horizontal:newViewProps.logoPadding.horizontal];
-    }
-    
-    if(oldViewProps.maxFps != newViewProps.maxFps){
-        _view.maxFps = newViewProps.maxFps;
-    }
+        if(oldViewProps.initialRegion.lat != newViewProps.initialRegion.lat){
+            [self->_view move:newViewProps.initialRegion.lat :newViewProps.initialRegion.lon :newViewProps.initialRegion.zoom :newViewProps.initialRegion.azimuth :newViewProps.initialRegion.tilt];
+        }
+        if(oldViewProps.logoPosition.horizontal != newViewProps.logoPosition.horizontal || oldViewProps.logoPosition.vertical != newViewProps.logoPosition.vertical){
+            NSDictionary *logoPositionDict = @{
+                @"horizontal": RCTNSStringFromString(toString(newViewProps.logoPosition.horizontal)),
+                @"vertical": RCTNSStringFromString(toString(newViewProps.logoPosition.vertical))
+            };
+            [self->_view setLogoPositionWithPosition:logoPositionDict];
+        }
+        if(oldViewProps.logoPadding.horizontal !=newViewProps.logoPadding.horizontal || oldViewProps.logoPadding.vertical != newViewProps.logoPadding.vertical){
+            [self->_view setLogoPaddingWithVertical:newViewProps.logoPadding.vertical horizontal:newViewProps.logoPadding.horizontal];
+        }
+        
+        if(oldViewProps.maxFps != newViewProps.maxFps){
+            self->_view.maxFps = newViewProps.maxFps;
+        }
+    });
     
     [super updateProps:props oldProps:oldProps];
 }
@@ -136,6 +132,10 @@ using namespace facebook::react;
 }
 
 - (void)handleOnMapLoadedWithResult:(NSDictionary *)obj{
+    if (_view != nil) {
+        [_view applyProperties];
+    }
+    
     if (_eventEmitter != nil) {
         YamapLiteViewEventEmitter::OnMapLoaded event = {};
         event.curZoomGeometryLoaded = [[obj objectForKey:@"curZoomGeometryLoaded"] doubleValue];

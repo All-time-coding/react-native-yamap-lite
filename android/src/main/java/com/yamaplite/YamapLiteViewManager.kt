@@ -41,67 +41,52 @@ class YamapLiteViewManager : ViewGroupManager<YamapLiteView>(), YamapLiteViewMan
 
   override fun getName() = "YamapLiteView"
 
-  @ReactProp(name = "setUserLocationIcon")
+  @ReactProp(name = "userLocationIcon")
   override fun setUserLocationIcon(view: YamapLiteView, value: String?) {
     view.setUserLocationIcon(value)
   }
 
-  @ReactProp(name = "setUserLocationIconScale")
+  @ReactProp(name = "userLocationIconScale")
   override fun setUserLocationIconScale(view: YamapLiteView, value: Float) {
     view.setUserLocationIconScale(value)
   }
 
-  @ReactProp(name = "setShowUserPosition")
+  @ReactProp(name = "showUserPosition")
   override fun setShowUserPosition(view: YamapLiteView, value: Boolean) {
     view.setShowUserPosition(value)
   }
 
-  @ReactProp(name = "setNightMode")
+  @ReactProp(name = "nightMode")
   override fun setNightMode(view: YamapLiteView, value: Boolean) {
     view.setNightMode(value)
   }
 
-  @ReactProp(name = "setMapStyle")
+  @ReactProp(name = "mapStyle")
   override fun setMapStyle(view: YamapLiteView, value: String?) {
     view.setMapStyle(value)
   }
 
-  @ReactProp(name = "setUserLocationAccuracyFillColor")
-  override fun setUserLocationAccuracyFillColor(view: YamapLiteView, value: String?) {
-    view.setUserLocationAccuracyFillColor(value)
-  }
-
-  @ReactProp(name = "setUserLocationAccuracyStrokeColor")
-  override fun setUserLocationAccuracyStrokeColor(view: YamapLiteView, value: String?) {
-    view.setUserLocationAccuracyStrokeColor(value)
-  }
-
-  @ReactProp(name = "setUserLocationAccuracyStrokeWidth")
-  override fun setUserLocationAccuracyStrokeWidth(view: YamapLiteView, value: Float) {
-    view.setUserLocationAccuracyStrokeWidth(value)
-  }
-
-  @ReactProp(name = "setScrollGesturesEnabled")
+  @ReactProp(name = "scrollGesturesEnabled")
   override fun setScrollGesturesEnabled(view: YamapLiteView, value: Boolean) {
     view.setScrollGesturesEnabled(value)
   }
 
-  @ReactProp(name = "setZoomGesturesEnabled")
+  @ReactProp(name = "zoomGesturesEnabled")
   override fun setZoomGesturesEnabled(view: YamapLiteView, value: Boolean) {
     view.setZoomGesturesEnabled(value)
   }
 
-  @ReactProp(name = "setTiltGesturesEnabled")
+  @ReactProp(name = "tiltGesturesEnabled")
   override fun setTiltGesturesEnabled(view: YamapLiteView, value: Boolean) {
     view.setTiltGesturesEnabled(value)
   }
 
-  @ReactProp(name = "setRotateGesturesEnabled")
+  @ReactProp(name = "rotateGesturesEnabled")
   override fun setRotateGesturesEnabled(view: YamapLiteView, value: Boolean) {
     view.setRotateGesturesEnabled(value)
   }
 
-  @ReactProp(name = "setFastTapEnabled")
+  @ReactProp(name = "fastTapEnabled")
   override fun setFastTapEnabled(view: YamapLiteView, value: Boolean) {
     view.setFastTapEnabled(value)
   }
@@ -119,22 +104,17 @@ class YamapLiteViewManager : ViewGroupManager<YamapLiteView>(), YamapLiteViewMan
     }
   }
 
-  @ReactProp(name = "setMaxFps")
+  @ReactProp(name = "maxFps")
   override fun setMaxFps(view: YamapLiteView, value: Float) {
     view.setMaxFps(value)
   }
 
-  @ReactProp(name = "setMapType")
+  @ReactProp(name = "mapType")
   override fun setMapType(view: YamapLiteView, value: String?) {
     view.setMapType(value)
   }
 
-  @ReactProp(name = "setFollowUser")
-  override fun setFollowUser(view: YamapLiteView, value: Boolean) {
-    view.setFollowUser(value)
-  }
-
-  @ReactProp(name = "setLogoPosition")
+  @ReactProp(name = "logoPosition")
   override fun setLogoPosition(view: YamapLiteView, value: ReadableMap?) {
     if (value != null) {
       val position = mutableMapOf<String, Any>()
@@ -144,12 +124,12 @@ class YamapLiteViewManager : ViewGroupManager<YamapLiteView>(), YamapLiteViewMan
     }
   }
 
-  @ReactProp(name = "setLogoPadding")
+  @ReactProp(name = "logoPadding")
   override fun setLogoPadding(view: YamapLiteView, value: ReadableMap?) {
     if (value != null) {
       val padding = mutableMapOf<String, Any>()
-      if (value.hasKey("vertical")) padding["vertical"] = value.getDouble("vertical")
-      if (value.hasKey("horizontal")) padding["horizontal"] = value.getDouble("horizontal")
+      if (value.hasKey("vertical")) padding["vertical"] = value.getDouble("vertical") ?: 0.0
+      if (value.hasKey("horizontal")) padding["horizontal"] = value.getDouble("horizontal") ?: 0.0
       view.setLogoPadding(padding)
     }
   }

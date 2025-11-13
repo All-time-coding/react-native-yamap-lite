@@ -1,5 +1,4 @@
 import { Platform, NativeModules } from 'react-native';
-import type { CameraPosition } from '../@types';
 
 const LINKING_ERROR =
   `The package 'react-native-yamap-lite' doesn't seem to be linked. Make sure: \n\n` +
@@ -8,7 +7,13 @@ const LINKING_ERROR =
   '- You are not using Expo managed workflow\n';
 
 interface IYamapUtilsModule {
-  getCameraPosition(viewId: number): Promise<CameraPosition>;
+  getCameraPosition(viewId: number): Promise<{
+    lat: number;
+    lon: number;
+    zoom: number;
+    azimuth: number;
+    tilt: number;
+  }>;
   setZoom(
     viewId: number,
     zoom: number,
