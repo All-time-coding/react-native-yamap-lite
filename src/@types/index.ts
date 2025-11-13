@@ -1,5 +1,11 @@
 export type YamapRef = {
-  getCameraPosition: () => Promise<any>;
+  getCameraPosition: () => Promise<{
+    lat: number;
+    lon: number;
+    zoom: number;
+    azimuth: number;
+    tilt: number;
+  }>;
   setZoom: (
     zoom: number,
     duration?: number,
@@ -32,15 +38,17 @@ export interface ScreenPoint {
 }
 
 export interface MapLoaded {
-  renderObjectCount: number;
-  curZoomModelsLoaded: number;
-  curZoomPlacemarksLoaded: number;
-  curZoomLabelsLoaded: number;
-  curZoomGeometryLoaded: number;
-  tileMemoryUsage: number;
-  delayedGeometryLoaded: number;
-  fullyAppeared: number;
-  fullyLoaded: number;
+  nativeEvent: {
+    renderObjectCount: number;
+    curZoomModelsLoaded: number;
+    curZoomPlacemarksLoaded: number;
+    curZoomLabelsLoaded: number;
+    curZoomGeometryLoaded: number;
+    tileMemoryUsage: number;
+    delayedGeometryLoaded: number;
+    fullyAppeared: number;
+    fullyLoaded: number;
+  };
 }
 
 export interface InitialRegion {
@@ -99,13 +107,15 @@ export interface RoutesFoundEvent<T extends DrivingInfo | MasstransitInfo> {
 }
 
 export interface CameraPosition {
-  zoom: number;
-  tilt: number;
-  azimuth: number;
-  latitude: number;
-  longitude: number;
-  finished: boolean;
-  target: number;
+  nativeEvent: {
+    zoom: number;
+    tilt: number;
+    azimuth: number;
+    point: { lat: number; lon: number };
+    finished: boolean;
+    target: number;
+    reason: 'GESTURES' | 'APPLICATION';
+  };
 }
 
 export type VisibleRegion = {

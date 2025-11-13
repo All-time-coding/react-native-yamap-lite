@@ -73,14 +73,11 @@ public protocol YamapViewComponentDelegate {
             guard let map = mapView?.mapWindow?.map else { return }
             print("nightMode \(nightMode)")
             map.isNightModeEnabled = nightMode
-            applyProperties()
         }
     }
 
     @objc public var scrollGesturesEnabled: Bool = true {
         didSet {
-            guard let map = mapView?.mapWindow?.map else { return }
-            map.isScrollGesturesEnabled = scrollGesturesEnabled
         }
     }
 
@@ -88,30 +85,48 @@ public protocol YamapViewComponentDelegate {
     @objc public var showUserPosition = false
     @objc public var zoomGesturesEnabled: Bool = true {
         didSet {
-            guard let map = mapView?.mapWindow?.map else { return }
-            map.isZoomGesturesEnabled = zoomGesturesEnabled
         }
     }
 
     @objc public var tiltGesturesEnabled: Bool = true {
         didSet {
-            guard let map = mapView?.mapWindow?.map else { return }
-            map.isTiltGesturesEnabled = tiltGesturesEnabled
         }
     }
 
     @objc public var rotateGesturesEnabled: Bool = true {
         didSet {
-            guard let map = mapView?.mapWindow?.map else { return }
-            map.isRotateGesturesEnabled = rotateGesturesEnabled
         }
     }
 
     @objc public var fastTapEnabled: Bool = true {
         didSet {
-            guard let map = mapView?.mapWindow?.map else { return }
-            map.isFastTapEnabled = fastTapEnabled
         }
+    }
+    
+    @objc public func applyProperties() {
+        if Thread.isMainThread {
+            updateProperties()
+        } else {
+            DispatchQueue.main.async { [weak self] in
+                self?.updateProperties()
+            }
+        }
+    }
+    
+    private func updateProperties() {
+        guard let map = mapView?.mapWindow?.map else { return }
+        switch mapType {
+        case "satellite": map.mapType = .satellite
+        case "hybrid": map.mapType = .hybrid
+        default: map.mapType = .map
+        }
+
+        map.isNightModeEnabled = nightMode
+        map.isScrollGesturesEnabled = scrollGesturesEnabled
+        map.isZoomGesturesEnabled = zoomGesturesEnabled
+        map.isTiltGesturesEnabled = tiltGesturesEnabled
+        map.isRotateGesturesEnabled = rotateGesturesEnabled
+        map.isFastTapEnabled = fastTapEnabled
     }
 
     @objc public var maxFps: Float = 30 {
@@ -164,19 +179,6 @@ public protocol YamapViewComponentDelegate {
         if userLocationLayer != nil {
             userLocationLayer.setVisibleWithOn(showUserPosition)
         }
-    }
-    
-    @objc private func applyProperties() {
-        guard let map = mapView?.mapWindow?.map else { return }
-        switch mapType {
-        case "satellite": map.mapType = .satellite
-        case "hybrid": map.mapType = .hybrid
-        default: map.mapType = .map
-        }
-
-        map.isNightModeEnabled = nightMode
-        map.isScrollGesturesEnabled = scrollGesturesEnabled
-        map.isZoomGesturesEnabled = zoomGesturesEnabled
     }
 
     ////////////////////////
@@ -280,8 +282,8 @@ public protocol YamapViewComponentDelegate {
         guard let map = mapView?.mapWindow?.map else { return nil }
         let position = map.cameraPosition
         let result: [String: Any] = [
-            "latitude": position.target.latitude,
-            "longitude": position.target.longitude,
+            "lat": position.target.latitude,
+            "lon": position.target.longitude,
             "zoom": Double(position.zoom),
             "azimuth": Double(position.azimuth),
             "tilt": Double(position.tilt),

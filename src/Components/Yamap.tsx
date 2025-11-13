@@ -14,7 +14,16 @@ import { YamapUtils } from '../Utils/YamapUtils';
 export const YaMap = forwardRef(
   (props: NativeProps, ref: ForwardedRef<YamapRef>) => {
     const nativeRef = useRef(null);
-    const { userLocationIcon, ...otherProps } = props;
+    const {
+      userLocationIcon,
+      zoomGesturesEnabled = true,
+      scrollGesturesEnabled = true,
+      tiltGesturesEnabled = true,
+      rotateGesturesEnabled = true,
+      fastTapEnabled = true,
+      nightMode = false,
+      ...otherProps
+    } = props;
     const viewId = findNodeHandle(nativeRef.current);
 
     useImperativeHandle(
@@ -69,6 +78,12 @@ export const YaMap = forwardRef(
       <YamapLiteView
         ref={nativeRef}
         userLocationIcon={userIcon}
+        zoomGesturesEnabled={zoomGesturesEnabled}
+        scrollGesturesEnabled={scrollGesturesEnabled}
+        tiltGesturesEnabled={tiltGesturesEnabled}
+        rotateGesturesEnabled={rotateGesturesEnabled}
+        fastTapEnabled={fastTapEnabled}
+        nightMode={nightMode}
         {...otherProps}
       />
     );

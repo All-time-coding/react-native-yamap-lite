@@ -48,31 +48,37 @@ interface CameraPosition {
 }
 
 export interface NativeProps extends ViewProps {
-  userLocationIcon?: string; //✅✅ from link
-  userLocationIconScale?: Float; //✅✅
-  showUserPosition?: boolean; //✅✅
-  nightMode?: boolean; //✅✅
+  userLocationIcon?: string;
+  userLocationIconScale?: Float;
+  showUserPosition?: boolean;
+  /** @default false */
+  nightMode?: boolean;
   mapStyle?: string;
 
-  onCameraPositionChange?: DirectEventHandler<Readonly<CameraPosition>>; //✅✅
-  onCameraPositionChangeEnd?: DirectEventHandler<Readonly<CameraPosition>>; //✅✅
+  onCameraPositionChange?: DirectEventHandler<Readonly<CameraPosition>>;
+  onCameraPositionChangeEnd?: DirectEventHandler<Readonly<CameraPosition>>;
   // onMapPress?: (event: NativeSyntheticEvent<Point>) => void;
   // onMapLongPress?: (event: NativeSyntheticEvent<Point>) => void;
-  onMapLoaded?: DirectEventHandler<Readonly<MapLoad>>; //✅✅
-  userLocationAccuracyFillColor?: string; //
-  userLocationAccuracyStrokeColor?: string; //
-  userLocationAccuracyStrokeWidth?: Float; //
-  scrollGesturesEnabled?: boolean; //✅
-  zoomGesturesEnabled?: boolean; //✅
-  tiltGesturesEnabled?: boolean; //✅
-  rotateGesturesEnabled?: boolean; //✅
-  fastTapEnabled?: boolean; //✅
-  initialRegion?: InitialRegion; //✅✅
-  maxFps?: Float; //✅
+  onMapLoaded?: DirectEventHandler<Readonly<MapLoad>>;
+  // userLocationAccuracyFillColor?: string; //
+  // userLocationAccuracyStrokeColor?: string; //
+  // userLocationAccuracyStrokeWidth?: Float; //
+  /** @default true */
+  scrollGesturesEnabled?: boolean;
+  /** @default true */
+  zoomGesturesEnabled?: boolean;
+  /** @default true */
+  tiltGesturesEnabled?: boolean;
+  /** @default true */
+  rotateGesturesEnabled?: boolean;
+  /** @default true */
+  fastTapEnabled?: boolean;
+  initialRegion?: InitialRegion;
+  maxFps?: Float;
   mapType?: WithDefault<'map' | 'satellite' | 'hybrid', 'map'>;
-  followUser?: boolean;
-  logoPosition?: YandexLogoPosition; //✅✅;
-  logoPadding?: YandexLogoPadding; //✅✅;
+  // followUser?: boolean;
+  logoPosition?: YandexLogoPosition;
+  logoPadding?: YandexLogoPadding;
 }
 
 export type YamapViewComponent = HostComponent<NativeProps>;
