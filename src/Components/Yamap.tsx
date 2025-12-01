@@ -4,16 +4,16 @@ import {
   useRef,
   type ForwardedRef,
 } from 'react';
-import type { NativeProps } from '../YamapLiteViewNativeComponent';
-import { findNodeHandle, Image, type ImageSourcePropType } from 'react-native';
-import type { Point, YamapRef } from '../@types';
+import { findNodeHandle, Image } from 'react-native';
+import type { Point, YaMapProps, YaMapRef } from '../@types';
 import YamapLiteView from '../YamapLiteViewNativeComponent';
 import { YamapUtils } from '../Utils/YamapUtils';
 
-// 'reload',
 export const YaMap = forwardRef(
-  (props: NativeProps, ref: ForwardedRef<YamapRef>) => {
+  (props: YaMapProps, ref: ForwardedRef<YaMapRef>) => {
     const nativeRef = useRef(null);
+    const viewId = findNodeHandle(nativeRef.current);
+
     const {
       userLocationIcon,
       zoomGesturesEnabled = true,
@@ -22,9 +22,12 @@ export const YaMap = forwardRef(
       rotateGesturesEnabled = true,
       fastTapEnabled = true,
       nightMode = false,
+      showUserPosition = false,
+      userLocationAccuracyFillColor = '#00FF00',
+      userLocationAccuracyStrokeColor = '#000000',
+      userLocationAccuracyStrokeWidth = 2,
       ...otherProps
     } = props;
-    const viewId = findNodeHandle(nativeRef.current);
 
     useImperativeHandle(
       ref,
@@ -70,20 +73,24 @@ export const YaMap = forwardRef(
       [viewId]
     );
 
-    const userIcon = userLocationIcon
-      ? Image.resolveAssetSource(userLocationIcon as ImageSourcePropType).uri
+    const userLocationIconUri = userLocationIcon
+      ? Image.resolveAssetSource(userLocationIcon).uri
       : '';
 
     return (
       <YamapLiteView
         ref={nativeRef}
-        userLocationIcon={userIcon}
+        userLocationIcon={userLocationIconUri}
         zoomGesturesEnabled={zoomGesturesEnabled}
         scrollGesturesEnabled={scrollGesturesEnabled}
         tiltGesturesEnabled={tiltGesturesEnabled}
         rotateGesturesEnabled={rotateGesturesEnabled}
         fastTapEnabled={fastTapEnabled}
         nightMode={nightMode}
+        showUserPosition={showUserPosition}
+        userLocationAccuracyFillColor={userLocationAccuracyFillColor}
+        userLocationAccuracyStrokeColor={userLocationAccuracyStrokeColor}
+        userLocationAccuracyStrokeWidth={userLocationAccuracyStrokeWidth}
         {...otherProps}
       />
     );

@@ -17,7 +17,7 @@ export interface NativeProps extends ViewProps {
   scale?: Double;
   rotated?: boolean;
   onMarkerPress?: DirectEventHandler<Readonly<Point>>;
-  source?: string; // ImageSourcePropType
+  source?: string;
   anchor?: {
     x: Double;
     y: Double;

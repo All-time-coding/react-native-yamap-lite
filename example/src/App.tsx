@@ -33,12 +33,21 @@ export default function App() {
         rotateGesturesEnabled={false}
         fastTapEnabled={false}
         nightMode={true}
+        showUserPosition={true}
+        // userLocationIcon={{
+        //   uri: 'https://www.shutterstock.com/image-vector/user-location-icon-vector-graphics-260nw-1496198948.jpg',
+        // }}
+        userLocationIcon={require('./assets/user-pin.png')}
+        userLocationIconScale={2}
+        userLocationAccuracyFillColor="#ff0000"
+        userLocationAccuracyStrokeColor="#ff0000"
+        userLocationAccuracyStrokeWidth={100}
       >
         {markers.map((marker, index) => (
           <Marker
             key={`${marker.lat}-${marker.lon}-${index}`}
             point={{ lat: marker.lat, lon: marker.lon }}
-            source={marker.source}
+            source={{ uri: marker.source }}
             size={marker.size}
             onMarkerPress={(event) => {
               console.log('Marker pressed', event);

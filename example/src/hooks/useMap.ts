@@ -1,8 +1,8 @@
 import React from 'react';
-import type { CameraPosition, MapLoaded, YamapRef } from '../../../src/@types';
+import type { CameraPosition, MapLoaded, YaMapRef } from '../../../src/@types';
 
 export const useMap = () => {
-  const mapRef = React.useRef<YamapRef>(null);
+  const mapRef = React.useRef<YaMapRef>(null);
   const [zoom, setZoom] = React.useState(10);
 
   const handleIncreaseZoom = async () => {

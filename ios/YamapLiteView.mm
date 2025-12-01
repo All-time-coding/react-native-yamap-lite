@@ -63,20 +63,34 @@ using namespace facebook::react;
         if(oldViewProps.nightMode != newViewProps.nightMode){
             self->_view.nightMode = newViewProps.nightMode;
         }
-        
-        self->_view.zoomGesturesEnabled = newViewProps.zoomGesturesEnabled;
-        self->_view.scrollGesturesEnabled = newViewProps.scrollGesturesEnabled;
-        self->_view.rotateGesturesEnabled = newViewProps.rotateGesturesEnabled;
-        self->_view.tiltGesturesEnabled = newViewProps.tiltGesturesEnabled;
-        self->_view.fastTapEnabled = newViewProps.fastTapEnabled;
-        
-        [self->_view applyProperties];
-        
+        if(oldViewProps.zoomGesturesEnabled != newViewProps.zoomGesturesEnabled){
+            self->_view.zoomGesturesEnabled = newViewProps.zoomGesturesEnabled;
+        }
+        if(oldViewProps.scrollGesturesEnabled != newViewProps.scrollGesturesEnabled){
+            self->_view.scrollGesturesEnabled = newViewProps.scrollGesturesEnabled;
+        }
+        if(oldViewProps.rotateGesturesEnabled != newViewProps.rotateGesturesEnabled){
+            self->_view.rotateGesturesEnabled = newViewProps.rotateGesturesEnabled;
+        }
+        if(oldViewProps.tiltGesturesEnabled != newViewProps.tiltGesturesEnabled){
+            self->_view.tiltGesturesEnabled = newViewProps.tiltGesturesEnabled;
+        }
+        if(oldViewProps.fastTapEnabled != newViewProps.fastTapEnabled){
+            self->_view.fastTapEnabled = newViewProps.fastTapEnabled;
+        }
+        if(oldViewProps.userLocationAccuracyFillColor != newViewProps.userLocationAccuracyFillColor){
+            self->_view.userLocationAccuracyFillColor = [self hexStringToColor:RCTNSStringFromString(newViewProps.userLocationAccuracyFillColor)];
+        }
+        if(oldViewProps.userLocationAccuracyStrokeColor != newViewProps.userLocationAccuracyStrokeColor){
+            self->_view.userLocationAccuracyStrokeColor = [self hexStringToColor:RCTNSStringFromString(newViewProps.userLocationAccuracyStrokeColor)];
+        }
+        if(oldViewProps.userLocationAccuracyStrokeWidth != newViewProps.userLocationAccuracyStrokeWidth){
+            self->_view.userLocationAccuracyStrokeWidth = newViewProps.userLocationAccuracyStrokeWidth;
+        }
         if(oldViewProps.showUserPosition != newViewProps.showUserPosition){
             self->_view.showUserPosition = newViewProps.showUserPosition;
             [self->_view setShowUserPositionState:newViewProps.showUserPosition];
         }
-          
         if(oldViewProps.userLocationIconScale != newViewProps.userLocationIconScale){
             self->_view.userLocationIconScale = newViewProps.userLocationIconScale;
             [self->_view updateUserIcon];
@@ -98,10 +112,10 @@ using namespace facebook::react;
         if(oldViewProps.logoPadding.horizontal !=newViewProps.logoPadding.horizontal || oldViewProps.logoPadding.vertical != newViewProps.logoPadding.vertical){
             [self->_view setLogoPaddingWithVertical:newViewProps.logoPadding.vertical horizontal:newViewProps.logoPadding.horizontal];
         }
-        
         if(oldViewProps.maxFps != newViewProps.maxFps){
             self->_view.maxFps = newViewProps.maxFps;
         }
+        [self->_view applyProperties];
     });
     
     [super updateProps:props oldProps:oldProps];

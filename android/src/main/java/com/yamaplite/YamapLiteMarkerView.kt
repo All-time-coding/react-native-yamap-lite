@@ -36,6 +36,7 @@ import com.facebook.react.uimanager.UIManagerHelper
 import com.facebook.react.uimanager.events.EventDispatcher
 import com.facebook.react.uimanager.events.Event
 import com.yamaplite.utils.MarkerImageCache
+import com.yamaplite.utils.ResolveImageHelper
 
 class YamapLiteMarkerView(context: Context) : View(context), MapObjectTapListener {
   var latitude: Double = 0.0
@@ -96,30 +97,6 @@ class YamapLiteMarkerView(context: Context) : View(context), MapObjectTapListene
     iconSource = name
     applyStyle()
   }
-  
-  private fun loadImageFromUrl(urlString: String) {
-    coroutineScope.launch {
-      try {
-        val bitmap = withContext(Dispatchers.IO) {
-          val url = URL(urlString)
-          val connection = url.openConnection()
-          connection.connectTimeout = 5000
-          connection.readTimeout = 5000
-          connection.connect()
-          connection.getInputStream().use { inputStream ->
-            BitmapFactory.decodeStream(inputStream)
-          }
-        }
-        // Apply size to loaded bitmap
-        iconBitmap = resizeBitmap(bitmap, _size) ?: bitmap
-        applyStyle()
-      } catch (e: Exception) {
-        android.util.Log.e("YamapLiteMarkerView", "Failed to load image from URL: $urlString", e)
-        iconBitmap = null
-        applyStyle()
-      }
-    }
-  }
 
   fun setScale(value: Double) {
     markerScale = value
@@ -155,25 +132,6 @@ class YamapLiteMarkerView(context: Context) : View(context), MapObjectTapListene
   
   fun getHandled(): Boolean = _handled
 
-  private fun resizeBitmap(bitmap: Bitmap?, targetSize: Int): Bitmap? {
-    if (bitmap == null || targetSize <= 0) return bitmap
-    
-    // Convert dp to pixels based on screen density
-    val density = context.resources.displayMetrics.density
-    val targetSizePx = (targetSize * density).toInt()
-    
-    val width = bitmap.width
-    val height = bitmap.height
-    
-    if (width == targetSizePx && height == targetSizePx) return bitmap
-    
-    val scale = targetSizePx.toFloat() / width.coerceAtLeast(height).toFloat()
-    val scaledWidth = (width * scale).toInt()
-    val scaledHeight = (height * scale).toInt()
-    
-    return Bitmap.createScaledBitmap(bitmap, scaledWidth, scaledHeight, true)
-  }
-
   fun setSize(value: Int) {
     _size = value
     applyStyle()
@@ -188,96 +146,6 @@ class YamapLiteMarkerView(context: Context) : View(context), MapObjectTapListene
     }
     _childView = view
     _childView!!.addOnLayoutChangeListener(childLayoutListener)
-  }
-
-  private fun loadImageAndSetIcon(url: String, iconSize: Int, iconStyle: IconStyle) {
-    val mapObject = placemark
-    
-    // 1. Проверка кэша - всегда ресайзим изображение из кэша под нужный размер
-    MarkerImageCache.get(url)?.let { cachedBitmap ->
-        Log.d("ImageLoader", "Loaded from cache: $url")
-        val resizedBitmap = resizeBitmap(cachedBitmap, iconSize) ?: cachedBitmap
-        val icon = ImageProvider.fromBitmap(resizedBitmap)
-        if (mapObject != null && mapObject.isValid) {
-            mapObject.setIcon(icon)
-            mapObject.setIconStyle(iconStyle)
-        }
-        return
-    }
-
-    // 2. Проверяем как ресурс Android (для React Native ассетов в res/drawable-*)
-    val resId = context.resources.getIdentifier(url, "drawable", context.packageName)
-    if (resId != 0) {
-        try {
-            val bmp = BitmapFactory.decodeResource(context.resources, resId)
-            val resized = resizeBitmap(bmp, iconSize)
-            MarkerImageCache.put(url, resized ?: bmp)
-            val icon = ImageProvider.fromBitmap(resized ?: bmp)
-            if (mapObject != null && mapObject.isValid) {
-                mapObject.setIcon(icon)
-                mapObject.setIconStyle(iconStyle)
-            }
-            Log.d("ImageLoader", "Loaded from resources: $url")
-            return
-        } catch (e: Exception) {
-            Log.e("ImageLoader", "Error loading from resources: $url", e)
-        }
-    }
-
-    // 3. HTTP/HTTPS → асинхронно
-    if (url.startsWith("http://") || url.startsWith("https://")) {
-        synchronized(inProgressRequests) {
-            val list = inProgressRequests[url]
-            if (list != null) {
-                mapObject?.let { list.add(it) }
-                return
-            } else {
-                mapObject?.let { inProgressRequests[url] = mutableListOf(it) }
-            }
-        }
-
-        Log.d("ImageLoader", "Loading from network: $url")
-        val client = OkHttpClient.Builder()
-            .retryOnConnectionFailure(true)
-            .build()
-
-        val request = Request.Builder().url(url).build()
-        client.newCall(request).enqueue(object : okhttp3.Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                Log.e("ImageLoader", "Network load failed: $url", e)
-                synchronized(inProgressRequests) { inProgressRequests.remove(url) }
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                var bitmap: Bitmap? = null
-                response.body?.byteStream()?.use { inputStream ->
-                    try {
-                        bitmap = BitmapFactory.decodeStream(inputStream)?.let { resizeBitmap(it, iconSize) }
-                        bitmap?.let { MarkerImageCache.put(url, it) }
-                    } catch (e: Exception) {
-                        Log.e("ImageLoader", "Error decoding image: $url", e)
-                    } finally {
-                        response.close()
-                    }
-                }
-
-                bitmap?.let { bmp ->
-                    val icon = ImageProvider.fromBitmap(bmp)
-                    val waitingList = synchronized(inProgressRequests) { inProgressRequests.remove(url) }
-                    waitingList?.forEach { mo ->
-                        Handler(Looper.getMainLooper()).post {
-                            if (mo.isValid) {
-                                mo.setIcon(icon)
-                                mo.setIconStyle(iconStyle)
-                            }
-                        }
-                    }
-                }
-            }
-        })
-        return
-    }
-    Log.w("ImageLoader", "Unsupported URL scheme: $url")
   }
 
   private fun applyStyle() {
@@ -298,8 +166,7 @@ class YamapLiteMarkerView(context: Context) : View(context), MapObjectTapListene
           )
           val c = Canvas(b)
           _childView!!.draw(c)
-          // Изменяем размер изображения используя iconSize как ширину
-          val resizedBitmap = resizeBitmap(b, _size)
+          val resizedBitmap = ResolveImageHelper().resizeBitmap(context, b, _size)
           (placemark as PlacemarkMapObject).setIcon(ImageProvider.fromBitmap(resizedBitmap))
           (placemark as PlacemarkMapObject).setIconStyle(iconStyle)
         } catch (e: Exception) {
@@ -307,7 +174,19 @@ class YamapLiteMarkerView(context: Context) : View(context), MapObjectTapListene
         }
       }
       if (_childView == null && iconSource?.isNotEmpty() == true) {
-        loadImageAndSetIcon(iconSource!!, _size, iconStyle)
+        val currentPlacemark = placemark as? PlacemarkMapObject
+        val currentIconStyle = iconStyle
+        coroutineScope.launch {
+          val icon = ResolveImageHelper().resolveImage(context, iconSource!!, _size)
+          icon?.let {
+            currentPlacemark?.let { pm ->
+              if (pm.isValid) {
+                pm.setIcon(it)
+                currentIconStyle?.let { pm.setIconStyle(it) }
+              }
+            }
+          }
+        }
       }
     }
   }

@@ -133,4 +133,19 @@ class YamapLiteViewManager : ViewGroupManager<YamapLiteView>(), YamapLiteViewMan
       view.setLogoPadding(padding)
     }
   }
+
+  @ReactProp(name = "userLocationAccuracyFillColor")
+  override fun setUserLocationAccuracyFillColor(view: YamapLiteView, value: String?) {
+    view.setUserLocationAccuracyFillColor(value)
+  }
+
+  @ReactProp(name = "userLocationAccuracyStrokeColor")
+  override fun setUserLocationAccuracyStrokeColor(view: YamapLiteView, value: String?) {
+    view.setUserLocationAccuracyStrokeColor(value)
+  }
+
+  @ReactProp(name = "userLocationAccuracyStrokeWidth")
+  override fun setUserLocationAccuracyStrokeWidth(view: YamapLiteView, value: Float) {
+    view.setUserLocationAccuracyStrokeWidth(value)
+  }
 }

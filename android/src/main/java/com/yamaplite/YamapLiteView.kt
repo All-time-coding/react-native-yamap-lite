@@ -2,6 +2,7 @@ package com.yamaplite
 
 import android.content.Context
 import android.graphics.Color
+import android.graphics.Bitmap
 import android.util.Log
 import android.widget.FrameLayout
 import com.facebook.react.bridge.Arguments
@@ -17,7 +18,11 @@ import com.yandex.mapkit.geometry.BoundingBox
 import com.yandex.mapkit.geometry.Geometry
 import com.yandex.mapkit.mapview.MapView
 import com.yandex.mapkit.user_location.UserLocationLayer
+import com.yandex.mapkit.user_location.UserLocationObjectListener
+import com.yandex.mapkit.user_location.UserLocationView
 import com.yandex.runtime.image.ImageProvider
+import com.yandex.runtime.ui_view.ViewProvider
+import com.yandex.mapkit.layers.ObjectEvent
 import android.view.View
 import android.os.Looper
 import android.os.Handler
@@ -27,10 +32,17 @@ import com.yandex.mapkit.map.CameraListener
 import com.yandex.mapkit.map.CameraPosition
 import com.yandex.mapkit.map.Map as YMap
 import com.yandex.mapkit.map.CameraUpdateReason
+import com.yandex.mapkit.map.IconStyle
+import com.yamaplite.utils.ResolveImageHelper
+import javax.annotation.Nonnull
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
-class YamapLiteView(context: Context) : FrameLayout(context), MapLoadedListener, CameraListener {
+class YamapLiteView(context: Context) : FrameLayout(context), MapLoadedListener, CameraListener, UserLocationObjectListener {
   private val mapView: MapView = MapView(context)
   private val reactChildren = mutableListOf<View>()
+  private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
   private var userLocationLayer: UserLocationLayer? = null
   private var isUserLocationEnabled = false
@@ -51,7 +63,8 @@ class YamapLiteView(context: Context) : FrameLayout(context), MapLoadedListener,
   private var followUser = false
   private var logoPosition: Map<String, Any>? = null
   private var logoPadding: Map<String, Any>? = null
-  
+  private var userLocationView: UserLocationView? = null
+
   init {
     setupMap()
     mapView.mapWindow.map.setMapLoadedListener(this)
@@ -79,14 +92,32 @@ class YamapLiteView(context: Context) : FrameLayout(context), MapLoadedListener,
   
   fun setUserLocationIcon(icon: String?) {
     userLocationIcon = icon
+    if (userLocationView != null) {
+      updateUserLocationIcon()
+    }
   }
   
   fun setUserLocationIconScale(scale: Float) {
     userLocationIconScale = scale
+    if (userLocationView != null) {
+      updateUserLocationIcon()
+    }
   }
   
   fun setShowUserPosition(show: Boolean) {
-    isUserLocationEnabled = show
+    if (userLocationLayer == null) {
+      userLocationLayer = MapKitFactory.getInstance().createUserLocationLayer(mapView.mapWindow)
+    }
+
+    if (show) {
+      userLocationLayer!!.setObjectListener(this)
+      userLocationLayer!!.isVisible = true
+      userLocationLayer!!.isHeadingModeActive = true
+    } else {
+      userLocationLayer!!.isVisible = false
+      userLocationLayer!!.isHeadingModeActive = false
+      userLocationLayer!!.setObjectListener(null)
+    }
   }
   
   fun setNightMode(nightMode: Boolean) {
@@ -251,6 +282,18 @@ class YamapLiteView(context: Context) : FrameLayout(context), MapLoadedListener,
     }
   }
   
+  fun setUserLocationAccuracyFillColor(color: String?) {
+    userLocationAccuracyFillColor = color ?: "#00FF00"
+  }
+
+  fun setUserLocationAccuracyStrokeColor(color: String?) {
+    userLocationAccuracyStrokeColor = color ?: "#000000"
+  }
+
+  fun setUserLocationAccuracyStrokeWidth(width: Float) {
+    userLocationAccuracyStrokeWidth = width
+  }
+
   private fun calculateBoundingBox(points: ArrayList<Point?>): BoundingBox {
       var minLat = Double.MAX_VALUE
       var maxLat = -Double.MAX_VALUE
@@ -399,6 +442,46 @@ class YamapLiteView(context: Context) : FrameLayout(context), MapLoadedListener,
         }
       }
     }
+  }
+
+  private fun updateUserLocationIcon() {
+    if (userLocationView == null || userLocationIcon == null) {
+      return
+    }
+
+    val userIconStyle = IconStyle()
+    userIconStyle.setScale(userLocationIconScale)
+
+    val pin = userLocationView!!.pin
+    val arrow = userLocationView!!.arrow
+    coroutineScope.launch {
+      val icon = ResolveImageHelper().resolveImage(context, userLocationIcon!!, 25)
+      icon?.let {
+        pin.setIcon(it, userIconStyle)
+        arrow.setIcon(it, userIconStyle)
+      }
+    }
+    val circle = userLocationView!!.accuracyCircle
+    if (userLocationAccuracyFillColor != null) {
+      circle.fillColor = Color.parseColor(userLocationAccuracyFillColor)
+    }
+    if (userLocationAccuracyStrokeColor != null) {
+      circle.strokeColor = Color.parseColor(userLocationAccuracyStrokeColor)
+    }
+    circle.strokeWidth = userLocationAccuracyStrokeWidth
+  }
+
+  override fun onObjectAdded(_userLocationView: UserLocationView) {
+    userLocationView = _userLocationView
+    updateUserLocationIcon()
+  }
+
+  override fun onObjectRemoved(userLocationView: UserLocationView) {
+  }
+
+  override fun onObjectUpdated(_userLocationView: UserLocationView, objectEvent: ObjectEvent) {
+    userLocationView = _userLocationView
+    updateUserLocationIcon()
   }
 
   private class CameraPositionChangeEvent(viewTag: Int, private val eventData: WritableMap?) : Event<CameraPositionChangeEvent>(viewTag) {

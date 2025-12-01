@@ -1,4 +1,6 @@
-export type YamapRef = {
+import type { ImageSourcePropType, ViewProps } from 'react-native';
+
+export type YaMapRef = {
   getCameraPosition: () => Promise<{
     lat: number;
     lon: number;
@@ -21,6 +23,83 @@ export type YamapRef = {
   ) => void;
   fitAllMarkers: () => void;
 };
+
+export interface MarkerProps extends ViewProps {
+  point: Point;
+  zInd?: number;
+  scale?: number;
+  rotated?: boolean;
+  onMarkerPress?: (event: Point) => void;
+  source?: ImageSourcePropType;
+  anchor?: {
+    x: number;
+    y: number;
+  };
+  visible?: boolean;
+  handled?: boolean;
+  size?: number;
+}
+
+export interface YaMapProps extends ViewProps {
+  userLocationIcon?: ImageSourcePropType;
+
+  userLocationIconScale?: number;
+
+  /** @default false */
+  showUserPosition?: boolean;
+
+  /** @default false */
+  nightMode?: boolean;
+
+  mapStyle?: string;
+
+  onCameraPositionChange?: (event: CameraPosition) => void;
+
+  onCameraPositionChangeEnd?: (event: CameraPosition) => void;
+
+  // onMapPress?: (event: NativeSyntheticEvent<Point>) => void;
+
+  // onMapLongPress?: (event: NativeSyntheticEvent<Point>) => void;
+
+  onMapLoaded?: (event: MapLoaded) => void;
+
+  /** @default #00FF00 */
+  userLocationAccuracyFillColor?: string;
+
+  /** @default #000000 */
+  userLocationAccuracyStrokeColor?: string;
+
+  /** @default 2 */
+  userLocationAccuracyStrokeWidth?: number;
+
+  /** @default true */
+  scrollGesturesEnabled?: boolean;
+
+  /** @default true */
+  zoomGesturesEnabled?: boolean;
+
+  /** @default true */
+  tiltGesturesEnabled?: boolean;
+
+  /** @default true */
+  rotateGesturesEnabled?: boolean;
+
+  /** @default true */
+  fastTapEnabled?: boolean;
+
+  initialRegion?: InitialRegion;
+
+  /** @default 60 */
+  maxFps?: number;
+
+  mapType?: 'map' | 'satellite' | 'hybrid';
+
+  // followUser?: boolean;
+
+  logoPosition?: YandexLogoPosition;
+
+  logoPadding?: YandexLogoPadding;
+}
 
 export interface Point {
   lat: number;
@@ -129,6 +208,7 @@ export enum Animation {
   SMOOTH,
   LINEAR,
 }
+
 export type YandexLogoPosition = {
   horizontal?: 'left' | 'center' | 'right';
   vertical?: 'top' | 'bottom';

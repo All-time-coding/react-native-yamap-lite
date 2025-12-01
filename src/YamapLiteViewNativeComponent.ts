@@ -50,6 +50,7 @@ interface CameraPosition {
 export interface NativeProps extends ViewProps {
   userLocationIcon?: string;
   userLocationIconScale?: Float;
+  /** @default false */
   showUserPosition?: boolean;
   /** @default false */
   nightMode?: boolean;
@@ -60,9 +61,12 @@ export interface NativeProps extends ViewProps {
   // onMapPress?: (event: NativeSyntheticEvent<Point>) => void;
   // onMapLongPress?: (event: NativeSyntheticEvent<Point>) => void;
   onMapLoaded?: DirectEventHandler<Readonly<MapLoad>>;
-  // userLocationAccuracyFillColor?: string; //
-  // userLocationAccuracyStrokeColor?: string; //
-  // userLocationAccuracyStrokeWidth?: Float; //
+  /** @default #00FF00 */
+  userLocationAccuracyFillColor?: string;
+  /** @default #000000 */
+  userLocationAccuracyStrokeColor?: string;
+  /** @default 2 */
+  userLocationAccuracyStrokeWidth?: Float;
   /** @default true */
   scrollGesturesEnabled?: boolean;
   /** @default true */

@@ -1,15 +1,11 @@
 import React from 'react';
-import type { NativeProps } from '../YamapMarkerViewNativeComponents';
-import type { Point } from '../@types';
-import type { NativeSyntheticEvent } from 'react-native';
+import type { MarkerProps, Point } from '../@types';
+import { Image, type NativeSyntheticEvent } from 'react-native';
 import YamapLiteMarkerView from '../YamapMarkerViewNativeComponents';
 
-export interface YaMapMarkerProps extends Omit<NativeProps, 'onMarkerPress'> {
-  onMarkerPress?: (event: Point) => void;
-}
-
-export const Marker: React.FC<YaMapMarkerProps> = ({
+export const Marker: React.FC<MarkerProps> = ({
   onMarkerPress,
+  source,
   ...props
 }) => {
   const handleMarkerPress = (event: NativeSyntheticEvent<Point>) => {
@@ -20,5 +16,14 @@ export const Marker: React.FC<YaMapMarkerProps> = ({
       });
     }
   };
-  return <YamapLiteMarkerView {...props} onMarkerPress={handleMarkerPress} />;
+
+  const markerIconUri = source ? Image.resolveAssetSource(source).uri : '';
+
+  return (
+    <YamapLiteMarkerView
+      {...props}
+      source={markerIconUri}
+      onMarkerPress={handleMarkerPress}
+    />
+  );
 };

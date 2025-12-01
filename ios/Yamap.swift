@@ -68,41 +68,18 @@ public protocol YamapViewComponentDelegate {
         }
     }
 
-    @objc public var nightMode: Bool = false {
-        didSet {
-            guard let map = mapView?.mapWindow?.map else { return }
-            print("nightMode \(nightMode)")
-            map.isNightModeEnabled = nightMode
-        }
-    }
-
-    @objc public var scrollGesturesEnabled: Bool = true {
-        didSet {
-        }
-    }
-
+    @objc public var nightMode: Bool = false
+    @objc public var scrollGesturesEnabled: Bool = true
     @objc public var userLocationIconScale: Float = 1.0
     @objc public var showUserPosition = false
-    @objc public var zoomGesturesEnabled: Bool = true {
-        didSet {
-        }
-    }
+    @objc public var userLocationAccuracyFillColor: UIColor = UIColor.green
+    @objc public var userLocationAccuracyStrokeColor: UIColor = UIColor.black
+    @objc public var userLocationAccuracyStrokeWidth: Float = 2.0
+    @objc public var zoomGesturesEnabled: Bool = true
+    @objc public var tiltGesturesEnabled: Bool = true
+    @objc public var rotateGesturesEnabled: Bool = true
+    @objc public var fastTapEnabled: Bool = true
 
-    @objc public var tiltGesturesEnabled: Bool = true {
-        didSet {
-        }
-    }
-
-    @objc public var rotateGesturesEnabled: Bool = true {
-        didSet {
-        }
-    }
-
-    @objc public var fastTapEnabled: Bool = true {
-        didSet {
-        }
-    }
-    
     @objc public func applyProperties() {
         if Thread.isMainThread {
             updateProperties()
@@ -127,6 +104,8 @@ public protocol YamapViewComponentDelegate {
         map.isTiltGesturesEnabled = tiltGesturesEnabled
         map.isRotateGesturesEnabled = rotateGesturesEnabled
         map.isFastTapEnabled = fastTapEnabled
+
+        self.updateUserIcon();
     }
 
     @objc public var maxFps: Float = 30 {
@@ -240,9 +219,9 @@ public protocol YamapViewComponentDelegate {
         }
         let circle: YMKCircleMapObject? = userLocationListener?.userLocationView?.accuracyCircle
         if circle == nil {
-            circle?.fillColor = UIColor.green
-            circle?.strokeColor = UIColor.red
-            circle?.strokeWidth = 10.0
+            circle?.fillColor = userLocationAccuracyFillColor
+            circle?.strokeColor = userLocationAccuracyStrokeColor
+            circle?.strokeWidth = userLocationAccuracyStrokeWidth
         }
     }
 
