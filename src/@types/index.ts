@@ -29,7 +29,7 @@ export interface MarkerProps extends ViewProps {
   zInd?: number;
   scale?: number;
   rotated?: boolean;
-  onMarkerPress?: (event: Point) => void;
+  onPress?: (event: Point) => void;
   source?: ImageSourcePropType;
   anchor?: {
     x: number;
@@ -38,6 +38,17 @@ export interface MarkerProps extends ViewProps {
   visible?: boolean;
   handled?: boolean;
   size?: number;
+}
+
+export interface CircleProps extends ViewProps {
+  fillColor?: string;
+  strokeColor?: string;
+  strokeWidth?: number;
+  zInd?: number;
+  onPress?: (event: Point) => void;
+  center: Point;
+  radius: number;
+  handled?: boolean;
 }
 
 export interface YaMapProps extends ViewProps {

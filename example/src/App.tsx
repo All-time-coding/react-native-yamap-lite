@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { YaMap, Marker } from 'react-native-yamap-lite';
+import { YaMap, Marker, Circle } from 'react-native-yamap-lite';
 import { markers } from './constants/markers';
 import { useMap } from './hooks/useMap';
 import { ControlPanel } from './components/ControlPanel';
@@ -51,11 +51,22 @@ export default function App() {
             point={{ lat: marker.lat, lon: marker.lon }}
             source={{ uri: marker.source }}
             size={marker.size}
-            onMarkerPress={(event) => {
+            onPress={(event) => {
               console.log('Marker pressed', event);
             }}
           />
         ))}
+        <Circle
+          center={{ lat: 55.751244, lon: 36.518423 }}
+          radius={10000}
+          fillColor="#0000ff"
+          strokeColor="#ff0000"
+          strokeWidth={10}
+          zInd={1000}
+          onPress={(event) => {
+            console.log('Circle pressed', event);
+          }}
+        />
       </YaMap>
       <ControlPanel
         handleIncreaseZoom={handleIncreaseZoom}

@@ -2,13 +2,9 @@ package com.yamaplite
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.PointF
 import android.view.View
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.map.PlacemarkMapObject
 import com.yandex.mapkit.mapview.MapView
@@ -18,24 +14,14 @@ import com.yandex.mapkit.map.RotationType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.io.InputStream
-import java.net.URL
-import okhttp3.Call
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
-import java.io.IOException
 import com.yandex.mapkit.map.MapObjectTapListener
 import com.yandex.mapkit.map.MapObject
 import com.facebook.react.bridge.ReactContext
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.WritableMap
-import com.facebook.react.uimanager.UIManagerModule
 import com.facebook.react.uimanager.UIManagerHelper
 import com.facebook.react.uimanager.events.EventDispatcher
 import com.facebook.react.uimanager.events.Event
-import com.yamaplite.utils.ImageCache
 import com.yamaplite.utils.ResolveImageHelper
 
 class YamapLiteMarkerView(context: Context) : View(context), MapObjectTapListener {

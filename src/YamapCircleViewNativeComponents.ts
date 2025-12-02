@@ -1,7 +1,7 @@
 import codegenNativeComponent from 'react-native/Libraries/Utilities/codegenNativeComponent';
 import type { HostComponent, ViewProps, ColorValue } from 'react-native';
 import type {
-  BubblingEventHandler,
+  DirectEventHandler,
   Double,
   Float,
   Int32,
@@ -17,7 +17,7 @@ export interface NativeProps extends ViewProps {
   strokeColor?: ColorValue;
   strokeWidth?: Float;
   zInd?: Int32;
-  onCirclePress?: BubblingEventHandler<Point>;
+  onCirclePress?: DirectEventHandler<Readonly<Point>>;
   center: Point;
   radius: Float;
   handled?: boolean;

@@ -74,6 +74,16 @@ using namespace facebook::react;
        [super updateProps:props oldProps:oldProps];
 }
 
+- (void)onCirclePressWithPoint:(NSDictionary<NSString *,NSNumber *> * _Nonnull)point {
+    if (_eventEmitter != nil) {
+        YamapLiteCircleViewEventEmitter::OnCirclePress event = {};
+        event.lat = [[point objectForKey:@"lat"] doubleValue];
+        event.lon = [[point objectForKey:@"lon"] doubleValue];
+        std::dynamic_pointer_cast<const YamapLiteCircleViewEventEmitter>(_eventEmitter)
+        ->onCirclePress(event);
+    }
+}
+
 Class<RCTComponentViewProtocol> YamapLiteCircleViewCls(void)
 {
     return YamapLiteCircleView.class;

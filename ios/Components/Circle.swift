@@ -4,7 +4,7 @@ import YandexMapsMobile
 
 @objc(YamapLiteCircleComponentDelegate)
 public protocol YamapLiteCircleComponentDelegate {
-    func onMarkerPress(point: [String: Double])
+    func onCirclePress(point: [String: Double])
 }
 
 @objc(YamapLiteCircle)
@@ -76,7 +76,10 @@ public class YamapLiteCircle: UIView, MapObjectTapHandler {
     }
 
     public func onMapObjectTap(point _: YMKPoint) {
-        // TODO:
+      delegate?.onCirclePress(point: [
+            "lat": circleCenter.latitude,
+            "lon": circleCenter.longitude,
+        ])
     }
 
     @objc public func setMapObject(object: YMKMapObject) {

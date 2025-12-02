@@ -356,13 +356,10 @@ public protocol YamapViewComponentDelegate {
     @objc public func fitAllMarkers() {
         var markerPoints: [YMKPoint] = []
         
-        for subview in subviews {
-          // TODO: FIX CRASH
-//            if let markerContainer = subview as? UIView,
-//               let markerView = markerContainer.value(forKey: "contentView") as? YamapLiteMarker,
-//               let point = markerView.point {
-//                markerPoints.append(YMKPoint(latitude: point.lat, longitude: point.lon))
-//            }
+        for marker in mapObjects {
+            if marker.visible, let point = marker.point {
+                markerPoints.append(YMKPoint(latitude: point.lat, longitude: point.lon))
+            }
         }
         
         if markerPoints.isEmpty {
@@ -375,6 +372,7 @@ public protocol YamapViewComponentDelegate {
     @objc func cleanMap() {
         guard let map = mapView?.mapWindow?.map else { return }
         map.mapObjects.clear()
+        mapObjects.removeAll()
     }
 
     static func requiresMainQueueSetup() -> Bool {
@@ -392,6 +390,10 @@ public protocol YamapViewComponentDelegate {
             let viewPlacemark = mapView.mapWindow.map.mapObjects.addPlacemark()
             viewPlacemark.geometry = point
             markerView.setMapObject(object: viewPlacemark)
+            // Add marker to the array for tracking
+            if !mapObjects.contains(where: { $0 === markerView }) {
+                mapObjects.append(markerView)
+            }
         }
 
         else if let circleContainer = subview as? UIView {

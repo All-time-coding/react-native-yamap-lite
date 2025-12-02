@@ -39,6 +39,7 @@ import com.yandex.mapkit.map.Map as YMap
 import com.yandex.mapkit.map.CameraUpdateReason
 import com.yandex.mapkit.map.IconStyle
 import com.yamaplite.utils.ResolveImageHelper
+import com.yamaplite.components.YamapCircle
 import javax.annotation.Nonnull
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -338,6 +339,8 @@ class YamapLiteView(context: Context) : FrameLayout(context), MapLoadedListener,
     }
     if (child is YamapLiteMarkerView) {
       child.addToMap(mapView)
+    } else if (child is YamapCircle) {
+      child.addToMap(mapView)
     }
   }
 
@@ -345,6 +348,8 @@ class YamapLiteView(context: Context) : FrameLayout(context), MapLoadedListener,
     if (index < 0 || index >= reactChildren.size) return
     val child = reactChildren.removeAt(index)
     if (child is YamapLiteMarkerView) {
+      child.removeFromMap(mapView)
+    } else if (child is YamapCircle) {
       child.removeFromMap(mapView)
     }
   }

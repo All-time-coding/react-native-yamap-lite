@@ -1,91 +1,150 @@
-package com.yamaplite.Components
+package com.yamaplite.components
 
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.PointF
-import android.util.AttributeSet
-import android.view.View
-import com.facebook.react.bridge.ReadableMap
+import android.graphics.Color
+import android.view.ViewGroup
+import com.facebook.react.bridge.Arguments
+import com.facebook.react.bridge.ReactContext
+import com.facebook.react.bridge.WritableMap
+import com.yandex.mapkit.geometry.Circle
+import com.yandex.mapkit.geometry.Point
+import com.yandex.mapkit.map.CircleMapObject
+import com.yandex.mapkit.map.MapObject
+import com.yandex.mapkit.map.MapObjectTapListener
+import com.yandex.mapkit.mapview.MapView
+import com.facebook.react.uimanager.UIManagerHelper
+import com.facebook.react.uimanager.events.Event
 
-class Circle : View {
-    private var fillColor: Int = 0x00000000
-    private var strokeColor: Int = 0xFF000000.toInt()
-    private var strokeWidth: Float = 1f
-    private var center: PointF? = null
-    private var radius: Float = 0f
-    private var handled: Boolean = false
+class YamapCircle(context: Context?) : ViewGroup(context), MapObjectTapListener {
+  var circle: Circle
 
-    private val fillPaint = Paint().apply {
-        style = Paint.Style.FILL
-        isAntiAlias = true
+  var rnMapObject: MapObject? = null
+  private var mapView: MapView? = null
+  private var handled = true
+  private var fillColor = Color.BLACK
+  private var strokeColor = Color.BLACK
+  private var zInd = 1
+  private var strokeWidth = 1f
+  private var center = Point(0.0, 0.0)
+  private var radius = 0f
+
+  init {
+    circle = Circle(center, radius)
+  }
+
+  override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
+  }
+
+  // PROPS
+  fun setCenter(point: Point) {
+    center = point
+    updateGeometry()
+    if (rnMapObject == null && mapView != null && radius > 0) {
+      addToMap(mapView!!)
+    } else {
+      updateCircle()
     }
+  }
 
-    private val strokePaint = Paint().apply {
-        style = Paint.Style.STROKE
-        isAntiAlias = true
+  fun setRadius(_radius: Float) {
+    radius = _radius
+    updateGeometry()
+    if (rnMapObject == null && mapView != null && radius > 0 && (center.latitude != 0.0 || center.longitude != 0.0)) {
+      addToMap(mapView!!)
+    } else {
+      updateCircle()
     }
+  }
 
-    constructor(context: Context?) : super(context)
-    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
-    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(
-        context,
-        attrs,
-        defStyleAttr
-    )
+  private fun updateGeometry() {
+    circle = Circle(center, radius)
+  }
 
-    fun setFillColor(color: Int?) {
-        fillColor = color ?: 0x00000000
-        fillPaint.color = fillColor
-        invalidate()
+  fun setZInd(_zInd: Int) {
+    zInd = _zInd
+    updateCircle()
+  }
+
+  fun setHandled(_handled: Boolean) {
+    handled = _handled
+  }
+
+  fun setStrokeColor(_color: Int) {
+    strokeColor = _color
+    updateCircle()
+  }
+
+  fun setFillColor(_color: Int) {
+    fillColor = _color
+    updateCircle()
+  }
+
+  fun setStrokeWidth(width: Float) {
+    strokeWidth = width
+    updateCircle()
+  }
+
+  private fun updateCircle() {
+    if (rnMapObject != null) {
+      (rnMapObject as CircleMapObject).geometry = circle
+      (rnMapObject as CircleMapObject).strokeWidth = strokeWidth
+      (rnMapObject as CircleMapObject).strokeColor = strokeColor
+      (rnMapObject as CircleMapObject).fillColor = fillColor
+      (rnMapObject as CircleMapObject).zIndex = zInd.toFloat()
     }
+  }
 
-    fun setStrokeColor(color: Int?) {
-        strokeColor = color ?: 0xFF000000.toInt()
-        strokePaint.color = strokeColor
-        invalidate()
-    }
+  fun setCircleMapObject(obj: MapObject?) {
+    rnMapObject = obj as CircleMapObject?
+    rnMapObject!!.addTapListener(this)
+    updateCircle()
+  }
 
-    fun setStrokeWidth(width: Float) {
-        strokeWidth = width
-        strokePaint.strokeWidth = strokeWidth
-        invalidate()
-    }
+  fun addToMap(mapView: MapView) {
+    this.mapView = mapView
+    updateGeometry()
+    val circleObject = mapView.getMapWindow().map.mapObjects.addCircle(circle)
+    rnMapObject = circleObject
+    circleObject.addTapListener(this)
+    updateCircle()
+  }
 
-    fun setCenter(center: ReadableMap?) {
-        if (center != null) {
-            val lat = center.getDouble("lat").toFloat()
-            val lon = center.getDouble("lon").toFloat()
-            this.center = PointF(lat, lon)
-            invalidate()
-        }
+  fun removeFromMap(mapView: MapView) {
+    rnMapObject?.let {
+      mapView.getMapWindow().map.mapObjects.remove(it)
+      rnMapObject = null
     }
+  }
 
-    fun setRadius(radius: Float) {
-        this.radius = radius
-        invalidate()
+  override fun onMapObjectTap(mapObject: MapObject, point: Point): Boolean {
+    val reactContext = context as? ReactContext
+    if (reactContext == null) {
+      return false
     }
+    
+    val viewId = getId()
+    val eventDispatcher = UIManagerHelper.getEventDispatcherForReactTag(reactContext, viewId)
+    
+    if (eventDispatcher != null) {
+      val eventData = Arguments.createMap().apply {
+        putDouble("lat", point.latitude)
+        putDouble("lon", point.longitude)
+      }
+      val event = PressEvent(viewId, eventData)
+      eventDispatcher.dispatchEvent(event as Event<*>)
+    }
+      return true
+  }
 
-    fun setHandled(handled: Boolean) {
-        this.handled = handled
+  private class PressEvent(viewTag: Int, private val eventData: WritableMap?) : Event<PressEvent>(viewTag) {
+    override fun getEventName(): String {
+      return "onCirclePress"
     }
-
-    override fun onDraw(canvas: Canvas) {
-        super.onDraw(canvas)
-        
-        if (center != null && radius > 0) {
-            val centerX = width / 2f
-            val centerY = height / 2f
-            
-            // Рисуем заливку
-            if (fillColor != 0x00000000) {
-                canvas.drawCircle(centerX, centerY, radius, fillPaint)
-            }
-            
-            // Рисуем обводку
-            if (strokeWidth > 0) {
-                canvas.drawCircle(centerX, centerY, radius, strokePaint)
-            }
-        }
+    override fun getEventData(): WritableMap? {
+      return eventData
     }
+    override fun getCoalescingKey(): Short {
+      return 0
+    }
+  }
 }

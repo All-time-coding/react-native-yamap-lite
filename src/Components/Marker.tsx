@@ -4,13 +4,13 @@ import { Image, type NativeSyntheticEvent } from 'react-native';
 import YamapLiteMarkerView from '../YamapMarkerViewNativeComponents';
 
 export const Marker: React.FC<MarkerProps> = ({
-  onMarkerPress,
+  onPress,
   source,
   ...props
 }) => {
   const handleMarkerPress = (event: NativeSyntheticEvent<Point>) => {
-    if (onMarkerPress) {
-      onMarkerPress({
+    if (onPress) {
+      onPress({
         lat: event.nativeEvent.lat,
         lon: event.nativeEvent.lon,
       });
