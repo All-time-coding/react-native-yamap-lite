@@ -52,6 +52,9 @@
     "url": "git+https://github.com/hydromoll/react-native-yamap-lite.git"
   },
   "author": "hydromoll <hydromoll@mail.ru> (https://github.com/hydromoll)",
+  "contributors": [
+    "pe1ros <ilya.ezy@gmail.com> (https://github.com/pe1ros)"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/hydromoll/react-native-yamap-lite/issues"
