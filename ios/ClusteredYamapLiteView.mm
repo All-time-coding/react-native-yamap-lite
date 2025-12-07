@@ -129,7 +129,7 @@ using namespace facebook::react;
     }
     
     if (_eventEmitter != nil) {
-        YamapLiteViewEventEmitter::OnMapLoaded event = {};
+        ClusteredYamapLiteViewEventEmitter::OnMapLoaded event = {};
         event.curZoomGeometryLoaded = [[obj objectForKey:@"curZoomGeometryLoaded"] doubleValue];
         event.curZoomModelsLoaded = [[obj objectForKey:@"curZoomModelsLoaded"] doubleValue];
         event.curZoomLabelsLoaded = [[obj objectForKey:@"curZoomLabelsLoaded"] doubleValue];
@@ -139,7 +139,7 @@ using namespace facebook::react;
         event.tileMemoryUsage = [[obj objectForKey:@"tileMemoryUsage"] doubleValue];
         event.delayedGeometryLoaded = [[obj objectForKey:@"delayedGeometryLoaded"] doubleValue];
         event.fullyAppeared = [[obj objectForKey:@"fullyAppeared"] doubleValue];
-        std::dynamic_pointer_cast<const YamapLiteViewEventEmitter>(_eventEmitter)
+        std::dynamic_pointer_cast<const ClusteredYamapLiteViewEventEmitter>(_eventEmitter)
         ->onMapLoaded(event);
     }
 }
@@ -147,7 +147,7 @@ using namespace facebook::react;
 
 - (void)handleOnCameraPositionChangeWithCoords:(NSDictionary *)coords {
     if (_eventEmitter != nil) {
-        YamapLiteViewEventEmitter::OnCameraPositionChange event = {};
+        ClusteredYamapLiteViewEventEmitter::OnCameraPositionChange event = {};
         event.point.lat = [[coords objectForKey:@"lat"] doubleValue];
         event.point.lon = [[coords objectForKey:@"lon"] doubleValue];
         event.zoom = [[coords objectForKey:@"zoom"] doubleValue];
@@ -166,19 +166,19 @@ using namespace facebook::react;
             reasonString = [NSString stringWithFormat:@"%@", reasonObj];
         }
         if ([reasonString isEqualToString:@"APPLICATION"]) {
-            event.reason = YamapLiteViewEventEmitter::OnCameraPositionChangeReason::APPLICATION;
+            event.reason = ClusteredYamapLiteViewEventEmitter::OnCameraPositionChangeReason::APPLICATION;
         } else {
-            event.reason = YamapLiteViewEventEmitter::OnCameraPositionChangeReason::GESTURES;
+            event.reason = ClusteredYamapLiteViewEventEmitter::OnCameraPositionChangeReason::GESTURES;
         }
 
-        std::dynamic_pointer_cast<const YamapLiteViewEventEmitter>(_eventEmitter)
+        std::dynamic_pointer_cast<const ClusteredYamapLiteViewEventEmitter>(_eventEmitter)
         ->onCameraPositionChange(event);
     }
 }
 
 - (void)handleOnCameraPositionChangeEndWithCoords:(NSDictionary<NSString *,id> *)coords {
     if (_eventEmitter != nil) {
-        YamapLiteViewEventEmitter::OnCameraPositionChangeEnd event = {};
+        ClusteredYamapLiteViewEventEmitter::OnCameraPositionChangeEnd event = {};
         event.point.lat = [[coords objectForKey:@"lat"] doubleValue];
         event.point.lon = [[coords objectForKey:@"lon"] doubleValue];
         event.zoom = [[coords objectForKey:@"zoom"] doubleValue];
@@ -197,12 +197,12 @@ using namespace facebook::react;
             reasonString = [NSString stringWithFormat:@"%@", reasonObj];
         }
         if ([reasonString isEqualToString:@"APPLICATION"]) {
-          event.reason = YamapLiteViewEventEmitter::OnCameraPositionChangeEndReason::APPLICATION;
+          event.reason = ClusteredYamapLiteViewEventEmitter::OnCameraPositionChangeEndReason::APPLICATION;
         } else {
-            event.reason = YamapLiteViewEventEmitter::OnCameraPositionChangeEndReason::GESTURES;
+            event.reason = ClusteredYamapLiteViewEventEmitter::OnCameraPositionChangeEndReason::GESTURES;
         }
 
-        std::dynamic_pointer_cast<const YamapLiteViewEventEmitter>(_eventEmitter)
+        std::dynamic_pointer_cast<const ClusteredYamapLiteViewEventEmitter>(_eventEmitter)
         ->onCameraPositionChangeEnd(event);
     }
 }
