@@ -39,13 +39,19 @@
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
     "prepare": "bob build",
     "codegenIos": "yarn react-native codegen --path example/ --outputPath example/ios",
-    "codegenAndroid": "yarn react-native codegen --path example/ --outputPath example/android",
+    "codegenAndroid": "yarn react-native codegen --path example/ --outputPath ./",
     "release": "release-it --only-version"
   },
   "keywords": [
     "react-native",
     "ios",
-    "android"
+    "android",
+    "yandex",
+    "maps",
+    "mapkit",
+    "mapkit-lite",
+    "react-native-yamap",
+    "react-native-yamap-lite"
   ],
   "repository": {
     "type": "git",
