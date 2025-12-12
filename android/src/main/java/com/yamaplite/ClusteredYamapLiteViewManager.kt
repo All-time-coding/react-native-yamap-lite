@@ -165,4 +165,9 @@ class ClusteredYamapLiteViewManager : ViewGroupManager<ClusteredYamapLiteView>()
   override fun setClusterColor(view: ClusteredYamapLiteView, value: String?) {
     view.setClusterColor(Color.parseColor(value ?: "#000000"))
   }
+
+  @ReactProp(name = "followUser")
+  override fun setFollowUser(view: ClusteredYamapLiteView, value: Boolean) {
+    view.setFollowUser(value)
+  }
 }

@@ -4,12 +4,12 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.Bitmap
 import android.util.Log
+import android.graphics.PointF
 import android.widget.FrameLayout
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.WritableMap
 import com.facebook.react.bridge.ReactContext
 import com.facebook.react.bridge.ReadableMap
-import com.facebook.react.uimanager.events.RCTModernEventEmitter
 import com.facebook.react.uimanager.UIManagerHelper
 import com.facebook.react.uimanager.events.Event
 import com.yandex.mapkit.Animation
@@ -38,6 +38,7 @@ import com.yandex.mapkit.map.CameraPosition
 import com.yandex.mapkit.map.Map as YMap
 import com.yandex.mapkit.map.CameraUpdateReason
 import com.yandex.mapkit.map.IconStyle
+import com.yandex.mapkit.map.InputListener
 import com.yamaplite.utils.ResolveImageHelper
 import com.yamaplite.components.YamapCircle
 import javax.annotation.Nonnull
@@ -45,7 +46,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-open class YamapLiteView(context: Context) : FrameLayout(context), MapLoadedListener, CameraListener, UserLocationObjectListener {
+open class YamapLiteView(context: Context) : FrameLayout(context), MapLoadedListener, CameraListener, UserLocationObjectListener, InputListener {
   protected val mapView: MapView = MapView(context)
   private val reactChildren = mutableListOf<View>()
   private val coroutineScope = CoroutineScope(Dispatchers.Main)
@@ -75,6 +76,7 @@ open class YamapLiteView(context: Context) : FrameLayout(context), MapLoadedList
     setupMap()
     mapView.mapWindow.map.setMapLoadedListener(this)
     mapView.mapWindow.map.addCameraListener(this)
+    mapView.mapWindow.map.addInputListener(this)
   }
   
   private fun setupMap() {
@@ -83,19 +85,7 @@ open class YamapLiteView(context: Context) : FrameLayout(context), MapLoadedList
       LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
     )
   }
-  
-  private fun setupUserLocation() {
 
-  }
-  
-  private fun setupLogo() {
-
-  }
-  
-  private fun addMapListeners() {
-
-  }
-  
   fun setUserLocationIcon(icon: String?) {
     userLocationIcon = icon
     if (userLocationView != null) {
@@ -292,7 +282,7 @@ open class YamapLiteView(context: Context) : FrameLayout(context), MapLoadedList
         return
       }
       
-      val boundingBox = calculateBoundingBox(ArrayList(markerPoints.map { it as Point? }))
+      val boundingBox = calculateBoundingBox(ArrayList(markerPoints))
       val geometry = Geometry.fromBoundingBox(boundingBox)
       val cameraPosition = map.cameraPosition(geometry)
       map.move(cameraPosition, Animation(Animation.Type.SMOOTH, 0.7f), null)
@@ -300,7 +290,24 @@ open class YamapLiteView(context: Context) : FrameLayout(context), MapLoadedList
       Log.e("YamapLiteView", "Failed to fit all markers", e)
     }
   }
-  
+
+  fun setFollowUser(follow: Boolean) {
+    if (userLocationLayer == null) {
+      setShowUserPosition(true)
+    }
+
+    if (follow) {
+      userLocationLayer!!.isAutoZoomEnabled = true
+      userLocationLayer!!.setAnchor(
+          PointF((width * 0.5).toFloat(), (height * 0.5).toFloat()),
+          PointF((width * 0.5).toFloat(), (height * 0.83).toFloat())
+      )
+    } else {
+      userLocationLayer!!.isAutoZoomEnabled = false
+      userLocationLayer!!.resetAnchor()
+    }
+  }
+
   fun setUserLocationAccuracyFillColor(color: String?) {
     userLocationAccuracyFillColor = color ?: "#00FF00"
   }
@@ -403,9 +410,10 @@ open class YamapLiteView(context: Context) : FrameLayout(context), MapLoadedList
     data.putDouble("fullyLoaded", statistics.fullyLoaded.toDouble())
 
     val viewId = getId()
+    val surfaceId = UIManagerHelper.getSurfaceId(reactContext)
     val eventDispatcher = UIManagerHelper.getEventDispatcherForReactTag(reactContext, viewId)
     if (eventDispatcher != null) {
-      val event = MapLoadEvent(viewId, data)
+      val event = MapLoadEvent(surfaceId, viewId, data)
       eventDispatcher.dispatchEvent(event)
     }
   }
@@ -434,13 +442,14 @@ open class YamapLiteView(context: Context) : FrameLayout(context), MapLoadedList
     data.putString("reason", reason.toString())
     
     val viewId = getId()
+    val surfaceId = UIManagerHelper.getSurfaceId(reactContext)
     
     val handler = Handler(Looper.getMainLooper())
     handler.post {
       val eventDispatcher = UIManagerHelper.getEventDispatcherForReactTag(reactContext, viewId)
       if (eventDispatcher != null) {
         try {
-          val event = CameraPositionChangeEvent(viewId, data)
+          val event = CameraPositionChangeEvent(surfaceId, viewId, data)
           eventDispatcher.dispatchEvent(event)
         } catch (e: Exception) {
           Log.e("YamapLiteView", "Error dispatching CameraPositionChangeEvent event", e)
@@ -460,13 +469,49 @@ open class YamapLiteView(context: Context) : FrameLayout(context), MapLoadedList
           endData.putString("reason", reason.toString())
 
           try {
-            val endEvent = CameraPositionChangeEndEvent(viewId, endData)
+            val endEvent = CameraPositionChangeEndEvent(surfaceId, viewId, endData)
             eventDispatcher.dispatchEvent(endEvent)
           } catch (e: Exception) {
             Log.e("YamapLiteView", "Error dispatching CameraPositionChangeEndEvent event", e)
           }
         }
       }
+    }
+  }
+
+  override fun onMapTap(map: YMap, point: Point) {
+    val reactContext = context as? ReactContext
+    if (reactContext == null) {
+      return
+    }
+    val viewId = getId()
+    val surfaceId = UIManagerHelper.getSurfaceId(reactContext)
+    val eventDispatcher = UIManagerHelper.getEventDispatcherForReactTag(reactContext, viewId)
+    if (eventDispatcher != null) {
+      val eventData = Arguments.createMap().apply {
+        putDouble("lat", point.latitude)
+        putDouble("lon", point.longitude)
+      }
+      val event = MapPressEvent(surfaceId, viewId, eventData)
+      eventDispatcher.dispatchEvent(event)
+    }
+  }
+
+  override fun onMapLongTap(map: YMap, point: Point) {
+    val reactContext = context as? ReactContext
+    if (reactContext == null) {
+      return
+    }
+    val viewId = getId()
+    val surfaceId = UIManagerHelper.getSurfaceId(reactContext)
+    val eventDispatcher = UIManagerHelper.getEventDispatcherForReactTag(reactContext, viewId)
+    if (eventDispatcher != null) {
+      val eventData = Arguments.createMap().apply {
+        putDouble("lat", point.latitude)
+        putDouble("lon", point.longitude)
+      }
+      val event = MapLongPressEvent(surfaceId, viewId, eventData)
+      eventDispatcher.dispatchEvent(event)
     }
   }
 
@@ -531,7 +576,7 @@ open class YamapLiteView(context: Context) : FrameLayout(context), MapLoadedList
     updateUserLocationIcon()
   }
 
-  private class CameraPositionChangeEvent(viewTag: Int, private val eventData: WritableMap?) : Event<CameraPositionChangeEvent>(viewTag) {
+  private class CameraPositionChangeEvent(surfaceId: Int, viewTag: Int, private val eventData: WritableMap?) : Event<CameraPositionChangeEvent>(surfaceId, viewTag) {
     override fun getEventName(): String {
       return "onCameraPositionChange"
     }
@@ -543,7 +588,7 @@ open class YamapLiteView(context: Context) : FrameLayout(context), MapLoadedList
     }
   }
 
-  private class CameraPositionChangeEndEvent(viewTag: Int, private val eventData: WritableMap?) : Event<CameraPositionChangeEndEvent>(viewTag) {
+  private class CameraPositionChangeEndEvent(surfaceId: Int, viewTag: Int, private val eventData: WritableMap?) : Event<CameraPositionChangeEndEvent>(surfaceId, viewTag) {
     override fun getEventName(): String {
       return "onCameraPositionChangeEnd"
     }
@@ -555,9 +600,33 @@ open class YamapLiteView(context: Context) : FrameLayout(context), MapLoadedList
     }
   }
 
-  private class MapLoadEvent(viewTag: Int, private val eventData: WritableMap?) : Event<MapLoadEvent>(viewTag) {
+  private class MapLoadEvent(surfaceId: Int, viewTag: Int, private val eventData: WritableMap?) : Event<MapLoadEvent>(surfaceId, viewTag) {
     override fun getEventName(): String {
       return "onMapLoaded"
+    }
+    override fun getEventData(): WritableMap? {
+      return eventData
+    }
+    override fun getCoalescingKey(): Short {
+      return 0
+    }
+  }
+
+  private class MapPressEvent(surfaceId: Int, viewTag: Int, private val eventData: WritableMap?) : Event<MapPressEvent>(surfaceId, viewTag) {
+    override fun getEventName(): String {
+      return "onMapPress"
+    }
+    override fun getEventData(): WritableMap? {
+      return eventData
+    }
+    override fun getCoalescingKey(): Short {
+      return 0
+    }
+  }
+
+  private class MapLongPressEvent(surfaceId: Int, viewTag: Int, private val eventData: WritableMap?) : Event<MapLongPressEvent>(surfaceId, viewTag) {
+    override fun getEventName(): String {
+      return "onMapLongPress"
     }
     override fun getEventData(): WritableMap? {
       return eventData

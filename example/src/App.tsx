@@ -16,17 +16,21 @@ export default function App() {
     onMapLoaded,
     onCameraPositionChange,
     onCameraPositionChangeEnd,
+    onMapPress,
+    onMapLongPress,
   } = useMap();
 
   return (
     <View style={styles.container}>
-      <YaMap
+      {/* <ClusteredYamap
         ref={mapRef}
         style={styles.box}
         initialRegion={{ lat: 55.551244, lon: 36.518423, zoom: 10 }}
         onMapLoaded={onMapLoaded}
         onCameraPositionChange={onCameraPositionChange}
         onCameraPositionChangeEnd={onCameraPositionChangeEnd}
+        onMapPress={onMapPress}
+        onMapLongPress={onMapLongPress}
         zoomGesturesEnabled={false}
         scrollGesturesEnabled={false}
         tiltGesturesEnabled={false}
@@ -34,9 +38,6 @@ export default function App() {
         fastTapEnabled={false}
         nightMode={true}
         showUserPosition={true}
-        // userLocationIcon={{
-        //   uri: 'https://www.shutterstock.com/image-vector/user-location-icon-vector-graphics-260nw-1496198948.jpg',
-        // }}
         userLocationIcon={require('./assets/user-pin.png')}
         userLocationIconScale={1.5}
         userLocationAccuracyFillColor="#ff0000"
@@ -44,6 +45,46 @@ export default function App() {
         userLocationAccuracyStrokeWidth={100}
         logoPadding={{ horizontal: 100, vertical: 100 }}
         logoPosition={{ horizontal: 'left', vertical: 'bottom' }}
+        followUser={true}
+        renderMarker={({ point, data }) => (
+          <Marker
+            key={`${point.lat}-${point.lon}-${data.index}`}
+            point={point}
+            source={{ uri: data.source }}
+            size={data.size}
+          />
+        )}
+        clusteredMarkers={markers.map((marker) => ({
+          point: marker,
+          data: marker,
+        }))}
+      /> */}
+      <YaMap
+        ref={mapRef}
+        style={styles.box}
+        initialRegion={{ lat: 55.551244, lon: 36.518423, zoom: 10 }}
+        onMapLoaded={onMapLoaded}
+        onCameraPositionChange={onCameraPositionChange}
+        onCameraPositionChangeEnd={onCameraPositionChangeEnd}
+        onMapPress={onMapPress}
+        onMapLongPress={onMapLongPress}
+        zoomGesturesEnabled={false}
+        scrollGesturesEnabled={false}
+        tiltGesturesEnabled={false}
+        rotateGesturesEnabled={false}
+        fastTapEnabled={false}
+        nightMode={true}
+        showUserPosition={true}
+        userLocationIcon={{
+          uri: 'https://www.shutterstock.com/image-vector/user-location-icon-vector-graphics-260nw-1496198948.jpg',
+        }}
+        userLocationIconScale={1.5}
+        userLocationAccuracyFillColor="#ff0000"
+        userLocationAccuracyStrokeColor="#ff0000"
+        userLocationAccuracyStrokeWidth={100}
+        logoPadding={{ horizontal: 100, vertical: 100 }}
+        logoPosition={{ horizontal: 'left', vertical: 'bottom' }}
+        followUser={true}
       >
         {markers.map((marker, index) => (
           <Marker

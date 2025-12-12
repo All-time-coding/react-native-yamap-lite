@@ -8,17 +8,21 @@ public protocol YamapViewComponentDelegate {
     func handleOnMapLoaded(result: [String: Any])
     func handleOnCameraPositionChange(coords: [String: Any])
     func handleOnCameraPositionChangeEnd(coords: [String: Any])
+    func handleOnMapPress(coords: [String: Any])
+    func handleOnMapLongPress(coords: [String: Any])
 }
 
-    @objc(YamapView)
-    public class YamapView: UIView {
-        @objc public weak var delegate: YamapViewComponentDelegate? = nil {
-            didSet {
-                if delegate != nil && mapView != nil {
-                    setupListeners()
+@objc(YamapView)
+public class YamapView: UIView {
+    @objc public weak var delegate: YamapViewComponentDelegate? = nil {
+        didSet {
+            if delegate != nil && mapView != nil {
+                runOnMainThread {
+                  self.setupListeners()
                 }
             }
         }
+    }
 
     @objc private var mapObjects: [YamapLiteMarker] = []
 
@@ -30,6 +34,7 @@ public protocol YamapViewComponentDelegate {
 
     private var cameraListener: CameraListener?
     private var loadListener: MapLoadListener?
+    private var mapInputListener: MapInputListener?
     private var userLocationListener: UserLocationObjectListener?
     private var userLocationLayer: YMKUserLocationLayer!
     private var userLocationImage: UIImage?
@@ -81,12 +86,8 @@ public protocol YamapViewComponentDelegate {
     @objc public var fastTapEnabled: Bool = true
 
     @objc public func applyProperties() {
-        if Thread.isMainThread {
-            updateMapProperties()
-        } else {
-            DispatchQueue.main.async { [weak self] in
-                self?.updateMapProperties()
-            }
+        runOnMainThread {
+          self.updateMapProperties()
         }
     }
     
@@ -108,6 +109,22 @@ public protocol YamapViewComponentDelegate {
         self.updateUserIcon();
     }
 
+    @objc public func setFollowUser(_ follow: Bool) {
+    if (userLocationLayer == nil) {
+        setupListeners()
+        }
+
+        if (follow) {
+            userLocationLayer.isAutoZoomEnabled = true
+            guard let mapView = mapView else { return }
+            let width = mapView.bounds.width
+            let height = mapView.bounds.height
+            userLocationLayer.setAnchorWithAnchorNormal(CGPoint(x: 0.5 * width, y: 0.5 * height), anchorCourse: CGPoint(x: 0.5 * width, y: 0.83 * height))
+        } else {
+            userLocationLayer.isAutoZoomEnabled = false
+            userLocationLayer.resetAnchor()
+        }
+    }
     @objc public var maxFps: Float = 60 {
         didSet {
             if(maxFps <= 0 || maxFps > 60) {
@@ -129,6 +146,12 @@ public protocol YamapViewComponentDelegate {
     }
 
     private func initImpl() {
+        runOnMainThread {
+          self.initMapView()
+        }
+    }
+    
+    private func initMapView() {
         mapView = YMKMapView(frame: bounds, vulkanPreferred: YamapView.isM1Simulator())
         mapView.mapWindow.map.mapType = .map
         applyProperties()
@@ -147,6 +170,11 @@ public protocol YamapViewComponentDelegate {
             let cameraDelegate = CameraListener(callback: nil, delegate: delegate)
             cameraListener = cameraDelegate
             map.addCameraListener(with: cameraDelegate)
+        }
+        
+        if mapInputListener == nil {
+            mapInputListener = MapInputListener(delegate: delegate)
+            map.addInputListener(with: mapInputListener!)
         }
         
         if userLocationListener == nil {
@@ -225,17 +253,22 @@ public protocol YamapViewComponentDelegate {
     }
 
     @objc public func updateUserIcon() {
-        let userIconStyle = YMKIconStyle()
-        userIconStyle.scale = userLocationIconScale as NSNumber
-        if userLocationImage != nil {
-            userLocationListener?.userLocationView?.pin.setIconWith(userLocationImage!, style: userIconStyle)
-            userLocationListener?.userLocationView?.arrow.setIconWith(userLocationImage!, style: userIconStyle)
-        }
-        let circle: YMKCircleMapObject? = userLocationListener?.userLocationView?.accuracyCircle
-        if circle == nil {
-            circle?.fillColor = userLocationAccuracyFillColor
-            circle?.strokeColor = userLocationAccuracyStrokeColor
-            circle?.strokeWidth = userLocationAccuracyStrokeWidth
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+
+            let userIconStyle = YMKIconStyle()
+            userIconStyle.scale = self.userLocationIconScale as NSNumber
+
+            if let image = self.userLocationImage {
+                self.userLocationListener?.userLocationView?.pin.setIconWith(image, style: userIconStyle)
+                self.userLocationListener?.userLocationView?.arrow.setIconWith(image, style: userIconStyle)
+            }
+
+            if let circle = self.userLocationListener?.userLocationView?.accuracyCircle {
+                circle.fillColor = self.userLocationAccuracyFillColor
+                circle.strokeColor = self.userLocationAccuracyStrokeColor
+                circle.strokeWidth = self.userLocationAccuracyStrokeWidth
+            }
         }
     }
 
@@ -406,5 +439,10 @@ public protocol YamapViewComponentDelegate {
                 circleView.setMapObject(object: circleObject)
             }
         }
+    }
+
+    private func runOnMainThread(_ block: @escaping () -> Void) {
+        if Thread.isMainThread { block() }
+        else { DispatchQueue.main.async { block() } }
     }
 }

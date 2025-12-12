@@ -4,7 +4,7 @@ import {
   useRef,
   type ForwardedRef,
 } from 'react';
-import { findNodeHandle, Image } from 'react-native';
+import { findNodeHandle, Image, type NativeSyntheticEvent } from 'react-native';
 import type { Point, YaMapProps, YaMapRef } from '../@types';
 import YamapLiteView from '../YamapLiteViewNativeComponent';
 import { YamapUtils } from '../Utils/YamapUtils';
@@ -27,6 +27,8 @@ export const YaMap = forwardRef(
       userLocationAccuracyStrokeColor = '#000000',
       userLocationAccuracyStrokeWidth = 2,
       userLocationIconScale = 1,
+      onMapPress,
+      onMapLongPress,
       ...otherProps
     } = props;
 
@@ -78,6 +80,24 @@ export const YaMap = forwardRef(
       ? Image.resolveAssetSource(userLocationIcon).uri
       : '';
 
+    const handleMapPress = (event: NativeSyntheticEvent<Point>) => {
+      if (onMapPress) {
+        onMapPress({
+          lat: event.nativeEvent.lat,
+          lon: event.nativeEvent.lon,
+        });
+      }
+    };
+
+    const handleMapLongPress = (event: NativeSyntheticEvent<Point>) => {
+      if (onMapLongPress) {
+        onMapLongPress({
+          lat: event.nativeEvent.lat,
+          lon: event.nativeEvent.lon,
+        });
+      }
+    };
+
     return (
       <YamapLiteView
         ref={nativeRef}
@@ -93,6 +113,8 @@ export const YaMap = forwardRef(
         userLocationAccuracyStrokeColor={userLocationAccuracyStrokeColor}
         userLocationAccuracyStrokeWidth={userLocationAccuracyStrokeWidth}
         userLocationIconScale={userLocationIconScale}
+        onMapPress={handleMapPress}
+        onMapLongPress={handleMapLongPress}
         {...otherProps}
       />
     );

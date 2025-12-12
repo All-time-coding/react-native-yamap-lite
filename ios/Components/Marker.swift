@@ -161,5 +161,15 @@ public class YamapLiteMarker: UIView, MapObjectTapHandler {
 }
 
 extension YamapLiteMarker {
-    // TODO: for clustered markers
+    @objc public func setClusterMapObject(_ placemark: YMKPlacemarkMapObject) {
+        mapObject = placemark
+        mapObject?.userData = self
+        if listener == nil {
+            listener = MarkerTapListener()
+        }
+        if let placemark = mapObject as? YMKPlacemarkMapObject {
+            placemark.addTapListener(with: listener!)
+        }
+        updateMarker()
+    }
 }

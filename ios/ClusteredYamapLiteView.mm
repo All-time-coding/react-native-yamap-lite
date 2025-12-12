@@ -1,4 +1,4 @@
-#import "YamapLiteView.h"
+#import "ClusteredYamapLiteView.h"
 #include "YamapLiteMarkerView.h"
 #include "YamapLiteCircleView.h"
 #include <Foundation/Foundation.h>
@@ -15,29 +15,30 @@
 
 #import "RCTFabricComponentsPlugins.h"
 #import "YamapLite-Swift.h"
+#import <YandexMapsMobile/YMKMapKitFactory.h>
 
 using namespace facebook::react;
 
-@interface YamapLiteView () <RCTYamapLiteViewViewProtocol, YamapViewComponentDelegate>
+@interface ClusteredYamapLiteView () <RCTClusteredYamapLiteViewViewProtocol, YamapViewComponentDelegate>
 
 @end
 
-@implementation YamapLiteView {
-    YamapView * _view;
+@implementation ClusteredYamapLiteView {
+    ClusteredYamapView * _view;
 }
 
 + (ComponentDescriptorProvider)componentDescriptorProvider
 {
-    return concreteComponentDescriptorProvider<YamapLiteViewComponentDescriptor>();
+    return concreteComponentDescriptorProvider<ClusteredYamapLiteViewComponentDescriptor>();
 }
 
 - (instancetype)initWithFrame:(CGRect)frame
 {
     if (self = [super initWithFrame:frame]) {
-        static const auto defaultProps = std::make_shared<const YamapLiteViewProps>();
+        static const auto defaultProps = std::make_shared<const ClusteredYamapLiteViewProps>();
         _props = defaultProps;
         
-        _view = [[YamapView alloc] init];
+        _view = [[ClusteredYamapView alloc] init];
         _view.delegate = self;
         
         
@@ -49,8 +50,8 @@ using namespace facebook::react;
 
 - (void)updateProps:(Props::Shared const &)props oldProps:(Props::Shared const &)oldProps
 {
-    const auto &oldViewProps = *std::static_pointer_cast<YamapLiteViewProps const>(_props);
-    const auto &newViewProps = *std::static_pointer_cast<YamapLiteViewProps const>(props);
+    const auto &oldViewProps = *std::static_pointer_cast<ClusteredYamapLiteViewProps const>(_props);
+    const auto &newViewProps = *std::static_pointer_cast<ClusteredYamapLiteViewProps const>(props);
     
     // Ensure all map property updates happen on the main thread
     // React Native Fabric can call updateProps from a background thread
@@ -69,7 +70,18 @@ using namespace facebook::react;
         self->_view.userLocationAccuracyStrokeWidth = newViewProps.userLocationAccuracyStrokeWidth;
         self->_view.showUserPosition = newViewProps.showUserPosition;
         self->_view.userLocationIconScale = newViewProps.userLocationIconScale;
+        self->_view.clusterColor = [self hexStringToColor:RCTNSStringFromString(newViewProps.clusterColor)];
         [self->_view setFollowUser:newViewProps.followUser];
+        // Convert std::vector<ClusteredYamapLiteViewClusteredMarkersStruct> to NSArray<NSDictionary *>
+        NSMutableArray *markersArray = [NSMutableArray arrayWithCapacity:newViewProps.clusteredMarkers.size()];
+        for (const auto &marker : newViewProps.clusteredMarkers) {
+            NSDictionary *markerDict = @{
+                @"lat": @(marker.lat),
+                @"lon": @(marker.lon)
+            };
+            [markersArray addObject:markerDict];
+        }
+        // [self->_view setClusteredMarkers:markersArray];
         NSDictionary *logoPositionDict = @{
             @"horizontal": RCTNSStringFromString(toString(newViewProps.logoPosition.horizontal)),
             @"vertical": RCTNSStringFromString(toString(newViewProps.logoPosition.vertical))
@@ -117,7 +129,7 @@ using namespace facebook::react;
     }
     
     if (_eventEmitter != nil) {
-        YamapLiteViewEventEmitter::OnMapLoaded event = {};
+        ClusteredYamapLiteViewEventEmitter::OnMapLoaded event = {};
         event.curZoomGeometryLoaded = [[obj objectForKey:@"curZoomGeometryLoaded"] doubleValue];
         event.curZoomModelsLoaded = [[obj objectForKey:@"curZoomModelsLoaded"] doubleValue];
         event.curZoomLabelsLoaded = [[obj objectForKey:@"curZoomLabelsLoaded"] doubleValue];
@@ -127,7 +139,7 @@ using namespace facebook::react;
         event.tileMemoryUsage = [[obj objectForKey:@"tileMemoryUsage"] doubleValue];
         event.delayedGeometryLoaded = [[obj objectForKey:@"delayedGeometryLoaded"] doubleValue];
         event.fullyAppeared = [[obj objectForKey:@"fullyAppeared"] doubleValue];
-        std::dynamic_pointer_cast<const YamapLiteViewEventEmitter>(_eventEmitter)
+        std::dynamic_pointer_cast<const ClusteredYamapLiteViewEventEmitter>(_eventEmitter)
         ->onMapLoaded(event);
     }
 }
@@ -135,7 +147,7 @@ using namespace facebook::react;
 
 - (void)handleOnCameraPositionChangeWithCoords:(NSDictionary *)coords {
     if (_eventEmitter != nil) {
-        YamapLiteViewEventEmitter::OnCameraPositionChange event = {};
+        ClusteredYamapLiteViewEventEmitter::OnCameraPositionChange event = {};
         event.point.lat = [[coords objectForKey:@"lat"] doubleValue];
         event.point.lon = [[coords objectForKey:@"lon"] doubleValue];
         event.zoom = [[coords objectForKey:@"zoom"] doubleValue];
@@ -154,19 +166,19 @@ using namespace facebook::react;
             reasonString = [NSString stringWithFormat:@"%@", reasonObj];
         }
         if ([reasonString isEqualToString:@"APPLICATION"]) {
-            event.reason = YamapLiteViewEventEmitter::OnCameraPositionChangeReason::APPLICATION;
+            event.reason = ClusteredYamapLiteViewEventEmitter::OnCameraPositionChangeReason::APPLICATION;
         } else {
-            event.reason = YamapLiteViewEventEmitter::OnCameraPositionChangeReason::GESTURES;
+            event.reason = ClusteredYamapLiteViewEventEmitter::OnCameraPositionChangeReason::GESTURES;
         }
 
-        std::dynamic_pointer_cast<const YamapLiteViewEventEmitter>(_eventEmitter)
+        std::dynamic_pointer_cast<const ClusteredYamapLiteViewEventEmitter>(_eventEmitter)
         ->onCameraPositionChange(event);
     }
 }
 
 - (void)handleOnCameraPositionChangeEndWithCoords:(NSDictionary<NSString *,id> *)coords {
     if (_eventEmitter != nil) {
-        YamapLiteViewEventEmitter::OnCameraPositionChangeEnd event = {};
+        ClusteredYamapLiteViewEventEmitter::OnCameraPositionChangeEnd event = {};
         event.point.lat = [[coords objectForKey:@"lat"] doubleValue];
         event.point.lon = [[coords objectForKey:@"lon"] doubleValue];
         event.zoom = [[coords objectForKey:@"zoom"] doubleValue];
@@ -185,33 +197,13 @@ using namespace facebook::react;
             reasonString = [NSString stringWithFormat:@"%@", reasonObj];
         }
         if ([reasonString isEqualToString:@"APPLICATION"]) {
-          event.reason = YamapLiteViewEventEmitter::OnCameraPositionChangeEndReason::APPLICATION;
+          event.reason = ClusteredYamapLiteViewEventEmitter::OnCameraPositionChangeEndReason::APPLICATION;
         } else {
-            event.reason = YamapLiteViewEventEmitter::OnCameraPositionChangeEndReason::GESTURES;
+            event.reason = ClusteredYamapLiteViewEventEmitter::OnCameraPositionChangeEndReason::GESTURES;
         }
 
-        std::dynamic_pointer_cast<const YamapLiteViewEventEmitter>(_eventEmitter)
+        std::dynamic_pointer_cast<const ClusteredYamapLiteViewEventEmitter>(_eventEmitter)
         ->onCameraPositionChangeEnd(event);
-    }
-}
-
-- (void)handleOnMapLongPressWithCoords:(NSDictionary *)coords {
-    if (_eventEmitter != nil) {
-        YamapLiteViewEventEmitter::OnMapLongPress event = {};
-        event.lat = [[coords objectForKey:@"lat"] doubleValue];
-        event.lon = [[coords objectForKey:@"lon"] doubleValue];
-        std::dynamic_pointer_cast<const YamapLiteViewEventEmitter>(_eventEmitter)
-        ->onMapLongPress(event);
-    }
-}
-
-- (void)handleOnMapPressWithCoords:(NSDictionary *)coords {
-    if (_eventEmitter != nil) {
-        YamapLiteViewEventEmitter::OnMapPress event = {};
-        event.lat = [[coords objectForKey:@"lat"] doubleValue];
-        event.lon = [[coords objectForKey:@"lon"] doubleValue];
-        std::dynamic_pointer_cast<const YamapLiteViewEventEmitter>(_eventEmitter)
-        ->onMapPress(event);
     }
 }
 
@@ -223,14 +215,15 @@ using namespace facebook::react;
         [_view insertReactSubview:childComponentView atIndex:index];
     }
 }
-
 - (void)unmountChildComponentView:(nonnull UIView<RCTComponentViewProtocol> *)childComponentView index:(NSInteger)index { 
 //TODO:
 }
 
-Class<RCTComponentViewProtocol> YamapLiteViewCls(void)
+
+
+Class<RCTComponentViewProtocol> ClusteredYamapLiteViewCls(void)
 {
-    return YamapLiteView.class;
+    return ClusteredYamapLiteView.class;
 }
 
 - hexStringToColor:(NSString *)stringToConvert

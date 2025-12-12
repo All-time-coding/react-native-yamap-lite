@@ -44,7 +44,7 @@ class YamapLiteMarkerView(context: Context) : View(context), MapObjectTapListene
   private val inProgressRequests = mutableMapOf<String, MutableList<PlacemarkMapObject>>()
 
   private val childLayoutListener =
-  OnLayoutChangeListener { v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom -> applyStyle() }
+  OnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> applyStyle() }
 
   fun setMarkerMapObject(obj: PlacemarkMapObject?) {
     placemark = obj
@@ -158,15 +158,14 @@ class YamapLiteMarkerView(context: Context) : View(context), MapObjectTapListene
         }
       }
       if (_childView == null && iconSource?.isNotEmpty() == true) {
-        val currentPlacemark = placemark as? PlacemarkMapObject
         val currentIconStyle = iconStyle
         coroutineScope.launch {
           val icon = ResolveImageHelper.getInstance().resolveImage(context, iconSource!!, _size)
           icon?.let {
-            currentPlacemark?.let { pm ->
+            placemark?.let { pm ->
               if (pm.isValid) {
                 pm.setIcon(it)
-                currentIconStyle?.let { pm.setIconStyle(it) }
+                currentIconStyle.let { pm.setIconStyle(it) }
               }
             }
           }
@@ -182,6 +181,7 @@ class YamapLiteMarkerView(context: Context) : View(context), MapObjectTapListene
     }
     
     val viewId = getId()
+    val surfaceId = UIManagerHelper.getSurfaceId(reactContext)
     val eventDispatcher = UIManagerHelper.getEventDispatcherForReactTag(reactContext, viewId)
     
     if (eventDispatcher != null) {
@@ -189,13 +189,13 @@ class YamapLiteMarkerView(context: Context) : View(context), MapObjectTapListene
         putDouble("lat", p1.latitude)
         putDouble("lon", p1.longitude)
       }
-      val event = PressEvent(viewId, eventData)
+      val event = PressEvent(surfaceId, viewId, eventData)
       eventDispatcher.dispatchEvent(event)
     }
     return _handled
   }
   
-  private class PressEvent(viewTag: Int, private val eventData: WritableMap?) : Event<PressEvent>(viewTag) {
+  private class PressEvent(surfaceId: Int, viewTag: Int, private val eventData: WritableMap?) : Event<PressEvent>(surfaceId, viewTag) {
     override fun getEventName(): String {
       return "onMarkerPress"
     }

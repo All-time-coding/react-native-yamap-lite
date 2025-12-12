@@ -1,7 +1,7 @@
 {
   "name": "react-native-yamap-lite",
-  "version": "0.1.0",
-  "description": "123",
+  "version": "1.0.0",
+  "description": "A lightweight wrapper for the Yandex MapKit SDK.",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
   "exports": {
@@ -39,19 +39,28 @@
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
     "prepare": "bob build",
     "codegenIos": "yarn react-native codegen --path example/ --outputPath example/ios",
-    "codegenAndroid": "yarn react-native codegen --path example/ --outputPath example/android",
+    "codegenAndroid": "yarn react-native codegen --path example/ --outputPath ./",
     "release": "release-it --only-version"
   },
   "keywords": [
     "react-native",
     "ios",
-    "android"
+    "android",
+    "yandex",
+    "maps",
+    "mapkit",
+    "mapkit-lite",
+    "react-native-yamap",
+    "react-native-yamap-lite"
   ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/hydromoll/react-native-yamap-lite.git"
   },
   "author": "hydromoll <hydromoll@mail.ru> (https://github.com/hydromoll)",
+  "contributors": [
+    "pe1ros <ilya.ezy@gmail.com> (https://github.com/pe1ros)"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/hydromoll/react-native-yamap-lite/issues"
