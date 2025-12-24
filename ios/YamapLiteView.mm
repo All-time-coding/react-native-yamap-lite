@@ -69,6 +69,7 @@ using namespace facebook::react;
         self->_view.userLocationAccuracyStrokeWidth = newViewProps.userLocationAccuracyStrokeWidth;
         self->_view.showUserPosition = newViewProps.showUserPosition;
         self->_view.userLocationIconScale = newViewProps.userLocationIconScale;
+        [self->_view setFollowUser:newViewProps.followUser];
         NSDictionary *logoPositionDict = @{
             @"horizontal": RCTNSStringFromString(toString(newViewProps.logoPosition.horizontal)),
             @"vertical": RCTNSStringFromString(toString(newViewProps.logoPosition.vertical))
@@ -194,6 +195,26 @@ using namespace facebook::react;
     }
 }
 
+- (void)handleOnMapLongPressWithCoords:(NSDictionary *)coords {
+    if (_eventEmitter != nil) {
+        YamapLiteViewEventEmitter::OnMapLongPress event = {};
+        event.lat = [[coords objectForKey:@"lat"] doubleValue];
+        event.lon = [[coords objectForKey:@"lon"] doubleValue];
+        std::dynamic_pointer_cast<const YamapLiteViewEventEmitter>(_eventEmitter)
+        ->onMapLongPress(event);
+    }
+}
+
+- (void)handleOnMapPressWithCoords:(NSDictionary *)coords {
+    if (_eventEmitter != nil) {
+        YamapLiteViewEventEmitter::OnMapPress event = {};
+        event.lat = [[coords objectForKey:@"lat"] doubleValue];
+        event.lon = [[coords objectForKey:@"lon"] doubleValue];
+        std::dynamic_pointer_cast<const YamapLiteViewEventEmitter>(_eventEmitter)
+        ->onMapPress(event);
+    }
+}
+
 - (void)mountChildComponentView:(nonnull UIView<RCTComponentViewProtocol> *)childComponentView index:(NSInteger)index { 
     if ([childComponentView isKindOfClass:YamapLiteMarkerView.class]) {
         [_view insertReactSubview:childComponentView atIndex:index];
@@ -202,11 +223,10 @@ using namespace facebook::react;
         [_view insertReactSubview:childComponentView atIndex:index];
     }
 }
+
 - (void)unmountChildComponentView:(nonnull UIView<RCTComponentViewProtocol> *)childComponentView index:(NSInteger)index { 
 //TODO:
 }
-
-
 
 Class<RCTComponentViewProtocol> YamapLiteViewCls(void)
 {

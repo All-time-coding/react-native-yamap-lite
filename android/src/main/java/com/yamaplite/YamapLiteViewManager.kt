@@ -153,4 +153,9 @@ class YamapLiteViewManager : ViewGroupManager<YamapLiteView>(), YamapLiteViewMan
   override fun setUserLocationAccuracyStrokeWidth(view: YamapLiteView, value: Float) {
     view.setUserLocationAccuracyStrokeWidth(value)
   }
+
+  @ReactProp(name = "followUser")
+  override fun setFollowUser(view: YamapLiteView, value: Boolean) {
+    view.setFollowUser(value)
+  }
 }

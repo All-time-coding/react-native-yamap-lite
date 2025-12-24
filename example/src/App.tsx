@@ -14,6 +14,8 @@ export default function App() {
     onMapLoaded,
     onCameraPositionChange,
     onCameraPositionChangeEnd,
+    onMapPress,
+    onMapLongPress,
   } = useMap();
 
   return (
@@ -40,6 +42,7 @@ export default function App() {
         userLocationAccuracyStrokeWidth={100}
         logoPadding={{ horizontal: 100, vertical: 100 }}
         logoPosition={{ horizontal: 'left', vertical: 'bottom' }}
+        followUser={true}
         renderMarker={({ point, data }) => (
           <Marker
             key={`${point.lat}-${point.lon}-${data.index}`}
@@ -78,6 +81,7 @@ export default function App() {
         userLocationAccuracyStrokeWidth={100}
         logoPadding={{ horizontal: 100, vertical: 100 }}
         logoPosition={{ horizontal: 'left', vertical: 'bottom' }}
+        followUser={true}
       >
         {markers.map((marker, index) => (
           // <Circle

@@ -19,7 +19,7 @@ import kotlin.math.sqrt
 
 class ClusteredYamapLiteView(context: Context) : YamapLiteView(context), ClusterListener,
 ClusterTapListener {
-  private lateinit var clusterCollection: ClusterizedPlacemarkCollection
+  private var clusterCollection: ClusterizedPlacemarkCollection
   private var clusterColor = 0
   private val placemarksMap: HashMap<String?, PlacemarkMapObject?> = HashMap<String?, PlacemarkMapObject?>()
   private var pointsList = ArrayList<Point>()
@@ -33,8 +33,11 @@ ClusterTapListener {
       placemarksMap.clear()
       val pt = ArrayList<Point>()
       for (i in points.indices) {
+        @Suppress("UNCHECKED_CAST")
         val point = points[i] as HashMap<String, Double>
-        pt.add(Point(point["lat"]!!, point["lon"]!!))
+        val lat = point["lat"] as Double
+        val lon = point["lon"] as Double
+        pt.add(Point(lat, lon))
       }
       val placemarks = clusterCollection.addPlacemarks(pt, TextImageProvider(""), IconStyle())
       pointsList = pt

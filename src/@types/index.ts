@@ -69,9 +69,9 @@ export interface YaMapProps extends ViewProps {
 
   onCameraPositionChangeEnd?: (event: CameraPosition) => void;
 
-  // onMapPress?: (event: NativeSyntheticEvent<Point>) => void;
+  onMapPress?: (event: Point) => void;
 
-  // onMapLongPress?: (event: NativeSyntheticEvent<Point>) => void;
+  onMapLongPress?: (event: Point) => void;
 
   onMapLoaded?: (event: MapLoaded) => void;
 
@@ -104,9 +104,11 @@ export interface YaMapProps extends ViewProps {
   /** @default 60 */
   maxFps?: number;
 
+  /** @default 'map' */
   mapType?: 'map' | 'satellite' | 'hybrid';
 
-  // followUser?: boolean;
+  /** @default false */
+  followUser?: boolean;
 
   logoPosition?: YandexLogoPosition;
 

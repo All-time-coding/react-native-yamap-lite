@@ -1655,7 +1655,7 @@ PODS:
     - React-perflogger (= 0.79.2)
     - React-utils (= 0.79.2)
   - SocketRocket (0.7.1)
-  - YamapLite (0.1.0):
+  - YamapLite (1.0.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1979,7 +1979,7 @@ SPEC CHECKSUMS:
   ReactCodegen: c63eda03ba1d94353fb97b031fc84f75a0d125ba
   ReactCommon: 76d2dc87136d0a667678668b86f0fca0c16fdeb0
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
-  YamapLite: f894ea6b25c483faf118056fe4b415d50b28a7c6
+  YamapLite: 53e0ee94a951ef91b187bb093b9f4d24f6918959
   YandexMapsMobile: e6443bf72724581ec9f884abdbae254273bc2912
   Yoga: c758bfb934100bb4bf9cbaccb52557cee35e8bdf
 

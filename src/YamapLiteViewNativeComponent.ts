@@ -7,6 +7,11 @@ import type {
   WithDefault,
 } from 'react-native/Libraries/Types/CodegenTypes';
 
+interface Point {
+  lat: Double;
+  lon: Double;
+}
+
 interface YandexLogoPosition {
   vertical?: WithDefault<'top' | 'bottom', 'bottom'>;
   horizontal?: WithDefault<'left' | 'center' | 'right', 'left'>;
@@ -39,7 +44,10 @@ interface InitialRegion {
 
 interface CameraPosition {
   finished: boolean;
-  point: { lat: Double; lon: Double };
+  point: {
+    lat: Double;
+    lon: Double;
+  };
   zoom: Double;
   azimuth: Double;
   tilt: Double;
@@ -55,11 +63,10 @@ export interface NativeProps extends ViewProps {
   /** @default false */
   nightMode?: boolean;
   mapStyle?: string;
-
   onCameraPositionChange?: DirectEventHandler<Readonly<CameraPosition>>;
   onCameraPositionChangeEnd?: DirectEventHandler<Readonly<CameraPosition>>;
-  // onMapPress?: (event: NativeSyntheticEvent<Point>) => void;
-  // onMapLongPress?: (event: NativeSyntheticEvent<Point>) => void;
+  onMapPress?: DirectEventHandler<Readonly<Point>>;
+  onMapLongPress?: DirectEventHandler<Readonly<Point>>;
   onMapLoaded?: DirectEventHandler<Readonly<MapLoad>>;
   /** @default #00FF00 */
   userLocationAccuracyFillColor?: string;
@@ -80,7 +87,8 @@ export interface NativeProps extends ViewProps {
   initialRegion?: InitialRegion;
   maxFps?: Float;
   mapType?: WithDefault<'map' | 'satellite' | 'hybrid', 'map'>;
-  // followUser?: boolean;
+  /** @default false */
+  followUser?: boolean;
   logoPosition?: YandexLogoPosition;
   logoPadding?: YandexLogoPadding;
 }

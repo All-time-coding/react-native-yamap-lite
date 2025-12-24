@@ -123,6 +123,7 @@ class YamapCircle(context: Context?) : ViewGroup(context), MapObjectTapListener 
     }
     
     val viewId = getId()
+    val surfaceId = UIManagerHelper.getSurfaceId(reactContext)
     val eventDispatcher = UIManagerHelper.getEventDispatcherForReactTag(reactContext, viewId)
     
     if (eventDispatcher != null) {
@@ -130,13 +131,13 @@ class YamapCircle(context: Context?) : ViewGroup(context), MapObjectTapListener 
         putDouble("lat", point.latitude)
         putDouble("lon", point.longitude)
       }
-      val event = PressEvent(viewId, eventData)
+      val event = PressEvent(surfaceId, viewId, eventData)
       eventDispatcher.dispatchEvent(event as Event<*>)
     }
       return true
   }
 
-  private class PressEvent(viewTag: Int, private val eventData: WritableMap?) : Event<PressEvent>(viewTag) {
+  private class PressEvent(surfaceId: Int, viewTag: Int, private val eventData: WritableMap?) : Event<PressEvent>(surfaceId, viewTag) {
     override fun getEventName(): String {
       return "onCirclePress"
     }

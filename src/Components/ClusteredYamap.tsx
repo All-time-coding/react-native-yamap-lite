@@ -4,7 +4,7 @@ import {
   useRef,
   type ForwardedRef,
 } from 'react';
-import { findNodeHandle, Image } from 'react-native';
+import { findNodeHandle, Image, type NativeSyntheticEvent } from 'react-native';
 import type { ClusteredYamapProps, Point, YaMapRef } from '../@types';
 import { YamapUtils } from '../Utils/YamapUtils';
 import ClusteredYamapLiteView from '../ClusteredYamapLiteViewNativeComponent';
@@ -30,6 +30,8 @@ export const ClusteredYamap = forwardRef(
       clusteredMarkers = [],
       renderMarker = () => null,
       clusterColor = '#FF0000',
+      onMapPress,
+      onMapLongPress,
       ...otherProps
     } = props;
 
@@ -85,6 +87,24 @@ export const ClusteredYamap = forwardRef(
       (marker) => marker.point as Point
     );
 
+    const handleMapPress = (event: NativeSyntheticEvent<Point>) => {
+      if (onMapPress) {
+        onMapPress({
+          lat: event.nativeEvent.lat,
+          lon: event.nativeEvent.lon,
+        });
+      }
+    };
+
+    const handleMapLongPress = (event: NativeSyntheticEvent<Point>) => {
+      if (onMapLongPress) {
+        onMapLongPress({
+          lat: event.nativeEvent.lat,
+          lon: event.nativeEvent.lon,
+        });
+      }
+    };
+
     return (
       <ClusteredYamapLiteView
         ref={nativeRef}
@@ -105,6 +125,8 @@ export const ClusteredYamap = forwardRef(
         children={clusteredMarkers.map((marker, index) =>
           renderMarker({ point: marker.point, data: marker.data }, index)
         )}
+        onMapPress={handleMapPress}
+        onMapLongPress={handleMapLongPress}
         {...otherProps}
       />
     );
