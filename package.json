@@ -1,7 +1,7 @@
 {
   "name": "react-native-yamap-lite",
   "version": "1.0.0",
-  "description": "",
+  "description": "A lightweight wrapper for the Yandex MapKit SDK",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
   "exports": {

@@ -16,7 +16,7 @@ public class YamapView: UIView {
         didSet {
             if delegate != nil && mapView != nil {
                 runOnMainThread {
-                  self.setupListeners()
+                    self.setupListeners()
                 }
             }
         }
@@ -84,10 +84,10 @@ public class YamapView: UIView {
 
     @objc public func applyProperties() {
         runOnMainThread {
-          self.updateMapProperties()
+            self.updateMapProperties()
         }
     }
-    
+
     private func updateMapProperties() {
         guard let map = mapView?.mapWindow?.map else { return }
         switch mapType {
@@ -103,12 +103,12 @@ public class YamapView: UIView {
         map.isRotateGesturesEnabled = rotateGesturesEnabled
         map.isFastTapEnabled = fastTapEnabled
 
-        self.updateUserIcon();
+        self.updateUserIcon()
     }
 
     @objc public var maxFps: Float = 60 {
         didSet {
-            if(maxFps <= 0 || maxFps > 60) {
+            if maxFps <= 0 || maxFps > 60 {
                 maxFps = 60
             }
             guard let map = mapView?.mapWindow else { return }
@@ -128,10 +128,10 @@ public class YamapView: UIView {
 
     private func initImpl() {
         runOnMainThread {
-          self.initMapView()
+            self.initMapView()
         }
     }
-    
+
     private func initMapView() {
         mapView = YMKMapView(frame: bounds, vulkanPreferred: YamapView.isM1Simulator())
         mapView.mapWindow.map.mapType = .map
@@ -141,7 +141,7 @@ public class YamapView: UIView {
 
     @objc private func setupListeners() {
         guard let delegate = delegate, let map = mapView?.mapWindow?.map else { return }
-        
+
         if loadListener == nil {
             loadListener = MapLoadListener(callback: nil, mapDelegate: delegate)
             map.setMapLoadedListenerWith(loadListener!)
@@ -152,16 +152,17 @@ public class YamapView: UIView {
             cameraListener = cameraDelegate
             map.addCameraListener(with: cameraDelegate)
         }
-        
+
         if userLocationListener == nil {
             userLocationListener = UserLocationObjectListener(callback: updateUserIcon)
         }
-        
+
         if userLocationLayer == nil {
-            userLocationLayer = YMKMapKit.sharedInstance().createUserLocationLayer(with: mapView.mapWindow)
+            userLocationLayer = YMKMapKit.sharedInstance().createUserLocationLayer(
+                with: mapView.mapWindow)
             userLocationLayer.setObjectListenerWith(userLocationListener)
         }
-        
+
         if userLocationLayer != nil {
             userLocationLayer.setVisibleWithOn(showUserPosition)
         }
@@ -174,18 +175,22 @@ public class YamapView: UIView {
     @objc public func setLogoPosition(position: NSDictionary) {
         guard let map = mapView?.mapWindow?.map else { return }
         let logoPosition = LogoPosition(position: position)
-        map.logo.setAlignmentWith(YMKLogoAlignment(horizontalAlignment: logoPosition.horizontal, verticalAlignment: logoPosition.vertical))
+        map.logo.setAlignmentWith(
+            YMKLogoAlignment(
+                horizontalAlignment: logoPosition.horizontal,
+                verticalAlignment: logoPosition.vertical))
     }
 
     @objc public func setLogoPadding(vertical: Int, horizontal: Int) {
         guard let map = mapView?.mapWindow?.map else { return }
-        map.logo.setPaddingWith(YMKLogoPadding(horizontalPadding: UInt(horizontal), verticalPadding: UInt(vertical)))
+        map.logo.setPaddingWith(
+            YMKLogoPadding(horizontalPadding: UInt(horizontal), verticalPadding: UInt(vertical)))
     }
 
     @objc public func setMapStyle(style: [String: Any]) {
         guard let map = mapView?.mapWindow?.map else { return }
         guard let data = try? JSONSerialization.data(withJSONObject: style, options: []),
-              let styleString = String(data: data, encoding: .utf8)
+            let styleString = String(data: data, encoding: .utf8)
         else {
             print("Failed to serialize style dictionary to JSON")
             return
@@ -210,19 +215,21 @@ public class YamapView: UIView {
     @objc public func setUserLocationIcon(path: String) {
         let helper = ResolveImageHelper.shared
         let baseSize: CGFloat = 50.0
-        
+
         let image = helper.resolveUIImage(uri: path as NSString) { [weak self] loadedImage in
             guard let self = self, let loadedImage = loadedImage else {
                 print("Failed to load image from URI: \(path)")
                 return
             }
-            let resizedImage = helper.resizeImage(loadedImage, toSize: CGSize(width: baseSize, height: baseSize))
+            let resizedImage = helper.resizeImage(
+                loadedImage, toSize: CGSize(width: baseSize, height: baseSize))
             self.userLocationImage = resizedImage
             self.updateUserIcon()
         }
-        
+
         if let image = image {
-            let resizedImage = helper.resizeImage(image, toSize: CGSize(width: baseSize, height: baseSize))
+            let resizedImage = helper.resizeImage(
+                image, toSize: CGSize(width: baseSize, height: baseSize))
             userLocationImage = resizedImage
             updateUserIcon()
         }
@@ -236,8 +243,10 @@ public class YamapView: UIView {
             userIconStyle.scale = self.userLocationIconScale as NSNumber
 
             if let image = self.userLocationImage {
-                self.userLocationListener?.userLocationView?.pin.setIconWith(image, style: userIconStyle)
-                self.userLocationListener?.userLocationView?.arrow.setIconWith(image, style: userIconStyle)
+                self.userLocationListener?.userLocationView?.pin.setIconWith(
+                    image, style: userIconStyle)
+                self.userLocationListener?.userLocationView?.arrow.setIconWith(
+                    image, style: userIconStyle)
             }
 
             if let circle = self.userLocationListener?.userLocationView?.accuracyCircle {
@@ -274,10 +283,20 @@ public class YamapView: UIView {
         let southWest = YMKPoint(latitude: minLatitude, longitude: minLongitude)
         let northEast = YMKPoint(latitude: maxLatitude, longitude: maxLongitude)
         let box = YMKBoundingBox(southWest: southWest, northEast: northEast)
+      
         let camera = map.cameraPosition(with: YMKGeometry(boundingBox: box))
+        let paddingZoom: Float = 0.75
+        let adjustedZoom = max(camera.zoom - paddingZoom, 0)
+          
+          let adjustedCamera = YMKCameraPosition(
+              target: camera.target,
+              zoom: adjustedZoom,
+              azimuth: camera.azimuth,
+              tilt: camera.tilt
+          )
 
-        let anim = YMKAnimation(type: .smooth, duration: 0.7)
-        map.move(with: camera, animation: anim)
+          let anim = YMKAnimation(type: .smooth, duration: 0.7)
+          map.move(with: adjustedCamera, animation: anim)
     }
 
     @objc public func getCameraPosition() -> [String: Any]? {
@@ -293,22 +312,25 @@ public class YamapView: UIView {
         return result
     }
 
-    @objc public func move(_ latitude: Double, _ longitude: Double, _ zoom: Float, _ azimuth: Float, _ tilt: Float) {
+    @objc public func move(
+        _ latitude: Double, _ longitude: Double, _ zoom: Float, _ azimuth: Float, _ tilt: Float
+    ) {
         guard let m = mapView?.mapWindow?.map else { return }
-        m.move(with: YMKCameraPosition(
-            target: YMKPoint(latitude: latitude, longitude: longitude),
-            zoom: zoom,
-            azimuth: azimuth,
-            tilt: tilt
-        )
+        m.move(
+            with: YMKCameraPosition(
+                target: YMKPoint(latitude: latitude, longitude: longitude),
+                zoom: zoom,
+                azimuth: azimuth,
+                tilt: tilt
+            )
         )
     }
 
     static func isM1Simulator() -> Bool {
         #if targetEnvironment(simulator) && arch(arm64)
-        return true
+            return true
         #else
-        return false
+            return false
         #endif
     }
 
@@ -321,21 +343,23 @@ public class YamapView: UIView {
         duration: Float,
         animation: String
     ) {
-      guard let map = mapView?.mapWindow?.map else { return }
-      let animType: YMKAnimationType
-      switch animation {
+        guard let map = mapView?.mapWindow?.map else { return }
+        let animType: YMKAnimationType
+        switch animation {
         case "LINEAR":
-          animType = .linear
+            animType = .linear
         default:
-          animType = .smooth
-      }
-      let newPosition = YMKCameraPosition(target: YMKPoint(latitude: latitude, longitude: longitude), zoom: Float(zoom), azimuth: azimuth, tilt: tilt)
-      if(duration > 0){
-        let anim = YMKAnimation(type: animType, duration: Float(duration) / 1000.0)
-        map.move(with: newPosition, animation: anim)
-      } else {
-        map.move(with: newPosition)
-      }
+            animType = .smooth
+        }
+        let newPosition = YMKCameraPosition(
+            target: YMKPoint(latitude: latitude, longitude: longitude), zoom: Float(zoom),
+            azimuth: azimuth, tilt: tilt)
+        if duration > 0 {
+            let anim = YMKAnimation(type: animType, duration: Float(duration) / 1000.0)
+            map.move(with: newPosition, animation: anim)
+        } else {
+            map.move(with: newPosition)
+        }
     }
 
     @objc(setZoomWithZoom:duration:animation:)
@@ -347,34 +371,36 @@ public class YamapView: UIView {
         guard let map = mapView?.mapWindow?.map else { return }
         let animType: YMKAnimationType
         switch animation {
-          case "LINEAR":
+        case "LINEAR":
             animType = .linear
-          default:
+        default:
             animType = .smooth
         }
         let prevPosition = map.cameraPosition
-        let newPosition = YMKCameraPosition(target: prevPosition.target, zoom: Float(zoom), azimuth: prevPosition.azimuth, tilt: prevPosition.tilt)
-      if(duration > 0){
-        let anim = YMKAnimation(type: animType, duration: Float(duration) / 1000.0)
-        map.move(with: newPosition, animation: anim)
-      } else {
-        map.move(with: newPosition)
-      }
+        let newPosition = YMKCameraPosition(
+            target: prevPosition.target, zoom: Float(zoom), azimuth: prevPosition.azimuth,
+            tilt: prevPosition.tilt)
+        if duration > 0 {
+            let anim = YMKAnimation(type: animType, duration: Float(duration) / 1000.0)
+            map.move(with: newPosition, animation: anim)
+        } else {
+            map.move(with: newPosition)
+        }
     }
 
     @objc public func fitAllMarkers() {
         var markerPoints: [YMKPoint] = []
-        
+
         for marker in mapObjects {
             if marker.visible, let point = marker.point {
                 markerPoints.append(YMKPoint(latitude: point.lat, longitude: point.lon))
             }
         }
-        
+
         if markerPoints.isEmpty {
             return
         }
-        
+
         fitMakers(markerPoints)
     }
 
@@ -389,26 +415,23 @@ public class YamapView: UIView {
     }
 
     @objc override public func insertReactSubview(_ subview: UIView!, at atIndex: Int) {
-        print("10")
         let safeIndex = min(atIndex, subviews.count)
         super.insertReactSubview(subview, at: safeIndex)
         if let markerContainer = subview as? UIView,
-           let markerView = markerContainer.value(forKey: "contentView") as? YamapLiteMarker
+            let markerView = markerContainer.value(forKey: "contentView") as? YamapLiteMarker
         {
-            let point = YMKPoint(latitude: markerView.point?.lat ?? 0.0, longitude: markerView.point?.lon ?? 0.0)
+            let point = YMKPoint(
+                latitude: markerView.point?.lat ?? 0.0, longitude: markerView.point?.lon ?? 0.0)
             let viewPlacemark = mapView.mapWindow.map.mapObjects.addPlacemark()
             viewPlacemark.geometry = point
             markerView.setMapObject(object: viewPlacemark)
-            // Add marker to the array for tracking
-            if !mapObjects.contains(where: { $0 === markerView }) {
+            // if !mapObjects.contains(where: { $0 === markerView }) {
                 mapObjects.append(markerView)
-            }
+            // }
         }
 
         else if let circleContainer = subview as? UIView {
             let cv = circleContainer.value(forKey: "contentView")
-
-            print("CVVV \(cv)")
             if let circleView = circleContainer.value(forKey: "contentView") as? YamapLiteCircle {
                 let mapObjects = mapView.mapWindow.map.mapObjects
                 let circleObject = mapObjects.addCircle(with: circleView.circle)
@@ -417,8 +440,7 @@ public class YamapView: UIView {
         }
     }
 
-    private func runOnMainThread(_ block: @escaping () -> Void) {
-        if Thread.isMainThread { block() }
-        else { DispatchQueue.main.async { block() } }
+    func runOnMainThread(_ block: @escaping () -> Void) {
+        if Thread.isMainThread { block() } else { DispatchQueue.main.async { block() } }
     }
 }

@@ -151,17 +151,17 @@ public class ResolveImageHelper {
         guard image.size.width > 0 && image.size.height > 0 else {
             return image
         }
-        
-        // Сохраняем пропорции: ширина = size.width, высота рассчитывается пропорционально
-        let scaleFactor = size.width / image.size.width
-        let targetHeight = image.size.height * scaleFactor
-        let newSize = CGSize(width: size.width, height: targetHeight)
-        
-        UIGraphicsBeginImageContextWithOptions(newSize, false, 0.0)
-        image.draw(in: CGRect(origin: .zero, size: newSize))
-        let newImage = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        
-        return newImage ?? image
+        return image
+//        // Сохраняем пропорции: ширина = size.width, высота рассчитывается пропорционально
+//        let scaleFactor = size.width / image.size.width
+//        let targetHeight = image.size.height * scaleFactor
+//        let newSize = CGSize(width: size.width, height: targetHeight)
+//        
+//        UIGraphicsBeginImageContextWithOptions(newSize, false, 0.0)
+//        image.draw(in: CGRect(origin: .zero, size: newSize))
+//        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+//        UIGraphicsEndImageContext()
+//        
+//        return newImage ?? image
     }
 }
