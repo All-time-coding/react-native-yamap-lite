@@ -14,6 +14,10 @@ interface IYamapUtilsModule {
     azimuth: number;
     tilt: number;
   }>;
+  init(apiKey: string): Promise<void>;
+  getLocale(): Promise<string>;
+  setLocale(locale: string): Promise<void>;
+  resetLocale(): Promise<void>;
   setZoom(
     viewId: number,
     zoom: number,

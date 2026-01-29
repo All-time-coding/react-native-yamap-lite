@@ -29,6 +29,11 @@ export interface Spec extends TurboModule {
     duration: Double,
     animation: string
   ): Promise<void>;
+
+  init(apiKey: string): Promise<void>;
+  getLocale(): Promise<string>;
+  setLocale(locale: string): Promise<void>;
+  resetLocale(): Promise<void>;
 }
 
 export default TurboModuleRegistry.getEnforcing<Spec>('YamapUtils');
