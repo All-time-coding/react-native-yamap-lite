@@ -5,17 +5,20 @@ import {
   type ForwardedRef,
 } from 'react';
 import { findNodeHandle, Image, type NativeSyntheticEvent } from 'react-native';
-import type { Point, YaMapProps, YaMapRef } from '../@types';
+import type { Point, ScreenPoint, YaMapProps, YaMapRef } from '../@types';
 import YamapLiteView from '../YamapLiteViewNativeComponent';
 import { YamapUtils } from '../Utils/YamapUtils';
 
 export const YaMap = forwardRef(
   (props: YaMapProps, ref: ForwardedRef<YaMapRef>) => {
     const nativeRef = useRef(null);
-    const viewId = findNodeHandle(nativeRef.current);
+    // Always holds the latest props without closing over stale values in imperative handle
+    const latestProps = useRef(props);
+    latestProps.current = props;
 
     const {
       userLocationIcon,
+      interactive = true,
       zoomGesturesEnabled = true,
       scrollGesturesEnabled = true,
       tiltGesturesEnabled = true,
@@ -29,6 +32,11 @@ export const YaMap = forwardRef(
       userLocationIconScale = 1,
       onMapPress,
       onMapLongPress,
+      // Destructure backward-compat callbacks so they don't leak into otherProps
+      onCameraPositionReceived: _onCameraPositionReceived,
+      onVisibleRegionReceived: _onVisibleRegionReceived,
+      onWorldToScreenPointsReceived: _onWorldToScreenPointsReceived,
+      onScreenToWorldPointsReceived: _onScreenToWorldPointsReceived,
       ...otherProps
     } = props;
 
@@ -36,7 +44,42 @@ export const YaMap = forwardRef(
       ref,
       () => ({
         getCameraPosition: async () => {
-          return YamapUtils.getCameraPosition(viewId!);
+          const result = await YamapUtils.getCameraPosition(
+            findNodeHandle(nativeRef.current)!
+          );
+          latestProps.current.onCameraPositionReceived?.({
+            nativeEvent: result,
+          });
+          return result;
+        },
+        getVisibleRegion: async () => {
+          const result = await YamapUtils.getVisibleRegion(
+            findNodeHandle(nativeRef.current)!
+          );
+          latestProps.current.onVisibleRegionReceived?.({
+            nativeEvent: result,
+          });
+          return result;
+        },
+        getScreenPoints: async (points: Point[]) => {
+          const result = await YamapUtils.getScreenPoints(
+            findNodeHandle(nativeRef.current)!,
+            points
+          );
+          latestProps.current.onWorldToScreenPointsReceived?.({
+            nativeEvent: { points: result.points },
+          });
+          return result.points;
+        },
+        getWorldPoints: async (points: ScreenPoint[]) => {
+          const result = await YamapUtils.getWorldPoints(
+            findNodeHandle(nativeRef.current)!,
+            points
+          );
+          latestProps.current.onScreenToWorldPointsReceived?.({
+            nativeEvent: { points: result.points },
+          });
+          return result.points;
         },
         setZoom: async (
           zoom: number,
@@ -44,7 +87,7 @@ export const YaMap = forwardRef(
           animation?: 'LINEAR' | 'SMOOTH'
         ) => {
           return YamapUtils.setZoom(
-            viewId!,
+            findNodeHandle(nativeRef.current)!,
             zoom,
             duration ?? 500,
             animation ?? 'SMOOTH'
@@ -59,7 +102,7 @@ export const YaMap = forwardRef(
           animation?: 'LINEAR' | 'SMOOTH'
         ) => {
           return YamapUtils.setCenter(
-            viewId!,
+            findNodeHandle(nativeRef.current)!,
             center.lat,
             center.lon,
             zoom ?? 10,
@@ -70,10 +113,16 @@ export const YaMap = forwardRef(
           );
         },
         fitAllMarkers: async () => {
-          return YamapUtils.fitAllMarkers(viewId!);
+          return YamapUtils.fitAllMarkers(findNodeHandle(nativeRef.current)!);
+        },
+        fitMarkers: async (_markers: any[]) => {
+          return YamapUtils.fitAllMarkers(findNodeHandle(nativeRef.current)!);
+        },
+        setTrafficVisible: (_visible: boolean) => {
+          // Traffic layer is not available in lite SDK
         },
       }),
-      [viewId]
+      []
     );
 
     const userLocationIconUri = userLocationIcon
@@ -102,11 +151,11 @@ export const YaMap = forwardRef(
       <YamapLiteView
         ref={nativeRef}
         userLocationIcon={userLocationIconUri}
-        zoomGesturesEnabled={zoomGesturesEnabled}
-        scrollGesturesEnabled={scrollGesturesEnabled}
-        tiltGesturesEnabled={tiltGesturesEnabled}
-        rotateGesturesEnabled={rotateGesturesEnabled}
-        fastTapEnabled={fastTapEnabled}
+        zoomGesturesEnabled={interactive ? zoomGesturesEnabled : false}
+        scrollGesturesEnabled={interactive ? scrollGesturesEnabled : false}
+        tiltGesturesEnabled={interactive ? tiltGesturesEnabled : false}
+        rotateGesturesEnabled={interactive ? rotateGesturesEnabled : false}
+        fastTapEnabled={interactive ? fastTapEnabled : false}
         nightMode={nightMode}
         showUserPosition={showUserPosition}
         userLocationAccuracyFillColor={userLocationAccuracyFillColor}

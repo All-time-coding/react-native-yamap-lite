@@ -7,7 +7,10 @@
     "ios": "react-native run-ios",
     "start": "react-native start",
     "build:android": "cd .. && yarn codegenAndroid && mv android/app/build ./android",
-    "build:ios": "cd .. && yarn codegenIos && mv build ./ios"
+    "build:ios": "cd .. && yarn codegenIos && mv build ./ios",
+    "test:harness": "NODE_OPTIONS='--experimental-require-module' react-native-harness",
+    "test:harness:ios": "NODE_OPTIONS='--experimental-require-module' react-native-harness --harnessRunner ios",
+    "test:harness:android": "NODE_OPTIONS='--experimental-require-module' react-native-harness --harnessRunner android"
   },
   "dependencies": {
     "react": "19.0.0",
@@ -21,14 +24,19 @@
     "@react-native-community/cli": "18.0.0",
     "@react-native-community/cli-platform-android": "18.0.0",
     "@react-native-community/cli-platform-ios": "18.0.0",
+    "@react-native-harness/jest": "1.2.0",
+    "@react-native-harness/platform-android": "1.2.0",
+    "@react-native-harness/platform-apple": "1.2.0",
+    "@react-native-harness/ui": "1.2.0",
     "@react-native/babel-preset": "0.79.2",
     "@react-native/metro-config": "0.79.2",
     "@react-native/typescript-config": "0.79.2",
     "@types/react": "^19.0.0",
     "react-native-builder-bob": "^0.40.11",
+    "react-native-harness": "1.2.0",
     "react-native-monorepo-config": "^0.1.9"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=22"
   }
 }

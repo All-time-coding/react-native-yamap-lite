@@ -125,13 +125,13 @@ public class YamapLiteMarker: UIView, MapObjectTapHandler {
 
     @objc public func setMapObject(object: YMKMapObject) {
         guard let placemark = object as? YMKPlacemarkMapObject else { return }
-        if mapObject == nil {
-            mapObject = placemark
-            mapObject!.userData = self
+        mapObject = placemark
+        mapObject!.userData = self
+        if listener == nil {
             listener = MarkerTapListener()
-            mapObject!.addTapListener(with: listener!)
-            updateMarker()
         }
+        mapObject!.addTapListener(with: listener!)
+        updateMarker()
     }
 
     @objc public func updateMarker() {
@@ -149,10 +149,12 @@ public class YamapLiteMarker: UIView, MapObjectTapHandler {
             let anchorY = anchor?.y ?? 0.5
             iconStyle.anchor = NSValue(cgPoint: CGPoint(x: CGFloat(anchorX), y: CGFloat(anchorY)))
 
-            iconStyle.rotationType = NSNumber(value: YMKRotationType.rotate.rawValue)
+            iconStyle.rotationType = NSNumber(value: rotated != 0
+                ? YMKRotationType.rotate.rawValue
+                : YMKRotationType.noRotation.rawValue)
 
             if let icon = originalIcon {
-              let resizedIcon = ResolveImageHelper.shared.resizeImage(icon, toSize: CGSize(width: size, height: size))
+              let resizedIcon = ResolveImageHelper.shared.resizeImage(icon, toWidth: CGFloat(size))
                 obj.setIconWith(resizedIcon ?? icon)
                 obj.setIconStyleWith(iconStyle)
             }

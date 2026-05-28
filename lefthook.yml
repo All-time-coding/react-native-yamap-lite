@@ -1,14 +1,29 @@
+glob_matcher: doublestar
+
 pre-commit:
   parallel: true
-  commands:
-    lint:
-      glob: "*.{js,ts,jsx,tsx}"
-      run: npx eslint {staged_files}
-    types:
-      glob: "*.{js,ts, jsx, tsx}"
-      run: npx tsc
+  jobs:
+    - name: lint
+      glob: "**/*.{js,jsx,ts,tsx}"
+      exclude:
+        - "**/node_modules/**"
+        - "lib/**"
+      run: yarn eslint {staged_files}
+
+    - name: typecheck
+      glob: "**/*.{js,jsx,ts,tsx}"
+      exclude:
+        - "**/node_modules/**"
+        - "lib/**"
+      run: yarn typecheck
+
+    - name: test
+      run: yarn test --passWithNoTests
+
+    - name: harness
+      run: yarn test:harness
+
 commit-msg:
-  parallel: true
-  commands:
-    commitlint:
-      run: npx commitlint --edit
+  jobs:
+    - name: commitlint
+      run: yarn commitlint --edit {1}

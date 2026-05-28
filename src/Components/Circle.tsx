@@ -3,15 +3,20 @@ import type { CircleProps, Point } from '../@types';
 import { type NativeSyntheticEvent } from 'react-native';
 import YamapLiteCircleView from '../YamapCircleViewNativeComponents';
 
-export const Circle: React.FC<CircleProps> = ({ onPress, ...props }) => {
+export const Circle: React.FC<CircleProps> = ({
+  onPress,
+  zIndex,
+  ...props
+}) => {
   const handleCirclePress = (event: NativeSyntheticEvent<Point>) => {
-    if (onPress) {
-      onPress({
-        lat: event.nativeEvent.lat,
-        lon: event.nativeEvent.lon,
-      });
-    }
+    onPress?.(event.nativeEvent);
   };
 
-  return <YamapLiteCircleView {...props} onCirclePress={handleCirclePress} />;
+  return (
+    <YamapLiteCircleView
+      {...props}
+      zInd={zIndex}
+      onCirclePress={handleCirclePress}
+    />
+  );
 };

@@ -85,7 +85,7 @@ RCT_EXPORT_MODULE()
   RCTExecuteOnMainQueue(^{
     YamapView *view = [self getView:viewId];
     if (view) {
-        [view setCenterWithLatitude:latitude longitude:longitude zoom:(float)zoom azimuth:(float)azimuth tilt:(float)tilt duration:(int)duration animation:animation];
+        [view setCenterWithLatitude:latitude longitude:longitude zoom:(float)zoom azimuth:(float)azimuth tilt:(float)tilt duration:(float)duration animation:animation];
       resolve(nil);
     } else {
       [self rejecter:reject name:@"setCenter"];
@@ -111,13 +111,44 @@ RCT_EXPORT_MODULE()
                  points:(NSArray<NSDictionary<NSString *, id> *> *)points
                 resolve:(nonnull RCTPromiseResolveBlock)resolve
                  reject:(nonnull RCTPromiseRejectBlock)reject {
-  // TODO:
+  RCTExecuteOnMainQueue(^{
+    YamapView *view = [self getView:viewId];
+    if (view) {
+      NSArray *screenPoints = [view getScreenPoints:(NSArray<NSDictionary<NSString *, NSNumber *> *> *)points];
+      resolve(@{ @"points": screenPoints });
+    } else {
+      [self rejecter:reject name:@"getScreenPoints"];
+    }
+  });
+}
+
+- (void)getWorldPoints:(double)viewId
+                points:(NSArray<NSDictionary<NSString *, id> *> *)points
+               resolve:(nonnull RCTPromiseResolveBlock)resolve
+                reject:(nonnull RCTPromiseRejectBlock)reject {
+  RCTExecuteOnMainQueue(^{
+    YamapView *view = [self getView:viewId];
+    if (view) {
+      NSArray *worldPoints = [view getWorldPoints:(NSArray<NSDictionary<NSString *, NSNumber *> *> *)points];
+      resolve(@{ @"points": worldPoints });
+    } else {
+      [self rejecter:reject name:@"getWorldPoints"];
+    }
+  });
 }
 
 - (void)getVisibleRegion:(double)viewId
                  resolve:(nonnull RCTPromiseResolveBlock)resolve
                   reject:(nonnull RCTPromiseRejectBlock)reject {
-  // TODO:
+  RCTExecuteOnMainQueue(^{
+    YamapView *view = [self getView:viewId];
+    NSDictionary *region = [view getVisibleRegion];
+    if (region) {
+      resolve(region);
+    } else {
+      [self rejecter:reject name:@"getVisibleRegion"];
+    }
+  });
 }
 
 - (void)getLocale:(nonnull RCTPromiseResolveBlock)resolve reject:(nonnull RCTPromiseRejectBlock)reject {
@@ -132,27 +163,30 @@ RCT_EXPORT_MODULE()
 }
 
 - (void)init:(nonnull NSString *)apiKey resolve:(nonnull RCTPromiseResolveBlock)resolve reject:(nonnull RCTPromiseRejectBlock)reject {
-  @try {
-    RCTExecuteOnMainQueue(^{
-    [YMKMapKit setApiKey: apiKey];
-    [[YMKMapKit sharedInstance] onStart];
+  RCTExecuteOnMainQueue(^{
+    @try {
+      [YMKMapKit setApiKey:apiKey];
+      [[YMKMapKit sharedInstance] onStart];
+      resolve(nil);
+    } @catch (NSException *exception) {
+      [self rejecter:reject name:[NSString stringWithFormat:@"init %@ %@", exception.name, exception.reason]];
+    }
+  });
+}
+
+
+- (void)resetLocale:(nonnull RCTPromiseResolveBlock)resolve reject:(nonnull RCTPromiseRejectBlock)reject {
+  RCTExecuteOnMainQueue(^{
+    [YRTI18nManagerFactory setLocaleWithLocale:nil];
     resolve(nil);
-    });
-  } @catch (NSException *exception) {
-    [self rejecter:reject name:[NSString stringWithFormat:@"init %@ %@", exception.name, exception.reason]];
-  }
+  });
 }
 
-
-- (void)resetLocale:(nonnull RCTPromiseResolveBlock)resolve reject:(nonnull RCTPromiseRejectBlock)reject { 
-  [YRTI18nManagerFactory setLocaleWithLocale:nil];
-  resolve(nil);
-}
-
-
-- (void)setLocale:(nonnull NSString *)locale resolve:(nonnull RCTPromiseResolveBlock)resolve reject:(nonnull RCTPromiseRejectBlock)reject { 
-  [YRTI18nManagerFactory setLocaleWithLocale:locale];
-  resolve(nil);
+- (void)setLocale:(nonnull NSString *)locale resolve:(nonnull RCTPromiseResolveBlock)resolve reject:(nonnull RCTPromiseRejectBlock)reject {
+  RCTExecuteOnMainQueue(^{
+    [YRTI18nManagerFactory setLocaleWithLocale:locale];
+    resolve(nil);
+  });
 }
 
 @end

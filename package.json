@@ -32,8 +32,12 @@
     "!**/.*"
   ],
   "scripts": {
+    "prepare": "lefthook install",
     "example": "yarn workspace react-native-yamap-lite-example",
     "test": "jest",
+    "test:harness": "cd example && yarn test:harness",
+    "test:harness:ios": "cd example && yarn test:harness:ios",
+    "test:harness:android": "cd example && yarn test:harness:android",
     "typecheck": "tsc",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
@@ -80,6 +84,7 @@
     "@release-it/conventional-changelog": "^9.0.2",
     "@types/jest": "^29.5.5",
     "@types/react": "^19.0.0",
+    "@types/react-test-renderer": "^19.1.0",
     "commitlint": "^19.6.1",
     "del-cli": "^5.1.0",
     "eslint": "^9.22.0",
@@ -90,6 +95,7 @@
     "react": "19.0.0",
     "react-native": "0.79.2",
     "react-native-builder-bob": "^0.40.11",
+    "react-test-renderer": "19.0.0",
     "release-it": "^17.10.0",
     "turbo": "^1.10.7",
     "typescript": "^5.8.3"
@@ -98,7 +104,9 @@
     "react": "*",
     "react-native": "*"
   },
-  "workspaces": [],
+  "workspaces": [
+    "example"
+  ],
   "packageManager": "yarn@3.6.1",
   "jest": {
     "preset": "react-native",
@@ -107,14 +115,9 @@
       "<rootDir>/lib/"
     ]
   },
-  "commitlint": {
-    "extends": [
-      "@commitlint/config-conventional"
-    ]
-  },
   "release-it": {
     "git": {
-      "commitMessage": "chore: release ${version}",
+      "commitMessage": "chore(🔖): release ${version}",
       "tagName": "v${version}"
     },
     "npm": {
@@ -168,6 +171,8 @@
         "YamapLiteView": "YamapLiteView",
         "YamapLiteMarkerView": "YamapLiteMarkerView",
         "YamapLiteCircleView": "YamapLiteCircleView",
+        "YamapLitePolygonView": "YamapLitePolygonView",
+        "YamapLitePolylineView": "YamapLitePolylineView",
         "ClusteredYamapLiteView": "ClusteredYamapLiteView"
       }
     }

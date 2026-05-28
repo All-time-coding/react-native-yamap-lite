@@ -1,7 +1,10 @@
 #import "ClusteredYamapLiteView.h"
+#include <os/log.h>
 #include "ReactCodegen/react/renderer/components/YamapLiteViewSpec/EventEmitters.h"
 #include "YamapLiteCircleView.h"
 #include "YamapLiteMarkerView.h"
+#include "YamapLitePolygonView.h"
+#include "YamapLitePolylineView.h"
 #include <Foundation/Foundation.h>
 #include <objc/NSObject.h>
 
@@ -41,7 +44,6 @@ using namespace facebook::react;
 
     _view = [[ClusteredYamapView alloc] init];
     _view.delegate = self;
-
     self.contentView = _view;
   }
 
@@ -54,7 +56,6 @@ using namespace facebook::react;
       *std::static_pointer_cast<ClusteredYamapLiteViewProps const>(_props);
   const auto &newViewProps =
       *std::static_pointer_cast<ClusteredYamapLiteViewProps const>(props);
-
   // Ensure all map property updates happen on the main thread
   // React Native Fabric can call updateProps from a background thread
   dispatch_async(dispatch_get_main_queue(), ^{
@@ -81,11 +82,13 @@ using namespace facebook::react;
     self->_view.userLocationIconScale = newViewProps.userLocationIconScale;
     self->_view.clusterColor = [self
         hexStringToColor:RCTNSStringFromString(newViewProps.clusterColor)];
-    
-    NSMutableArray<YMKPoint *> *markersArr = [NSMutableArray arrayWithCapacity:newViewProps.clusteredMarkers.size()];
-    
+
+    NSMutableArray<YMKPoint *> *markersArr =
+        [NSMutableArray arrayWithCapacity:newViewProps.clusteredMarkers.size()];
+
     for (const auto &marker : newViewProps.clusteredMarkers) {
-      YMKPoint *point = [YMKPoint pointWithLatitude:marker.lat longitude:marker.lon];
+      YMKPoint *point = [YMKPoint pointWithLatitude:marker.lat
+                                          longitude:marker.lon];
       [markersArr addObject:point];
     }
 
@@ -138,7 +141,7 @@ using namespace facebook::react;
   if (_view != nil) {
     [_view setZoomWithZoom:zoom duration:duration animation:animation];
   } else {
-    NSLog(@"ERROR: _view is nil");
+    os_log_error(OS_LOG_DEFAULT, "ClusteredYamapLiteView: _view is nil");
   }
 }
 
@@ -146,7 +149,7 @@ using namespace facebook::react;
   if (_view != nil) {
     [_view fitAllMarkers];
   } else {
-    NSLog(@"ERROR: _view is nil");
+    os_log_error(OS_LOG_DEFAULT, "ClusteredYamapLiteView: _view is nil");
   }
 }
 
@@ -277,12 +280,21 @@ using namespace facebook::react;
   if ([childComponentView isKindOfClass:YamapLiteCircleView.class]) {
     [_view insertReactSubview:childComponentView atIndex:index];
   }
+  if ([childComponentView isKindOfClass:YamapLitePolygonView.class]) {
+    [_view insertReactSubview:childComponentView atIndex:index];
+  }
+  if ([childComponentView isKindOfClass:YamapLitePolylineView.class]) {
+    [_view insertReactSubview:childComponentView atIndex:index];
+  }
 }
 - (void)unmountChildComponentView:
             (nonnull UIView<RCTComponentViewProtocol> *)childComponentView
                             index:(NSInteger)index {
   if ([childComponentView isKindOfClass:YamapLiteMarkerView.class] ||
-      [childComponentView isKindOfClass:YamapLiteCircleView.class]) {
+      [childComponentView isKindOfClass:YamapLiteCircleView.class] ||
+      [childComponentView isKindOfClass:YamapLitePolygonView.class] ||
+      [childComponentView isKindOfClass:YamapLitePolylineView.class]) {
+    [_view removeReactSubview:childComponentView];
     [childComponentView removeFromSuperview];
   }
 }

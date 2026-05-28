@@ -1,29 +1,50 @@
-import React from 'react';
-import type { MarkerProps, Point } from '../@types';
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react';
+import type { MarkerProps, MarkerRef, Point } from '../@types';
 import { Image, type NativeSyntheticEvent } from 'react-native';
 import YamapLiteMarkerView from '../YamapMarkerViewNativeComponents';
 
-export const Marker: React.FC<MarkerProps> = ({
-  onPress,
-  source,
-  ...props
-}) => {
-  const handleMarkerPress = (event: NativeSyntheticEvent<Point>) => {
-    if (onPress) {
-      onPress({
-        lat: event.nativeEvent.lat,
-        lon: event.nativeEvent.lon,
-      });
-    }
-  };
+export const Marker = forwardRef<MarkerRef, MarkerProps>(
+  ({ onPress, source, zIndex, point: pointProp, ...props }, ref) => {
+    const [point, setPoint] = useState<Point>(pointProp);
+    const prevPointPropRef = useRef(pointProp);
 
-  const markerIconUri = source ? Image.resolveAssetSource(source).uri : '';
+    useEffect(() => {
+      if (
+        pointProp.lat !== prevPointPropRef.current.lat ||
+        pointProp.lon !== prevPointPropRef.current.lon
+      ) {
+        prevPointPropRef.current = pointProp;
+        setPoint(pointProp);
+      }
+    }, [pointProp]);
 
-  return (
-    <YamapLiteMarkerView
-      {...props}
-      source={markerIconUri}
-      onMarkerPress={handleMarkerPress}
-    />
-  );
-};
+    useImperativeHandle(ref, () => ({
+      animatedMoveTo: (newPoint: Point, _duration: number) => {
+        setPoint(newPoint);
+      },
+      animatedRotateTo: (_angle: number, _duration: number) => {},
+    }));
+
+    const handleMarkerPress = (event: NativeSyntheticEvent<Point>) => {
+      onPress?.(event.nativeEvent);
+    };
+
+    const markerIconUri = source ? Image.resolveAssetSource(source).uri : '';
+
+    return (
+      <YamapLiteMarkerView
+        {...props}
+        point={point}
+        zInd={zIndex ?? 1}
+        source={markerIconUri}
+        onMarkerPress={handleMarkerPress}
+      />
+    );
+  }
+);
