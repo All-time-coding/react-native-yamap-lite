@@ -378,6 +378,8 @@ public class YamapView: UIView {
   @objc public func move(
     _ latitude: Double, _ longitude: Double, _ zoom: Float, _ azimuth: Float, _ tilt: Float
   ) {
+    guard latitude.isFinite, longitude.isFinite, zoom.isFinite, azimuth.isFinite, tilt.isFinite
+    else { return }
     guard let m = mapView?.mapWindow?.map else { return }
     m.move(
       with: YMKCameraPosition(
@@ -406,6 +408,8 @@ public class YamapView: UIView {
     duration: Float,
     animation: String
   ) {
+    guard latitude.isFinite, longitude.isFinite, zoom.isFinite, azimuth.isFinite, tilt.isFinite
+    else { return }
     guard let map = mapView?.mapWindow?.map else { return }
     let animType: YMKAnimationType
     switch animation {
@@ -431,6 +435,7 @@ public class YamapView: UIView {
     duration: Float,
     animation: String
   ) {
+    guard zoom.isFinite else { return }
     guard let map = mapView?.mapWindow?.map else { return }
     let animType: YMKAnimationType
     switch animation {
@@ -455,7 +460,7 @@ public class YamapView: UIView {
     var markerPoints: [YMKPoint] = []
 
     for marker in mapObjects {
-      if marker.visible, let point = marker.point {
+      if marker.visible, let point = marker.point, point.lat.isFinite, point.lon.isFinite {
         markerPoints.append(YMKPoint(latitude: point.lat, longitude: point.lon))
       }
     }
@@ -483,10 +488,13 @@ public class YamapView: UIView {
     if let markerContainer = subview as? UIView,
       let markerView = markerContainer.value(forKey: "contentView") as? YamapLiteMarker
     {
-      let point = YMKPoint(
-        latitude: markerView.point?.lat ?? 0.0, longitude: markerView.point?.lon ?? 0.0)
+      let lat = markerView.point?.lat ?? 0.0
+      let lon = markerView.point?.lon ?? 0.0
       let viewPlacemark = mapView.mapWindow.map.mapObjects.addPlacemark()
-      viewPlacemark.geometry = point
+
+      if lat.isFinite, lon.isFinite {
+        viewPlacemark.geometry = YMKPoint(latitude: lat, longitude: lon)
+      }
       markerView.setMapObject(object: viewPlacemark)
       if !mapObjects.contains(where: { $0 === markerView }) {
         mapObjects.append(markerView)

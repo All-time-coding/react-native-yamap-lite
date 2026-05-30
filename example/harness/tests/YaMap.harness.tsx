@@ -1,9 +1,21 @@
-import { describe, test, expect, waitUntil } from 'react-native-harness';
+import {
+  describe,
+  test,
+  expect,
+  waitUntil,
+  render,
+} from 'react-native-harness';
+import { useEffect, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { YaMap, type YaMapRef } from 'react-native-yamap-lite';
 import { CAMERA_ANIMATION_TIMEOUT, INITIAL_REGION, MOSCOW } from '../constants';
-import { expectNear, renderMap } from '../helpers';
+import { ensureMapKitInitialized } from '../ensureMapKitInit';
+import { expectNear, renderMap, waitForMapReady } from '../helpers';
 
 // Minimal valid Yandex MapKit style — empty ruleset, overrides nothing
 const EMPTY_MAP_STYLE = '[]';
+// Local bundled asset used as a custom user-location icon.
+const LOCAL_ICON = require('../../src/assets/user-pin.png');
 
 describe('YaMap', () => {
   // ─── mount & ref API ──────────────────────────────────────────────────────
@@ -111,6 +123,66 @@ describe('YaMap', () => {
 
   test('renders with showUserPosition=true without crashing', async () => {
     const { mapRef } = await renderMap({ showUserPosition: true });
+
+    const position = await mapRef.current!.getCameraPosition();
+    expect(Number.isFinite(position.lat)).toBe(true);
+  });
+
+  test('renders with a custom userLocationIcon and showUserPosition', async () => {
+    // Exercises the setUserLocationIconWithPath path on the plain map
+    // (regression: the plain map's updateProps used to drop it).
+    const { mapRef } = await renderMap({
+      showUserPosition: true,
+      userLocationIcon: LOCAL_ICON,
+      userLocationIconScale: 1.5,
+    });
+
+    const position = await mapRef.current!.getCameraPosition();
+    expect(Number.isFinite(position.lat)).toBe(true);
+  });
+
+  test('toggles showUserPosition from false to true without crashing', async () => {
+    // Regression guard: showUserPosition must apply on update, not only at
+    // mount (plain map's updateProps only set the stored flag before).
+    await ensureMapKitInitialized();
+
+    const mapRef = { current: null as YaMapRef | null };
+    let mapLoaded = false;
+    let toggled = false;
+
+    const styles = StyleSheet.create({
+      container: { width: 400, height: 400 },
+      map: { flex: 1 },
+    });
+
+    function ToggleHost() {
+      const [show, setShow] = useState(false);
+      useEffect(() => {
+        const timer = setTimeout(() => {
+          setShow(true);
+          toggled = true;
+        }, 800);
+        return () => clearTimeout(timer);
+      }, []);
+      return (
+        <View style={styles.container}>
+          <YaMap
+            ref={mapRef}
+            style={styles.map}
+            initialRegion={INITIAL_REGION}
+            showUserPosition={show}
+            userLocationIcon={LOCAL_ICON}
+            onMapLoaded={() => {
+              mapLoaded = true;
+            }}
+          />
+        </View>
+      );
+    }
+
+    await render(<ToggleHost />);
+    await waitForMapReady(mapRef, () => mapLoaded);
+    await waitUntil(() => toggled, { timeout: 5000 });
 
     const position = await mapRef.current!.getCameraPosition();
     expect(Number.isFinite(position.lat)).toBe(true);
@@ -267,5 +339,40 @@ describe('YaMap', () => {
     expect(received).not.toBeNull();
     expect(received).toHaveProperty('bottomLeft');
     expect(received).toHaveProperty('topRight');
+  });
+
+  // ─── edge cases / robustness probes ───────────────────────────────────────
+  // Imperative API fed out-of-range / invalid input — must not crash native.
+
+  test('setZoom with out-of-range zoom does not crash', async () => {
+    const { mapRef } = await renderMap();
+
+    await expect(
+      mapRef.current!.setZoom(100, 0, 'LINEAR')
+    ).resolves.toBeUndefined();
+    await expect(
+      mapRef.current!.setZoom(-5, 0, 'LINEAR')
+    ).resolves.toBeUndefined();
+
+    const position = await mapRef.current!.getCameraPosition();
+    expect(Number.isFinite(position.zoom)).toBe(true);
+  });
+
+  test('setCenter with NaN coordinates does not crash', async () => {
+    const { mapRef } = await renderMap();
+
+    await expect(
+      mapRef.current!.setCenter(
+        { lat: Number.NaN, lon: Number.NaN },
+        12,
+        0,
+        0,
+        0,
+        'LINEAR'
+      )
+    ).resolves.toBeUndefined();
+
+    const position = await mapRef.current!.getCameraPosition();
+    expect(Number.isFinite(position.lat)).toBe(true);
   });
 });

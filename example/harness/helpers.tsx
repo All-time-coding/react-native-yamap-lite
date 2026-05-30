@@ -160,6 +160,70 @@ export async function renderMapWithOverlays(
   return { mapRef };
 }
 
+/**
+ * Renders an overlay (Marker / Circle / Polygon / Polyline) inside a map,
+ * then swaps it for a second variant after `delayMs`. Use to exercise the
+ * native updateProps / didSet path (geometry & style updates), which the
+ * mount-only overlay tests never touch.
+ *
+ * Returns `waitForUpdate()` which resolves once the prop swap has been applied.
+ */
+export async function renderUpdatingOverlays(options: {
+  initial: React.ReactNode;
+  updated: React.ReactNode;
+  initialRegion?: InitialRegion;
+  delayMs?: number;
+}): Promise<{
+  mapRef: React.MutableRefObject<YaMapRef | null>;
+  waitForUpdate: () => Promise<void>;
+}> {
+  await ensureMapKitInitialized();
+
+  const mapRef = { current: null as YaMapRef | null };
+  let mapLoaded = false;
+  let updated = false;
+
+  function UpdatingHost() {
+    const [phase, setPhase] = React.useState<'initial' | 'updated'>('initial');
+
+    React.useEffect(() => {
+      const timer = setTimeout(() => {
+        setPhase('updated');
+        updated = true;
+      }, options.delayMs ?? 800);
+      return () => clearTimeout(timer);
+    }, []);
+
+    return (
+      <View style={styles.container}>
+        <ClusteredYamap
+          ref={mapRef}
+          style={styles.map}
+          initialRegion={options.initialRegion ?? INITIAL_REGION}
+          clusteredMarkers={[]}
+          renderMarker={() => <View />}
+          onMapLoaded={() => {
+            mapLoaded = true;
+          }}
+        >
+          {phase === 'initial' ? options.initial : options.updated}
+        </ClusteredYamap>
+      </View>
+    );
+  }
+
+  await render(<UpdatingHost />);
+  await waitForMapReady(mapRef, () => mapLoaded);
+
+  return {
+    mapRef,
+    waitForUpdate: () =>
+      waitUntil(() => updated, {
+        timeout: MAP_LOAD_TIMEOUT,
+      }) as unknown as Promise<void>,
+  };
+}
+
 export function expectNear(
   actual: number,
   expected: number,

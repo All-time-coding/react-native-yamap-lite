@@ -8,22 +8,22 @@ pre-commit:
       exclude:
         - "**/node_modules/**"
         - "lib/**"
-      run: yarn eslint {staged_files}
+      run: ./scripts/lefthook-run.sh yarn eslint {staged_files}
 
     - name: typecheck
       glob: "**/*.{js,jsx,ts,tsx}"
       exclude:
         - "**/node_modules/**"
         - "lib/**"
-      run: yarn typecheck
+      run: ./scripts/lefthook-run.sh yarn typecheck
 
     - name: test
-      run: yarn test --passWithNoTests
+      run: ./scripts/lefthook-run.sh yarn test --passWithNoTests
 
     - name: harness
-      run: yarn test:harness
+      run: ./scripts/lefthook-run.sh yarn test:harness
 
 commit-msg:
   jobs:
     - name: commitlint
-      run: yarn commitlint --edit {1}
+      run: ./scripts/lefthook-run.sh yarn commitlint --edit {1}

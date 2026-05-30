@@ -1,4 +1,3 @@
-
 import Foundation
 import React
 import YandexMapsMobile
@@ -15,6 +14,7 @@ public class YamapLiteMarker: UIView, MapObjectTapHandler {
     ////////////////////////
 
     private var listener: MarkerTapListener?
+    private weak var listenedObject: YMKMapObject?
 
     var point: Point? {
         didSet {
@@ -34,7 +34,7 @@ public class YamapLiteMarker: UIView, MapObjectTapHandler {
     }
 
     private var originalIcon: UIImage?
-    
+
     @objc public var icon: UIImage? {
         get {
             return originalIcon
@@ -106,7 +106,8 @@ public class YamapLiteMarker: UIView, MapObjectTapHandler {
     }
 
     @objc public func setIcon(uri: String) {
-        let image = ResolveImageHelper.shared.resolveUIImage(uri: uri as NSString) { [weak self] loadedImage in
+        let image = ResolveImageHelper.shared.resolveUIImage(uri: uri as NSString) {
+            [weak self] loadedImage in
             guard let self = self else {
                 return
             }
@@ -116,7 +117,7 @@ public class YamapLiteMarker: UIView, MapObjectTapHandler {
             self.originalIcon = loadedImage
             self.updateMarker()
         }
-        
+
         if let image = image {
             originalIcon = image
             updateMarker()
@@ -130,15 +131,21 @@ public class YamapLiteMarker: UIView, MapObjectTapHandler {
         if listener == nil {
             listener = MarkerTapListener()
         }
-        mapObject!.addTapListener(with: listener!)
+
+        if listenedObject !== placemark {
+            placemark.addTapListener(with: listener!)
+            listenedObject = placemark
+        }
         updateMarker()
     }
 
     @objc public func updateMarker() {
         DispatchQueue.main.async { [self] in
             guard let obj = mapObject as? YMKPlacemarkMapObject, obj.isValid else { return }
-            let geometryPoint = YMKPoint(latitude: self.point?.lat ?? 0.0, longitude: self.point?.lon ?? 0.0)
-            obj.geometry = geometryPoint
+            let lat = self.point?.lat ?? 0.0
+            let lon = self.point?.lon ?? 0.0
+            guard lat.isFinite, lon.isFinite else { return }
+            obj.geometry = YMKPoint(latitude: lat, longitude: lon)
 
             obj.zIndex = Float(zIndex)
 
@@ -149,12 +156,14 @@ public class YamapLiteMarker: UIView, MapObjectTapHandler {
             let anchorY = anchor?.y ?? 0.5
             iconStyle.anchor = NSValue(cgPoint: CGPoint(x: CGFloat(anchorX), y: CGFloat(anchorY)))
 
-            iconStyle.rotationType = NSNumber(value: rotated != 0
-                ? YMKRotationType.rotate.rawValue
-                : YMKRotationType.noRotation.rawValue)
+            iconStyle.rotationType = NSNumber(
+                value: rotated != 0
+                    ? YMKRotationType.rotate.rawValue
+                    : YMKRotationType.noRotation.rawValue)
 
             if let icon = originalIcon {
-              let resizedIcon = ResolveImageHelper.shared.resizeImage(icon, toWidth: CGFloat(size))
+                let resizedIcon = ResolveImageHelper.shared.resizeImage(
+                    icon, toWidth: CGFloat(size))
                 obj.setIconWith(resizedIcon ?? icon)
                 obj.setIconStyleWith(iconStyle)
             }
@@ -169,8 +178,9 @@ extension YamapLiteMarker {
         if listener == nil {
             listener = MarkerTapListener()
         }
-        if let placemark = mapObject as? YMKPlacemarkMapObject {
+        if listenedObject !== placemark {
             placemark.addTapListener(with: listener!)
+            listenedObject = placemark
         }
         updateMarker()
     }

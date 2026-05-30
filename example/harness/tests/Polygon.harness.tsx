@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'react-native-harness';
 import { Polygon } from 'react-native-yamap-lite';
 import { MOSCOW } from '../constants';
-import { renderMapWithOverlays } from '../helpers';
+import { renderMapWithOverlays, renderUpdatingOverlays } from '../helpers';
 
 const BASE_POINTS = [
   { lat: MOSCOW.lat + 0.1, lon: MOSCOW.lon + 0.1 },
@@ -33,6 +33,17 @@ describe('Polygon overlay', () => {
     const pos = await mapRef.current!.getCameraPosition();
     expect(Number.isFinite(pos.lat)).toBe(true);
     expect(Number.isFinite(pos.lon)).toBe(true);
+  });
+
+  // Regression guard: an unresolved color prop must not reach the native
+  // YMK*MapObject as nil (would assert "Invalid parameter not satisfying").
+  test('mounts without any color props without crashing', async () => {
+    const { mapRef } = await renderMapWithOverlays({
+      children: <Polygon points={BASE_POINTS} />,
+    });
+
+    const pos = await mapRef.current!.getCameraPosition();
+    expect(Number.isFinite(pos.lat)).toBe(true);
   });
 
   test('mounts with inner rings (hole polygon)', async () => {
@@ -143,5 +154,114 @@ describe('Polygon overlay', () => {
     const pos = await mapRef.current!.getCameraPosition();
     expect(Number.isFinite(pos.lat)).toBe(true);
     expect(pressCount).toBe(0);
+  });
+
+  // ─── prop updates after mount (updateGeometry / updatePolygon path) ────────
+
+  test('updates points and style after mount without crashing', async () => {
+    const shifted = BASE_POINTS.map((p) => ({
+      lat: p.lat + 0.05,
+      lon: p.lon + 0.05,
+    }));
+
+    const { mapRef, waitForUpdate } = await renderUpdatingOverlays({
+      initial: (
+        <Polygon
+          points={BASE_POINTS}
+          fillColor="#0000ff80"
+          strokeColor="#ff0000"
+          strokeWidth={3}
+          zIndex={1}
+        />
+      ),
+      updated: (
+        <Polygon
+          points={shifted}
+          fillColor="#00ff0080"
+          strokeColor="#0000ff"
+          strokeWidth={6}
+          zIndex={5}
+        />
+      ),
+    });
+
+    await waitForUpdate();
+
+    const pos = await mapRef.current!.getCameraPosition();
+    expect(Number.isFinite(pos.lat)).toBe(true);
+  });
+
+  // Regression guard: shrinking down to the minimum ring size must not crash
+  // (Polygon.updateGeometry rebuilds only when points.count >= 3).
+  test('shrinks to a 3-point ring after mount without crashing', async () => {
+    const triangle = BASE_POINTS.slice(0, 3);
+
+    const { mapRef, waitForUpdate } = await renderUpdatingOverlays({
+      initial: (
+        <Polygon points={BASE_POINTS} fillColor="#0000ff80" strokeWidth={3} />
+      ),
+      updated: (
+        <Polygon points={triangle} fillColor="#0000ff80" strokeWidth={3} />
+      ),
+    });
+
+    await waitForUpdate();
+
+    const pos = await mapRef.current!.getCameraPosition();
+    expect(Number.isFinite(pos.lat)).toBe(true);
+  });
+
+  // ─── edge cases / robustness probes ───────────────────────────────────────
+  // These feed degenerate input straight into the native YMK constructors.
+  // If any crashes, the native layer needs a guard (cf. the nil-color fix).
+
+  test('mounts with an empty points array without crashing', async () => {
+    const { mapRef } = await renderMapWithOverlays({
+      children: <Polygon points={[]} fillColor="#0000ff80" strokeWidth={2} />,
+    });
+
+    const pos = await mapRef.current!.getCameraPosition();
+    expect(Number.isFinite(pos.lat)).toBe(true);
+  });
+
+  test('mounts with a degenerate (2-point) inner ring without crashing', async () => {
+    const { mapRef } = await renderMapWithOverlays({
+      children: (
+        <Polygon
+          points={BASE_POINTS}
+          innerRings={[
+            [
+              { lat: MOSCOW.lat + 0.12, lon: MOSCOW.lon + 0.08 },
+              { lat: MOSCOW.lat + 0.14, lon: MOSCOW.lon + 0.04 },
+            ],
+          ]}
+          fillColor="#0000ff80"
+          strokeWidth={2}
+        />
+      ),
+    });
+
+    const pos = await mapRef.current!.getCameraPosition();
+    expect(Number.isFinite(pos.lat)).toBe(true);
+  });
+
+  test('mounts at NaN coordinates without crashing', async () => {
+    const { mapRef } = await renderMapWithOverlays({
+      children: (
+        <Polygon
+          points={[
+            { lat: Number.NaN, lon: Number.NaN },
+            { lat: Number.NaN, lon: Number.NaN },
+            { lat: Number.NaN, lon: Number.NaN },
+            { lat: Number.NaN, lon: Number.NaN },
+          ]}
+          fillColor="#0000ff80"
+          strokeWidth={2}
+        />
+      ),
+    });
+
+    const pos = await mapRef.current!.getCameraPosition();
+    expect(Number.isFinite(pos.lat)).toBe(true);
   });
 });

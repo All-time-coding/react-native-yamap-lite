@@ -64,6 +64,11 @@ function fakeViewId(id = 42) {
   return id;
 }
 
+// Resolves the underlying native Fabric component instance from a rendered tree.
+function findNative(instance: any, modulePath: string) {
+  return instance.root.findByType(require(modulePath).default);
+}
+
 // ─── Exports ──────────────────────────────────────────────────────────────────
 
 describe('Exports', () => {
@@ -243,6 +248,30 @@ describe('YaMap render', () => {
     expect(nativeView.props.tiltGesturesEnabled).toBe(false);
     expect(nativeView.props.rotateGesturesEnabled).toBe(false);
     expect(nativeView.props.fastTapEnabled).toBe(false);
+  });
+
+  it('resolves userLocationIcon to a uri string on the native view', () => {
+    let instance: any;
+    act(() => {
+      instance = renderer.create(
+        <YaMap
+          style={{ flex: 1 }}
+          showUserPosition
+          userLocationIcon={{ uri: 'https://example.com/loc.png' }}
+        />
+      );
+    });
+    const native = findNative(instance, '../YamapLiteViewNativeComponent');
+    expect(native.props.userLocationIcon).toBe('https://example.com/loc.png');
+  });
+
+  it('passes an empty userLocationIcon string when none is provided', () => {
+    let instance: any;
+    act(() => {
+      instance = renderer.create(<YaMap style={{ flex: 1 }} />);
+    });
+    const native = findNative(instance, '../YamapLiteViewNativeComponent');
+    expect(native.props.userLocationIcon).toBe('');
   });
 
   it('interactive=true preserves individual gesture props', () => {
@@ -671,6 +700,33 @@ describe('Marker', () => {
     expect(typeof native.props.source).toBe('string');
   });
 
+  it('passes an empty source string when source is absent', () => {
+    let instance: any;
+    act(() => {
+      instance = renderer.create(<Marker point={{ lat: 55.75, lon: 37.61 }} />);
+    });
+    const native = findNative(instance, '../YamapMarkerViewNativeComponents');
+    expect(native.props.source).toBe('');
+  });
+
+  it('maps zIndex prop to the native zInd prop (defaulting to 1)', () => {
+    let withZ: any;
+    let withoutZ: any;
+    act(() => {
+      withZ = renderer.create(
+        <Marker point={{ lat: 55.75, lon: 37.61 }} zIndex={8} />
+      );
+      withoutZ = renderer.create(<Marker point={{ lat: 55.75, lon: 37.61 }} />);
+    });
+    expect(
+      findNative(withZ, '../YamapMarkerViewNativeComponents').props.zInd
+    ).toBe(8);
+    // Marker defaults zInd to 1 when zIndex is omitted (zIndex ?? 1)
+    expect(
+      findNative(withoutZ, '../YamapMarkerViewNativeComponents').props.zInd
+    ).toBe(1);
+  });
+
   it('animatedMoveTo updates point via ref', async () => {
     const ref = React.createRef<any>();
     let instance: any;
@@ -747,6 +803,15 @@ describe('Circle', () => {
     expect(tree.toJSON()).toBeTruthy();
   });
 
+  it('maps zIndex prop to the native zInd prop', () => {
+    let instance: any;
+    act(() => {
+      instance = renderer.create(<Circle {...defaults} zIndex={7} />);
+    });
+    const native = findNative(instance, '../YamapCircleViewNativeComponents');
+    expect(native.props.zInd).toBe(7);
+  });
+
   it('fires onPress with nativeEvent point', () => {
     const onPress = jest.fn();
     let instance: any;
@@ -806,6 +871,15 @@ describe('Polygon', () => {
       tree = renderer.create(<Polygon points={pts} innerRings={[hole]} />);
     });
     expect(tree.toJSON()).toBeTruthy();
+  });
+
+  it('maps zIndex prop to the native zInd prop', () => {
+    let instance: any;
+    act(() => {
+      instance = renderer.create(<Polygon points={pts} zIndex={9} />);
+    });
+    const native = findNative(instance, '../YamapPolygonViewNativeComponents');
+    expect(native.props.zInd).toBe(9);
   });
 
   it('fires onPress with nativeEvent point', () => {
@@ -875,6 +949,15 @@ describe('Polyline', () => {
       );
     });
     expect(tree.toJSON()).toBeTruthy();
+  });
+
+  it('maps zIndex prop to the native zInd prop', () => {
+    let instance: any;
+    act(() => {
+      instance = renderer.create(<Polyline points={pts} zIndex={5} />);
+    });
+    const native = findNative(instance, '../YamapPolylineViewNativeComponents');
+    expect(native.props.zInd).toBe(5);
   });
 
   it('fires onPress with nativeEvent point', () => {

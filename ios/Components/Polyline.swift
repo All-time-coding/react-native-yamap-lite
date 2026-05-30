@@ -99,7 +99,9 @@ public final class YamapLitePolyline: UIView, MapObjectTapHandler {
     }
 
     @objc public func updateGeometry() {
-        if points.count >= 2 {
+        if points.count >= 2,
+            points.allSatisfy({ $0.latitude.isFinite && $0.longitude.isFinite })
+        {
             polyline = YMKPolyline(points: points)
         }
     }

@@ -79,9 +79,12 @@ public class YamapLitePolygon: UIView, MapObjectTapHandler {
   }
 
   @objc public func updateGeometry() {
-    if let points = points, points.count >= 4 {
+    let isFinitePoint: (YMKPoint) -> Bool = { $0.latitude.isFinite && $0.longitude.isFinite }
+    if let points = points, points.count >= 3, points.allSatisfy(isFinitePoint) {
       let ring = YMKLinearRing(points: points)
-      let unwrappedInnerRings = (innerRings ?? []).map { YMKLinearRing(points: $0) }
+      let unwrappedInnerRings = (innerRings ?? [])
+        .filter { $0.count >= 3 && $0.allSatisfy(isFinitePoint) }
+        .map { YMKLinearRing(points: $0) }
       polygon = YMKPolygon(outerRing: ring, innerRings: unwrappedInnerRings)
     }
   }

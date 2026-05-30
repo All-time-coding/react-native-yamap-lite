@@ -70,9 +70,9 @@ public class YamapLiteCircle: UIView, MapObjectTapHandler {
   }
 
   @objc public func updateGeometry() {
-    if center != nil {
-      circle = YMKCircle(center: circleCenter, radius: radius)
-    }
+    guard circleCenter.latitude.isFinite, circleCenter.longitude.isFinite, radius.isFinite
+    else { return }
+    circle = YMKCircle(center: circleCenter, radius: radius)
   }
 
   public func onMapObjectTap(point _: YMKPoint) {

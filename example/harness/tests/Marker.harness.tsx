@@ -8,9 +8,16 @@ import {
 import { StyleSheet, View } from 'react-native';
 import { INITIAL_REGION, MOSCOW } from '../constants';
 import { ensureMapKitInitialized } from '../ensureMapKitInit';
-import { renderMapWithOverlays, waitForMapReady } from '../helpers';
+import {
+  renderMapWithOverlays,
+  renderUpdatingOverlays,
+  waitForMapReady,
+} from '../helpers';
 
 const ICON_URI = 'https://cdn-icons-png.flaticon.com/512/64/64113.png';
+// Local bundled asset — exercises the synchronous file:// decode branch of
+// ResolveImageHelper (the remote-URI tests never touch it).
+const LOCAL_ICON = require('../../src/assets/user-pin.png');
 
 describe('Marker', () => {
   test('mounts on the map without crashing', async () => {
@@ -98,6 +105,39 @@ describe('Marker', () => {
     expect(Number.isFinite(pos.lat)).toBe(true);
     // pressCount stays 0 — we are not simulating touch, just ensuring handler doesn't crash on mount
     expect(pressCount).toBe(0);
+  });
+
+  // ─── local (bundled) icon ─────────────────────────────────────────────────
+
+  test('mounts with a local require() asset without crashing', async () => {
+    const { mapRef } = await renderMapWithOverlays({
+      children: <Marker point={MOSCOW} source={LOCAL_ICON} size={28} />,
+    });
+
+    const pos = await mapRef.current!.getCameraPosition();
+    expect(Number.isFinite(pos.lat)).toBe(true);
+  });
+
+  // ─── prop updates after mount (updateMarker path) ─────────────────────────
+
+  test('updates point, source and size after mount without crashing', async () => {
+    const { mapRef, waitForUpdate } = await renderUpdatingOverlays({
+      initial: <Marker point={MOSCOW} source={{ uri: ICON_URI }} size={24} />,
+      updated: (
+        <Marker
+          point={{ lat: MOSCOW.lat + 0.05, lon: MOSCOW.lon + 0.05 }}
+          source={LOCAL_ICON}
+          size={40}
+          scale={1.5}
+          zIndex={10}
+        />
+      ),
+    });
+
+    await waitForUpdate();
+
+    const pos = await mapRef.current!.getCameraPosition();
+    expect(Number.isFinite(pos.lat)).toBe(true);
   });
 
   // ─── backward-compat ref API ──────────────────────────────────────────────
@@ -193,6 +233,32 @@ describe('Marker', () => {
 
     expect(() => markerRef.current!.animatedRotateTo(90, 300)).not.toThrow();
     expect(() => markerRef.current!.animatedRotateTo(0, 0)).not.toThrow();
+
+    const pos = await mapRef.current!.getCameraPosition();
+    expect(Number.isFinite(pos.lat)).toBe(true);
+  });
+
+  // ─── edge cases / robustness probes ───────────────────────────────────────
+
+  test('mounts at NaN coordinates without crashing', async () => {
+    const { mapRef } = await renderMapWithOverlays({
+      children: (
+        <Marker
+          point={{ lat: Number.NaN, lon: Number.NaN }}
+          source={{ uri: ICON_URI }}
+          size={24}
+        />
+      ),
+    });
+
+    const pos = await mapRef.current!.getCameraPosition();
+    expect(Number.isFinite(pos.lat)).toBe(true);
+  });
+
+  test('mounts with an empty source uri without crashing', async () => {
+    const { mapRef } = await renderMapWithOverlays({
+      children: <Marker point={MOSCOW} source={{ uri: '' }} size={24} />,
+    });
 
     const pos = await mapRef.current!.getCameraPosition();
     expect(Number.isFinite(pos.lat)).toBe(true);

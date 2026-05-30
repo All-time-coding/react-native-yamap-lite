@@ -15,10 +15,14 @@ const compat = new FlatCompat({
 });
 
 export default defineConfig([
-  {
-    extends: fixupConfigRules(compat.extends('@react-native', 'prettier')),
-    plugins: { prettier },
+  ...fixupConfigRules(compat.extends('@react-native', 'prettier')).map((config) => ({
+    ...config,
+    plugins: {
+      ...config.plugins,
+      prettier,
+    },
     rules: {
+      ...config.rules,
       'react/react-in-jsx-scope': 'off',
       '@typescript-eslint/no-unused-vars': ['error', { varsIgnorePattern: '^_', argsIgnorePattern: '^_' }],
       'prettier/prettier': [
@@ -32,11 +36,8 @@ export default defineConfig([
         },
       ],
     },
-  },
+  })),
   {
-    ignores: [
-      'node_modules/',
-      'lib/'
-    ],
+    ignores: ['node_modules/', 'lib/'],
   },
 ]);
