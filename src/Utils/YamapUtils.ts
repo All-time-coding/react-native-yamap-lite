@@ -14,6 +14,19 @@ interface IYamapUtilsModule {
     azimuth: number;
     tilt: number;
   }>;
+  getVisibleRegion(viewId: number): Promise<import('../@types').VisibleRegion>;
+  getScreenPoints(
+    viewId: number,
+    points: import('../@types').Point[]
+  ): Promise<{ points: import('../@types').ScreenPoint[] }>;
+  getWorldPoints(
+    viewId: number,
+    points: import('../@types').ScreenPoint[]
+  ): Promise<{ points: import('../@types').Point[] }>;
+  init(apiKey: string): Promise<void>;
+  getLocale(): Promise<string>;
+  setLocale(locale: string): Promise<void>;
+  resetLocale(): Promise<void>;
   setZoom(
     viewId: number,
     zoom: number,

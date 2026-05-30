@@ -6,64 +6,83 @@ import type {
   YaMapRef,
 } from '../../../src/@types';
 
-export const useMap = () => {
+type LogFn = (msg: string) => void;
+
+export const useMap = (log: LogFn) => {
   const mapRef = React.useRef<YaMapRef>(null);
   const [zoom, setZoom] = React.useState(10);
+  const [cameraInfo, setCameraInfo] = React.useState('');
 
-  const handleIncreaseZoom = async () => {
+  const handleIncreaseZoom = () => {
     const newZoom = zoom + 1;
     setZoom(newZoom);
-    mapRef.current?.setZoom(newZoom, 1000, 'SMOOTH');
+    mapRef.current?.setZoom(newZoom, 500, 'SMOOTH');
+    log(`setZoom → ${newZoom}`);
   };
 
-  const handleDecreaseZoom = async () => {
-    const newZoom = zoom - 1;
+  const handleDecreaseZoom = () => {
+    const newZoom = Math.max(1, zoom - 1);
     setZoom(newZoom);
-    mapRef.current?.setZoom(newZoom, 1000, 'LINEAR');
+    mapRef.current?.setZoom(newZoom, 500, 'SMOOTH');
+    log(`setZoom → ${newZoom}`);
   };
 
   const handleGetCameraPosition = async () => {
-    const cameraPosition = await mapRef.current?.getCameraPosition();
-    console.log('Camera position', cameraPosition);
+    const pos = await mapRef.current?.getCameraPosition();
+    if (pos) {
+      const info = `lat=${pos.lat.toFixed(4)} lon=${pos.lon.toFixed(4)} z=${pos.zoom.toFixed(1)}`;
+      setCameraInfo(info);
+      log(`getCameraPos: ${info}`);
+    }
   };
 
-  const handleCenterMap = async () => {
-    await mapRef.current?.setCenter(
-      { lat: 55.8, lon: 37.5 },
+  const handleCenterMap = () => {
+    mapRef.current?.setCenter(
+      { lat: 55.7558, lon: 37.6173 },
       10,
       0,
       0,
-      1000,
+      800,
       'SMOOTH'
     );
+    log('setCenter → Moscow');
   };
 
-  const handleFitAllMarkers = async () => {
-    await mapRef.current?.fitAllMarkers();
+  const handleFitAllMarkers = () => {
+    mapRef.current?.fitAllMarkers();
+    log('fitAllMarkers');
   };
 
   const onMapLoaded = (event: MapLoaded) => {
-    console.log('Map loaded', event.nativeEvent);
+    log(`mapLoaded: objects=${event.nativeEvent.renderObjectCount}`);
   };
 
   const onCameraPositionChange = (event: CameraPosition) => {
-    console.log('Camera position changed', event.nativeEvent);
+    const { point, zoom: z } = event.nativeEvent;
+    setCameraInfo(
+      `lat=${point.lat.toFixed(4)} lon=${point.lon.toFixed(4)} z=${z.toFixed(1)}`
+    );
   };
 
   const onCameraPositionChangeEnd = (event: CameraPosition) => {
-    console.log('Camera position changed end', event.nativeEvent);
+    const { point, zoom: z, reason } = event.nativeEvent;
+    log(`camEnd: z=${z.toFixed(1)} reason=${reason}`);
+    setCameraInfo(
+      `lat=${point.lat.toFixed(4)} lon=${point.lon.toFixed(4)} z=${z.toFixed(1)}`
+    );
   };
 
   const onMapPress = (event: Point) => {
-    console.log('Map pressed', event);
+    log(`mapPress: ${event.lat.toFixed(4)}, ${event.lon.toFixed(4)}`);
   };
 
   const onMapLongPress = (event: Point) => {
-    console.log('Map long pressed', event);
+    log(`longPress: ${event.lat.toFixed(4)}, ${event.lon.toFixed(4)}`);
   };
 
   return {
     mapRef,
+    cameraInfo,
     handleIncreaseZoom,
     handleDecreaseZoom,
     handleGetCameraPosition,

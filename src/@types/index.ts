@@ -1,18 +1,23 @@
 import type { ImageSourcePropType, ViewProps } from 'react-native';
 
+export type CameraPositionResult = {
+  lat: number;
+  lon: number;
+  zoom: number;
+  azimuth: number;
+  tilt: number;
+};
+
 export type YaMapRef = {
-  getCameraPosition: () => Promise<{
-    lat: number;
-    lon: number;
-    zoom: number;
-    azimuth: number;
-    tilt: number;
-  }>;
+  getCameraPosition: () => Promise<CameraPositionResult>;
+  getVisibleRegion: () => Promise<VisibleRegion>;
+  getScreenPoints: (points: Point[]) => Promise<ScreenPoint[]>;
+  getWorldPoints: (points: ScreenPoint[]) => Promise<Point[]>;
   setZoom: (
     zoom: number,
     duration?: number,
     animation?: 'LINEAR' | 'SMOOTH'
-  ) => void;
+  ) => Promise<void>;
   setCenter: (
     center: { lat: number; lon: number },
     zoom?: number,
@@ -20,13 +25,28 @@ export type YaMapRef = {
     tilt?: number,
     duration?: number,
     animation?: 'LINEAR' | 'SMOOTH'
-  ) => void;
-  fitAllMarkers: () => void;
+  ) => Promise<void>;
+  fitAllMarkers: () => Promise<void>;
+  /** Alias for fitAllMarkers — lite SDK does not support targeting specific markers */
+  fitMarkers: (markers: any[]) => Promise<void>;
+  /** No-op — traffic layer is not available in lite SDK */
+  setTrafficVisible: (visible: boolean) => void;
+};
+
+export type MarkerRef = {
+  /**
+   * @deprecated Not supported in lite SDK. Update the `point` prop instead
+   */
+  animatedMoveTo: (point: Point, duration: number) => void;
+  /**
+   * @deprecated Not supported in lite SDK
+   */
+  animatedRotateTo: (angle: number, duration: number) => void;
 };
 
 export interface MarkerProps extends ViewProps {
   point: Point;
-  zInd?: number;
+  zIndex?: number;
   scale?: number;
   rotated?: boolean;
   onPress?: (event: Point) => void;
@@ -44,10 +64,35 @@ export interface CircleProps extends ViewProps {
   fillColor?: string;
   strokeColor?: string;
   strokeWidth?: number;
-  zInd?: number;
+  zIndex?: number;
   onPress?: (event: Point) => void;
   center: Point;
   radius: number;
+  handled?: boolean;
+}
+
+export interface PolygonProps extends ViewProps {
+  fillColor?: string;
+  strokeColor?: string;
+  strokeWidth?: number;
+  zIndex?: number;
+  onPress?: (event: Point) => void;
+  points: Point[];
+  innerRings?: Point[][];
+  handled?: boolean;
+}
+
+export interface PolylineProps extends ViewProps {
+  strokeColor?: string;
+  strokeWidth?: number;
+  outlineColor?: string;
+  outlineWidth?: number;
+  zIndex?: number;
+  dashLength?: number;
+  gapLength?: number;
+  dashOffset?: number;
+  onPress?: (event: Point) => void;
+  points: Point[];
   handled?: boolean;
 }
 
@@ -113,6 +158,30 @@ export interface YaMapProps extends ViewProps {
   logoPosition?: YandexLogoPosition;
 
   logoPadding?: YandexLogoPadding;
+
+  /**
+   * Disables all map gestures when false.
+   * @default true
+   */
+  interactive?: boolean;
+
+  /** Fired after getCameraPosition() resolves — for backward compatibility with react-native-yamap */
+  onCameraPositionReceived?: (event: {
+    nativeEvent: CameraPositionResult;
+  }) => void;
+
+  /** Fired after getVisibleRegion() resolves — for backward compatibility with react-native-yamap */
+  onVisibleRegionReceived?: (event: { nativeEvent: VisibleRegion }) => void;
+
+  /** Fired after getScreenPoints() resolves — for backward compatibility with react-native-yamap */
+  onWorldToScreenPointsReceived?: (event: {
+    nativeEvent: { points: ScreenPoint[] };
+  }) => void;
+
+  /** Fired after getWorldPoints() resolves — for backward compatibility with react-native-yamap */
+  onScreenToWorldPointsReceived?: (event: {
+    nativeEvent: { points: Point[] };
+  }) => void;
 }
 
 export interface ClusteredYamapProps<T = any> extends YaMapProps {

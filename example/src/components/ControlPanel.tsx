@@ -2,39 +2,39 @@ import { View, StyleSheet } from 'react-native';
 import { Button } from './Button';
 
 interface ControlPanelProps {
-  handleIncreaseZoom: () => void;
-  handleDecreaseZoom: () => void;
-  handleGetCameraPosition: () => void;
-  handleCenterMap: () => void;
-  handleFitAllMarkers: () => void;
+  onIncreaseZoom: () => void;
+  onDecreaseZoom: () => void;
+  onGetCameraPosition: () => void;
+  onCenterMap: () => void;
+  onFitAllMarkers: () => void;
 }
 
 export const ControlPanel = ({
-  handleIncreaseZoom,
-  handleDecreaseZoom,
-  handleGetCameraPosition,
-  handleCenterMap,
-  handleFitAllMarkers,
+  onIncreaseZoom,
+  onDecreaseZoom,
+  onGetCameraPosition,
+  onCenterMap,
+  onFitAllMarkers,
 }: ControlPanelProps) => {
   return (
-    <View style={styles.buttonsContainer}>
-      <Button title="+" onPress={handleIncreaseZoom} boldText />
-      <Button title="-" onPress={handleDecreaseZoom} boldText />
-      <Button title="Cam" onPress={handleGetCameraPosition} />
-      <Button title="Center" onPress={handleCenterMap} />
-      <Button title="Fit All" onPress={handleFitAllMarkers} />
+    <View style={styles.container}>
+      <Button title="+" onPress={onIncreaseZoom} boldText />
+      <Button title="-" onPress={onDecreaseZoom} boldText />
+      <Button title="Fit" onPress={onFitAllMarkers} />
+      <Button title="Cam" onPress={onGetCameraPosition} />
+      <Button title="Ctr" onPress={onCenterMap} />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  buttonsContainer: {
-    gap: 10,
+  container: {
+    gap: 8,
     position: 'absolute',
     right: 10,
-    borderRadius: 10,
     top: '30%',
-    backgroundColor: 'black',
-    padding: 10,
+    borderRadius: 12,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    padding: 8,
   },
 });

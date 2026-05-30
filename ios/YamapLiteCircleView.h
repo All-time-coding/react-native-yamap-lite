@@ -1,5 +1,5 @@
-#import <React/RCTViewManager.h>
 #import <React/RCTViewComponentView.h>
+#import <React/RCTViewManager.h>
 #import <UIKit/UIKit.h>
 
 #ifndef YamapLiteCircleViewNativeComponent_h

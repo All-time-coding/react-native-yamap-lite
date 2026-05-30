@@ -1,14 +1,29 @@
+glob_matcher: doublestar
+
 pre-commit:
   parallel: true
-  commands:
-    lint:
-      glob: "*.{js,ts,jsx,tsx}"
-      run: npx eslint {staged_files}
-    types:
-      glob: "*.{js,ts, jsx, tsx}"
-      run: npx tsc
+  jobs:
+    - name: lint
+      glob: "**/*.{js,jsx,ts,tsx}"
+      exclude:
+        - "**/node_modules/**"
+        - "lib/**"
+      run: ./scripts/lefthook-run.sh yarn eslint {staged_files}
+
+    - name: typecheck
+      glob: "**/*.{js,jsx,ts,tsx}"
+      exclude:
+        - "**/node_modules/**"
+        - "lib/**"
+      run: ./scripts/lefthook-run.sh yarn typecheck
+
+    - name: test
+      run: ./scripts/lefthook-run.sh yarn test --passWithNoTests
+
+    - name: harness
+      run: ./scripts/lefthook-run.sh yarn test:harness
+
 commit-msg:
-  parallel: true
-  commands:
-    commitlint:
-      run: npx commitlint --edit
+  jobs:
+    - name: commitlint
+      run: ./scripts/lefthook-run.sh yarn commitlint --edit {1}
