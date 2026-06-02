@@ -107,6 +107,19 @@ RCT_EXPORT_MODULE()
   });
 }
 
+- (void)getMapObjectCount:(double)viewId
+                  resolve:(nonnull RCTPromiseResolveBlock)resolve
+                   reject:(nonnull RCTPromiseRejectBlock)reject {
+  RCTExecuteOnMainQueue(^{
+    YamapView *view = [self getView:viewId];
+    if (view) {
+      resolve([view getMapObjectCount]);
+    } else {
+      [self rejecter:reject name:@"getMapObjectCount"];
+    }
+  });
+}
+
 - (void)getScreenPoints:(double)viewId
                  points:(NSArray<NSDictionary<NSString *, id> *> *)points
                 resolve:(nonnull RCTPromiseResolveBlock)resolve
