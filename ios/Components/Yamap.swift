@@ -340,6 +340,13 @@ public class YamapView: UIView {
     return result
   }
 
+  @objc public func getMapObjectCount() -> NSNumber {
+    guard let map = mapView?.mapWindow?.map else { return 0 }
+    let visitor = MapObjectCountVisitor()
+    map.mapObjects.traverse(with: visitor)
+    return NSNumber(value: visitor.count)
+  }
+
   @objc public func getVisibleRegion() -> [String: Any]? {
     guard let mapWindow = mapView?.mapWindow else { return nil }
     let region = mapWindow.map.visibleRegion
@@ -504,9 +511,14 @@ public class YamapView: UIView {
     else if let circleContainer = subview as? UIView,
       let circleView = circleContainer.value(forKey: "contentView") as? YamapLiteCircle
     {
-      let nativeMapObjects = mapView.mapWindow.map.mapObjects
-      let circleObject = nativeMapObjects.addCircle(with: circleView.circle)
-      circleView.setMapObject(object: circleObject)
+      if circleView.radius > 0,
+        circleView.circleCenter.latitude.isFinite,
+        circleView.circleCenter.longitude.isFinite
+      {
+        let nativeMapObjects = mapView.mapWindow.map.mapObjects
+        let circleObject = nativeMapObjects.addCircle(with: circleView.circle)
+        circleView.setMapObject(object: circleObject)
+      }
     } else if let polygonContainer = subview as? UIView,
       let polygonView = polygonContainer.value(forKey: "contentView") as? YamapLitePolygon
     {
@@ -553,4 +565,21 @@ public class YamapView: UIView {
   func runOnMainThread(_ block: @escaping () -> Void) {
     if Thread.isMainThread { block() } else { DispatchQueue.main.async { block() } }
   }
+}
+
+private final class MapObjectCountVisitor: NSObject, YMKMapObjectVisitor {
+  var count = 0
+
+  func onPlacemarkVisited(withPlacemark placemark: YMKPlacemarkMapObject) { count += 1 }
+  func onPolylineVisited(withPolyline polyline: YMKPolylineMapObject) { count += 1 }
+  func onPolygonVisited(withPolygon: YMKPolygonMapObject) { count += 1 }
+  func onCircleVisited(withCircle: YMKCircleMapObject) { count += 1 }
+
+  func onCollectionVisitStart(with collection: YMKMapObjectCollection) -> Bool { true }
+  func onCollectionVisitEnd(with collection: YMKMapObjectCollection) {}
+  func onClusterizedCollectionVisitStart(with collection: YMKClusterizedPlacemarkCollection) -> Bool
+  {
+    true
+  }
+  func onClusterizedCollectionVisitEnd(with collection: YMKClusterizedPlacemarkCollection) {}
 }
