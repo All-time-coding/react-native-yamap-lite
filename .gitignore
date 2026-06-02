@@ -72,6 +72,14 @@ android/keystores/debug.keystore
 !.yarn/sdks
 !.yarn/versions
 
+# Nested workspace lockfiles: this is a single Yarn Berry workspace, only the
+# root lockfile is used. A lockfile inside example/ makes Yarn treat it as its
+# own project and breaks `yarn run` there (missing install-state on CI).
+example/yarn.lock
+example/.yarn/
+bun.lock
+example/bun.lock
+
 # Expo
 .expo/
 
