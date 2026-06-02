@@ -1,4 +1,3 @@
-import { Platform } from 'react-native';
 import { YamapUtils } from 'react-native-yamap-lite';
 import { YAMAP_API_KEY } from './constants';
 
@@ -6,12 +5,9 @@ import { YAMAP_API_KEY } from './constants';
 let initPromise: Promise<void> | null = null;
 
 export function ensureMapKitInitialized() {
-  if (Platform.OS !== 'ios') {
-    return Promise.resolve();
-  }
-
   if (!initPromise) {
     initPromise = YamapUtils.init(YAMAP_API_KEY).catch((error) => {
+      console.error('YamapUtils.init failed:', error);
       initPromise = null;
       throw error;
     });

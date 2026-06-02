@@ -44,6 +44,7 @@ interface IYamapUtilsModule {
     animation: 'LINEAR' | 'SMOOTH'
   ): Promise<void>;
   fitAllMarkers(viewId: number): Promise<void>;
+  getMapObjectCount(viewId: number): Promise<number>;
 }
 
 const YamapUtilsModule = true

@@ -33,6 +33,7 @@
     "@react-native/typescript-config": "0.79.2",
     "@types/react": "^19.0.0",
     "react-native-builder-bob": "^0.40.11",
+    "react-native-dotenv": "^3.4.11",
     "react-native-harness": "1.2.0",
     "react-native-monorepo-config": "^0.1.9"
   },

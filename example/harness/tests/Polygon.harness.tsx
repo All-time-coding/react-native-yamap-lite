@@ -33,6 +33,8 @@ describe('Polygon overlay', () => {
     const pos = await mapRef.current!.getCameraPosition();
     expect(Number.isFinite(pos.lat)).toBe(true);
     expect(Number.isFinite(pos.lon)).toBe(true);
+    // The polygon must actually reach the native map, not just mount in JS.
+    expect(await mapRef.current!.getMapObjectCount()).toBe(1);
   });
 
   // Regression guard: an unresolved color prop must not reach the native
@@ -44,6 +46,7 @@ describe('Polygon overlay', () => {
 
     const pos = await mapRef.current!.getCameraPosition();
     expect(Number.isFinite(pos.lat)).toBe(true);
+    expect(await mapRef.current!.getMapObjectCount()).toBe(1);
   });
 
   test('mounts with inner rings (hole polygon)', async () => {
@@ -61,6 +64,7 @@ describe('Polygon overlay', () => {
 
     const pos = await mapRef.current!.getCameraPosition();
     expect(Number.isFinite(pos.lat)).toBe(true);
+    expect(await mapRef.current!.getMapObjectCount()).toBe(1);
   });
 
   test('mounts with multiple inner rings', async () => {
@@ -84,6 +88,7 @@ describe('Polygon overlay', () => {
 
     const pos = await mapRef.current!.getCameraPosition();
     expect(Number.isFinite(pos.lat)).toBe(true);
+    expect(await mapRef.current!.getMapObjectCount()).toBe(1);
   });
 
   test('mounts with zIndex and handled props', async () => {
@@ -102,6 +107,7 @@ describe('Polygon overlay', () => {
 
     const pos = await mapRef.current!.getCameraPosition();
     expect(Number.isFinite(pos.lat)).toBe(true);
+    expect(await mapRef.current!.getMapObjectCount()).toBe(1);
   });
 
   test('mounts multiple polygons simultaneously', async () => {
@@ -133,6 +139,8 @@ describe('Polygon overlay', () => {
 
     const pos = await mapRef.current!.getCameraPosition();
     expect(Number.isFinite(pos.lat)).toBe(true);
+    // Both polygons must reach the map.
+    expect(await mapRef.current!.getMapObjectCount()).toBe(2);
   });
 
   test('registers onPress handler without crashing', async () => {
@@ -154,6 +162,7 @@ describe('Polygon overlay', () => {
     const pos = await mapRef.current!.getCameraPosition();
     expect(Number.isFinite(pos.lat)).toBe(true);
     expect(pressCount).toBe(0);
+    expect(await mapRef.current!.getMapObjectCount()).toBe(1);
   });
 
   // ─── prop updates after mount (updateGeometry / updatePolygon path) ────────
@@ -189,6 +198,8 @@ describe('Polygon overlay', () => {
 
     const pos = await mapRef.current!.getCameraPosition();
     expect(Number.isFinite(pos.lat)).toBe(true);
+    // The polygon survives the prop swap and stays attached to the map.
+    expect(await mapRef.current!.getMapObjectCount()).toBe(1);
   });
 
   // Regression guard: shrinking down to the minimum ring size must not crash
@@ -209,11 +220,16 @@ describe('Polygon overlay', () => {
 
     const pos = await mapRef.current!.getCameraPosition();
     expect(Number.isFinite(pos.lat)).toBe(true);
+    // A 3-point ring is still a valid polygon — it must remain on the map.
+    expect(await mapRef.current!.getMapObjectCount()).toBe(1);
   });
 
   // ─── edge cases / robustness probes ───────────────────────────────────────
   // These feed degenerate input straight into the native YMK constructors.
   // If any crashes, the native layer needs a guard (cf. the nil-color fix).
+  // Object count is intentionally NOT asserted here: whether degenerate
+  // geometry produces a map object is platform-dependent, so these stay
+  // crash-only smoke tests.
 
   test('mounts with an empty points array without crashing', async () => {
     const { mapRef } = await renderMapWithOverlays({

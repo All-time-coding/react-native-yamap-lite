@@ -1,11 +1,27 @@
 import {
   androidPlatform,
   androidEmulator,
+  physicalAndroidDevice,
 } from '@react-native-harness/platform-android';
 import {
   applePlatform,
   appleSimulator,
 } from '@react-native-harness/platform-apple';
+
+// By default we run against an already-connected device (e.g. Genymotion),
+// which only needs `adb`. Set HARNESS_ANDROID_AVD to make the harness manage
+// its own SDK AVD instead (requires a runnable `emulator` binary).
+const androidDevice = process.env.HARNESS_ANDROID_AVD
+  ? androidEmulator(process.env.HARNESS_ANDROID_AVD, {
+      apiLevel: Number(process.env.HARNESS_ANDROID_API_LEVEL ?? 35),
+      profile: process.env.HARNESS_ANDROID_PROFILE ?? 'pixel_6',
+      diskSize: '2G',
+      heapSize: '2G',
+    })
+  : physicalAndroidDevice(
+      process.env.HARNESS_ANDROID_MANUFACTURER ?? 'Genymobile',
+      process.env.HARNESS_ANDROID_MODEL ?? 'Pixel 3 XL'
+    );
 
 const config = {
   entryPoint: './index.js',
@@ -14,15 +30,7 @@ const config = {
   runners: [
     androidPlatform({
       name: 'android',
-      device: androidEmulator(
-        process.env.HARNESS_ANDROID_AVD ?? 'Pixel_8_API_35',
-        {
-          apiLevel: Number(process.env.HARNESS_ANDROID_API_LEVEL ?? 35),
-          profile: process.env.HARNESS_ANDROID_PROFILE ?? 'pixel_6',
-          diskSize: '2G',
-          heapSize: '2G',
-        }
-      ),
+      device: androidDevice,
       bundleId: 'yamaplite.example',
     }),
     applePlatform({
@@ -36,12 +44,14 @@ const config = {
   ],
 
   defaultRunner: 'ios',
-  bridgeTimeout: 120_000,
+  bridgeTimeout: 30_000,
   platformReadyTimeout: 120_000,
   bundleStartTimeout: 120_000,
   resetEnvironmentBetweenTestFiles: true,
   forwardClientLogs: true,
   disableViewFlattening: true,
+  detectNativeCrashes: true,
+  crashDetectionInterval: 500,
 
   coverage: {
     root: '..',

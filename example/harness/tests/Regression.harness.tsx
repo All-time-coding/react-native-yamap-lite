@@ -51,7 +51,12 @@ function ClusteredHost({ mapRef, onLoaded, markers }: ClusteredHostProps) {
         initialRegion={{ ...SPB, zoom: 3, azimuth: 0, tilt: 0 }}
         clusteredMarkers={markers}
         renderMarker={({ point, data }) => (
-          <Marker key={data.id} point={point} source={{ uri: ICON_URI }} size={20} />
+          <Marker
+            key={data.id}
+            point={point}
+            source={{ uri: ICON_URI }}
+            size={20}
+          />
         )}
         clusterColor="#ff0000"
         onMapLoaded={onLoaded}
@@ -81,8 +86,14 @@ describe('Regression', () => {
           }}
           markers={[
             { point: MOSCOW, data: { id: '1' } },
-            { point: { lat: MOSCOW.lat + 0.01, lon: MOSCOW.lon + 0.01 }, data: { id: '2' } },
-            { point: { lat: MOSCOW.lat - 0.01, lon: MOSCOW.lon - 0.01 }, data: { id: '3' } },
+            {
+              point: { lat: MOSCOW.lat + 0.01, lon: MOSCOW.lon + 0.01 },
+              data: { id: '2' },
+            },
+            {
+              point: { lat: MOSCOW.lat - 0.01, lon: MOSCOW.lon - 0.01 },
+              data: { id: '3' },
+            },
           ]}
         />
       );
@@ -115,7 +126,10 @@ describe('Regression', () => {
 
       const moscowMarkers = [
         { point: MOSCOW, data: { id: 'm1' } },
-        { point: { lat: MOSCOW.lat + 0.01, lon: MOSCOW.lon }, data: { id: 'm2' } },
+        {
+          point: { lat: MOSCOW.lat + 0.01, lon: MOSCOW.lon },
+          data: { id: 'm2' },
+        },
       ];
       const spbMarkers = [
         { point: SPB, data: { id: 's1' } },

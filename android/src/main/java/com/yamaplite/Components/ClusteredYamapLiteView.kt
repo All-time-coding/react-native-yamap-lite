@@ -17,65 +17,40 @@ import com.yandex.runtime.image.ImageProvider
 import kotlin.math.abs
 import kotlin.math.sqrt
 
-class ClusteredYamapLiteView(context: Context) : YamapLiteView(context), ClusterListener,
-ClusterTapListener {
+class ClusteredYamapLiteView(context: Context) :
+        YamapLiteView(context), ClusterListener, ClusterTapListener {
   private var clusterCollection: ClusterizedPlacemarkCollection
   private var clusterColor = Color.RED
-  private val placemarksMap: HashMap<String?, PlacemarkMapObject?> = HashMap<String?, PlacemarkMapObject?>()
+  private val placemarksMap: HashMap<String?, PlacemarkMapObject?> =
+          HashMap<String?, PlacemarkMapObject?>()
   private var pointsList = ArrayList<Point>()
 
   init {
     clusterCollection = mapView.mapWindow.map.mapObjects.addClusterizedPlacemarkCollection(this)
   }
 
-  fun setClusteredMarkers(points: ArrayList<Any>) {
-      clusterCollection.clear()
-      placemarksMap.clear()
-      val pt = ArrayList<Point>()
-      for (i in points.indices) {
-        @Suppress("UNCHECKED_CAST")
-        val point = points[i] as HashMap<String, Double>
-        val lat = point["lat"] as Double
-        val lon = point["lon"] as Double
-        pt.add(Point(lat, lon))
-      }
-      val placemarks = clusterCollection.addPlacemarks(pt, TextImageProvider(""), IconStyle())
-      pointsList = pt
-      val childCount = super.getReactChildCount()
-      for (i in placemarks.indices) {
-        val placemark = placemarks[i]
-        val geometry = placemark.geometry
-        placemarksMap["${geometry.latitude}${geometry.longitude}"] = placemark
-        if (i < childCount) {
-          val child: Any? = super.getReactChildAt(i)
-          if (child != null && child is YamapLiteMarkerView) {
-            child.setMarkerMapObject(placemark)
-          }
-        }
-      }
-      clusterCollection.clusterPlacemarks(50.0, 12)
+  fun setClusteredMarkers(points: List<Point>) {
+    pointsList = ArrayList(points)
+    rebuildClusterPlacemarks()
   }
 
   fun setClusterColor(color: Int) {
     clusterColor = color
-    updateUserMarkersColor()
+    rebuildClusterPlacemarks()
   }
 
-  private fun updateUserMarkersColor() {
+  private fun rebuildClusterPlacemarks() {
     clusterCollection.clear()
-    val placemarks = clusterCollection.addPlacemarks(
-      pointsList,
-      TextImageProvider(pointsList.size.toString()),
-      IconStyle()
-    )
+    placemarksMap.clear()
+    val placemarks = clusterCollection.addPlacemarks(pointsList, TextImageProvider(""), IconStyle())
     val childCount = super.getReactChildCount()
     for (i in placemarks.indices) {
       val placemark = placemarks[i]
       val geometry = placemark.geometry
-      placemarksMap["${geometry.latitude}${geometry.longitude}"] = placemark
+      placemarksMap[geometryKey(geometry.latitude, geometry.longitude)] = placemark
       if (i < childCount) {
-        val child: Any? = super.getReactChildAt(i)
-        if (child != null && child is YamapLiteMarkerView) {
+        val child = super.getReactChildAt(i)
+        if (child is YamapLiteMarkerView) {
           child.setMarkerMapObject(placemark)
         }
       }
@@ -83,24 +58,33 @@ ClusterTapListener {
     clusterCollection.clusterPlacemarks(50.0, 12)
   }
 
+  private fun geometryKey(lat: Double, lon: Double): String = "$lat,$lon"
+
   fun addChild(child: View, index: Int) {
-    super.addReactChild(child, index)
     if (child is YamapLiteMarkerView) {
-      val placemark = placemarksMap["" + child.latitude + child.longitude]
+      addReactChildToList(child, index)
+      val placemark = placemarksMap[geometryKey(child.latitude, child.longitude)]
       if (placemark != null) {
         child.setMarkerMapObject(placemark)
       }
+    } else {
+      super.addReactChild(child, index)
     }
   }
 
   fun removeChild(index: Int) {
-    val child = getChildAt(index)
+    if (index < 0 || index >= super.getReactChildCount()) {
+      return
+    }
+    val child = super.getReactChildAt(index)
     if (child is YamapLiteMarkerView) {
-      val mapObject = child.placemark
-      if (mapObject != null && mapObject.isValid) {
-        clusterCollection.remove(mapObject)
-        placemarksMap.remove("" + child.latitude + child.longitude)
+      val clusterPlacemark = placemarksMap.remove(geometryKey(child.latitude, child.longitude))
+      if (clusterPlacemark != null && clusterPlacemark.isValid) {
+        clusterCollection.remove(clusterPlacemark)
       }
+      removeReactChildFromListAt(index)
+    } else {
+      super.removeReactChildAt(index)
     }
   }
 
@@ -112,7 +96,7 @@ ClusterTapListener {
   override fun onClusterTap(cluster: Cluster): Boolean {
     val points = ArrayList<Point?>()
     for (placemark in cluster.placemarks) {
-        points.add(placemark.geometry)
+      points.add(placemark.geometry)
     }
     super.fitMarkers(points)
     return true
@@ -129,7 +113,7 @@ ClusterTapListener {
       val scaledFontSize = Companion.FONT_SIZE * density
       val scaledMarginSize = Companion.MARGIN_SIZE * density
       val scaledStrokeSize = Companion.STROKE_SIZE * density
-      
+
       val textPaint = Paint()
       textPaint.textSize = scaledFontSize
       textPaint.textAlign = Paint.Align.CENTER
@@ -152,25 +136,25 @@ ClusterTapListener {
       backgroundPaint.isAntiAlias = true
       backgroundPaint.color = clusterColor
       canvas.drawCircle(
-        (width / 2).toFloat(),
-        (width / 2).toFloat(),
-        externalRadius,
-        backgroundPaint
+              (width / 2).toFloat(),
+              (width / 2).toFloat(),
+              externalRadius,
+              backgroundPaint
       )
 
       backgroundPaint.color = Color.WHITE
       canvas.drawCircle(
-        (width / 2).toFloat(),
-        (width / 2).toFloat(),
-        internalRadius,
-        backgroundPaint
+              (width / 2).toFloat(),
+              (width / 2).toFloat(),
+              internalRadius,
+              backgroundPaint
       )
 
       canvas.drawText(
-        text,
-        (width / 2).toFloat(),
-        width / 2 - (textMetrics.ascent + textMetrics.descent) / 2,
-        textPaint
+              text,
+              (width / 2).toFloat(),
+              width / 2 - (textMetrics.ascent + textMetrics.descent) / 2,
+              textPaint
       )
 
       return bitmap
@@ -181,6 +165,5 @@ ClusterTapListener {
     private const val FONT_SIZE = 45f
     private const val MARGIN_SIZE = 9f
     private const val STROKE_SIZE = 9f
-    private val CLUSTER_COLOR = Color.parseColor("#000000")
   }
 }

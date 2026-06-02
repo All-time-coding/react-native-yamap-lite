@@ -24,7 +24,14 @@ export default defineConfig([
     rules: {
       ...config.rules,
       'react/react-in-jsx-scope': 'off',
-      '@typescript-eslint/no-unused-vars': ['error', { varsIgnorePattern: '^_', argsIgnorePattern: '^_' }],
+      // Only override this TS-only rule on config objects that actually register the
+      // @typescript-eslint plugin; otherwise ESLint 9 errors with "could not find plugin"
+      // when linting plain .js/.jsx files.
+      ...(config.plugins?.['@typescript-eslint']
+        ? {
+            '@typescript-eslint/no-unused-vars': ['error', { varsIgnorePattern: '^_', argsIgnorePattern: '^_' }],
+          }
+        : {}),
       'prettier/prettier': [
         'error',
         {

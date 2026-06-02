@@ -5,24 +5,22 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.PointF
 import android.view.View
+import com.facebook.react.bridge.ReactContext
+import com.facebook.react.uimanager.UIManagerHelper
+import com.yamaplite.events.PressEvent
+import com.yamaplite.utils.ResolveImageHelper
 import com.yandex.mapkit.geometry.Point
+import com.yandex.mapkit.map.IconStyle
+import com.yandex.mapkit.map.MapObject
+import com.yandex.mapkit.map.MapObjectTapListener
 import com.yandex.mapkit.map.PlacemarkMapObject
+import com.yandex.mapkit.map.RotationType
 import com.yandex.mapkit.mapview.MapView
 import com.yandex.runtime.image.ImageProvider
-import com.yandex.mapkit.map.IconStyle
-import com.yandex.mapkit.map.RotationType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import com.yandex.mapkit.map.MapObjectTapListener
-import com.yandex.mapkit.map.MapObject
-import com.facebook.react.bridge.ReactContext
-import com.facebook.react.bridge.Arguments
-import com.facebook.react.bridge.WritableMap
-import com.facebook.react.uimanager.UIManagerHelper
-import com.facebook.react.uimanager.events.EventDispatcher
-import com.facebook.react.uimanager.events.Event
-import com.yamaplite.utils.ResolveImageHelper
 
 class YamapLiteMarkerView(context: Context) : View(context), MapObjectTapListener {
   var latitude: Double = 0.0
@@ -41,10 +39,10 @@ class YamapLiteMarkerView(context: Context) : View(context), MapObjectTapListene
 
   var placemark: PlacemarkMapObject? = null
   private val coroutineScope = CoroutineScope(Dispatchers.Main)
-  private val inProgressRequests = mutableMapOf<String, MutableList<PlacemarkMapObject>>()
 
-  private val childLayoutListener =
-  OnLayoutChangeListener { _, _, _, _, _, _, _, _, _ -> applyStyle() }
+  private val childLayoutListener = OnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
+    applyStyle()
+  }
 
   fun setMarkerMapObject(obj: PlacemarkMapObject?) {
     placemark = obj
@@ -55,8 +53,13 @@ class YamapLiteMarkerView(context: Context) : View(context), MapObjectTapListene
   }
 
   fun addToMap(mapView: MapView) {
-    if (placemark != null) {
-      placemark?.addTapListener(this)
+    if (!latitude.isFinite() || !longitude.isFinite()) {
+      return
+    }
+    placemark?.let {
+      if (it.isValid) {
+        mapView.mapWindow.map.mapObjects.remove(it)
+      }
     }
     val point = Point(latitude, longitude)
     placemark = mapView.mapWindow.map.mapObjects.addPlacemark(point)
@@ -65,11 +68,19 @@ class YamapLiteMarkerView(context: Context) : View(context), MapObjectTapListene
     applyStyle()
   }
 
+  fun onDrop() {
+    _childView?.removeOnLayoutChangeListener(childLayoutListener)
+    _childView = null
+    coroutineScope.cancel()
+  }
+
   fun removeFromMap(mapView: MapView) {
     placemark?.let {
-      mapView.mapWindow.map.mapObjects.remove(it)
-      placemark = null
+      if (it.isValid) {
+        mapView.mapWindow.map.mapObjects.remove(it)
+      }
     }
+    placemark = null
   }
 
   fun setPoint(lat: Double, lon: Double) {
@@ -112,9 +123,9 @@ class YamapLiteMarkerView(context: Context) : View(context), MapObjectTapListene
   fun setHandled(value: Boolean) {
     _handled = value
   }
-  
+
   fun getRotated(): Boolean = _rotated
-  
+
   fun getHandled(): Boolean = _handled
 
   fun setSize(value: Int) {
@@ -124,10 +135,10 @@ class YamapLiteMarkerView(context: Context) : View(context), MapObjectTapListene
 
   fun setChildView(view: View?) {
     if (view == null) {
-        _childView?.removeOnLayoutChangeListener(childLayoutListener)
-        _childView = null
-        applyStyle()
-        return
+      _childView?.removeOnLayoutChangeListener(childLayoutListener)
+      _childView = null
+      applyStyle()
+      return
     }
     _childView = view
     _childView!!.addOnLayoutChangeListener(childLayoutListener)
@@ -150,9 +161,12 @@ class YamapLiteMarkerView(context: Context) : View(context), MapObjectTapListene
 
       if (_childView != null && _childView!!.width > 0 && _childView!!.height > 0) {
         try {
-          val b = Bitmap.createBitmap(
-            _childView!!.width, _childView!!.height, Bitmap.Config.ARGB_8888
-          )
+          val b =
+                  Bitmap.createBitmap(
+                          _childView!!.width,
+                          _childView!!.height,
+                          Bitmap.Config.ARGB_8888
+                  )
           val c = Canvas(b)
           _childView!!.draw(c)
           val resizedBitmap = ResolveImageHelper.getInstance().resizeBitmap(context, b, _size)
@@ -186,31 +200,15 @@ class YamapLiteMarkerView(context: Context) : View(context), MapObjectTapListene
     if (reactContext == null) {
       return _handled
     }
-    
+
     val viewId = getId()
     val surfaceId = UIManagerHelper.getSurfaceId(reactContext)
     val eventDispatcher = UIManagerHelper.getEventDispatcherForReactTag(reactContext, viewId)
-    
+
     if (eventDispatcher != null) {
-      val eventData = Arguments.createMap().apply {
-        putDouble("lat", p1.latitude)
-        putDouble("lon", p1.longitude)
-      }
-      val event = PressEvent(surfaceId, viewId, eventData)
+      val event = PressEvent(surfaceId, viewId, "onMarkerPress", p1)
       eventDispatcher.dispatchEvent(event)
     }
     return _handled
-  }
-  
-  private class PressEvent(surfaceId: Int, viewTag: Int, private val eventData: WritableMap?) : Event<PressEvent>(surfaceId, viewTag) {
-    override fun getEventName(): String {
-      return "onMarkerPress"
-    }
-    override fun getEventData(): WritableMap? {
-      return eventData
-    }
-    override fun getCoalescingKey(): Short {
-      return 0
-    }
   }
 }

@@ -2,7 +2,6 @@ package com.yamaplite.utils
 
 import com.yamaplite.utils.ImageCache
 import com.yandex.runtime.image.ImageProvider
-import com.yandex.mapkit.map.PlacemarkMapObject
 import android.util.Log
 import android.content.Context
 import android.graphics.Bitmap
@@ -21,16 +20,20 @@ import kotlin.coroutines.resume
 
 
 class ResolveImageHelper {
-    private val inProgressRequests = mutableMapOf<String, MutableList<PlacemarkMapObject>>()
 
     companion object {
-        private var instance: ResolveImageHelper? = null
-        fun getInstance(): ResolveImageHelper {
-            if (instance == null) {
-                instance = ResolveImageHelper()
-            }
-            return instance!!
+        private val httpClient: OkHttpClient by lazy {
+            OkHttpClient.Builder()
+                .retryOnConnectionFailure(true)
+                .build()
         }
+
+        @Volatile private var instance: ResolveImageHelper? = null
+
+        fun getInstance(): ResolveImageHelper =
+            instance ?: synchronized(this) {
+                instance ?: ResolveImageHelper().also { instance = it }
+            }
     }
 
     suspend fun resolveImage(context: Context, url: String, iconSize: Int): ImageProvider? = withContext(Dispatchers.IO) {
@@ -60,16 +63,14 @@ class ResolveImageHelper {
         // 3. HTTP/HTTPS → асинхронно, ждем завершения через suspendCancellableCoroutine
         if (url.startsWith("http://") || url.startsWith("https://")) {
             Log.d("ImageLoader", "Loading from network: $url")
-            val client = OkHttpClient.Builder()
-                .retryOnConnectionFailure(true)
-                .build()
 
             return@withContext suspendCancellableCoroutine { continuation ->
                 val request = Request.Builder().url(url).build()
-                client.newCall(request).enqueue(object : okhttp3.Callback {
+                val call = httpClient.newCall(request)
+                continuation.invokeOnCancellation { call.cancel() }
+                call.enqueue(object : okhttp3.Callback {
                     override fun onFailure(call: Call, e: IOException) {
                         Log.e("ImageLoader", "Network load failed: $url", e)
-                        synchronized(inProgressRequests) { inProgressRequests.remove(url) }
                         continuation.resume(null)
                     }
 
@@ -91,7 +92,6 @@ class ResolveImageHelper {
                         }
 
                         val imageProvider = bitmap?.let { ImageProvider.fromBitmap(it) }
-                        synchronized(inProgressRequests) { inProgressRequests.remove(url) }
                         continuation.resume(imageProvider)
                     }
                 })

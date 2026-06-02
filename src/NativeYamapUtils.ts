@@ -20,6 +20,7 @@ export interface Spec extends TurboModule {
     points: ScreenPoint[]
   ): Promise<{ points: Point[] }>;
   fitAllMarkers(viewId: Double): Promise<void>;
+  getMapObjectCount(viewId: Double): Promise<Double>;
   setZoom(
     viewId: Double,
     zoom: Double,

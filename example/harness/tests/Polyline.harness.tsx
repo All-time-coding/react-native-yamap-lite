@@ -26,6 +26,8 @@ describe('Polyline overlay', () => {
     const pos = await mapRef.current!.getCameraPosition();
     expect(Number.isFinite(pos.lat)).toBe(true);
     expect(Number.isFinite(pos.lon)).toBe(true);
+    // The polyline must actually reach the native map, not just mount in JS.
+    expect(await mapRef.current!.getMapObjectCount()).toBe(1);
   });
 
   // Regression guard: an unresolved color prop must not reach the native
@@ -37,6 +39,7 @@ describe('Polyline overlay', () => {
 
     const pos = await mapRef.current!.getCameraPosition();
     expect(Number.isFinite(pos.lat)).toBe(true);
+    expect(await mapRef.current!.getMapObjectCount()).toBe(1);
   });
 
   test('mounts with full style props (outline, dash)', async () => {
@@ -58,6 +61,7 @@ describe('Polyline overlay', () => {
 
     const pos = await mapRef.current!.getCameraPosition();
     expect(Number.isFinite(pos.lat)).toBe(true);
+    expect(await mapRef.current!.getMapObjectCount()).toBe(1);
   });
 
   test('mounts multiple polylines simultaneously', async () => {
@@ -87,6 +91,8 @@ describe('Polyline overlay', () => {
 
     const pos = await mapRef.current!.getCameraPosition();
     expect(Number.isFinite(pos.lat)).toBe(true);
+    // Both polylines must reach the map.
+    expect(await mapRef.current!.getMapObjectCount()).toBe(2);
   });
 
   test('registers onPress handler without crashing', async () => {
@@ -107,6 +113,7 @@ describe('Polyline overlay', () => {
     const pos = await mapRef.current!.getCameraPosition();
     expect(Number.isFinite(pos.lat)).toBe(true);
     expect(pressCount).toBe(0);
+    expect(await mapRef.current!.getMapObjectCount()).toBe(1);
   });
 
   // ─── prop updates after mount (updateGeometry / updatePolyline path) ───────
@@ -137,6 +144,8 @@ describe('Polyline overlay', () => {
 
     const pos = await mapRef.current!.getCameraPosition();
     expect(Number.isFinite(pos.lat)).toBe(true);
+    // The polyline survives the prop swap and stays attached to the map.
+    expect(await mapRef.current!.getMapObjectCount()).toBe(1);
   });
 
   // Regression guard: shrinking below 2 points must not crash
@@ -159,10 +168,16 @@ describe('Polyline overlay', () => {
 
     const pos = await mapRef.current!.getCameraPosition();
     expect(Number.isFinite(pos.lat)).toBe(true);
+    // updateGeometry skips the rebuild below 2 points, so the originally-added
+    // polyline stays on the map rather than disappearing.
+    expect(await mapRef.current!.getMapObjectCount()).toBe(1);
   });
 
   // ─── edge cases / robustness probes ───────────────────────────────────────
   // Degenerate input fed straight into the native YMKPolyline constructor.
+  // Object count is intentionally NOT asserted here: whether degenerate
+  // geometry produces a map object is platform-dependent, so these stay
+  // crash-only smoke tests.
 
   test('mounts with an empty points array without crashing', async () => {
     const { mapRef } = await renderMapWithOverlays({
