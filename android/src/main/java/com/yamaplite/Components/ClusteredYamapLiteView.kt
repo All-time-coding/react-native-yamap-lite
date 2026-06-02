@@ -39,12 +39,10 @@ class ClusteredYamapLiteView(context: Context) :
     rebuildClusterPlacemarks()
   }
 
-  /** Re-creates the clusterized placemarks from [pointsList] and re-binds child markers. */
   private fun rebuildClusterPlacemarks() {
     clusterCollection.clear()
     placemarksMap.clear()
-    val placemarks =
-            clusterCollection.addPlacemarks(pointsList, TextImageProvider(""), IconStyle())
+    val placemarks = clusterCollection.addPlacemarks(pointsList, TextImageProvider(""), IconStyle())
     val childCount = super.getReactChildCount()
     for (i in placemarks.indices) {
       val placemark = placemarks[i]
@@ -64,15 +62,12 @@ class ClusteredYamapLiteView(context: Context) :
 
   fun addChild(child: View, index: Int) {
     if (child is YamapLiteMarkerView) {
-      // Markers are owned by the cluster collection, not by the base map objects,
-      // so only track them in the list and bind to an existing cluster placemark.
       addReactChildToList(child, index)
       val placemark = placemarksMap[geometryKey(child.latitude, child.longitude)]
       if (placemark != null) {
         child.setMarkerMapObject(placemark)
       }
     } else {
-      // Non-marker overlays (circle/polyline/polygon) are still added to the map directly.
       super.addReactChild(child, index)
     }
   }
