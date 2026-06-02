@@ -24,6 +24,11 @@ class YamapLiteMarkerViewManager : SimpleViewManager<YamapLiteMarkerView>(), Yam
     return YamapLiteMarkerView(context)
   }
 
+  override fun onDropViewInstance(view: YamapLiteMarkerView) {
+    view.onDrop()
+    super.onDropViewInstance(view)
+  }
+
   @ReactProp(name = "point")
   override fun setPoint(view: YamapLiteMarkerView, value: ReadableMap?) {
     if (value == null) return

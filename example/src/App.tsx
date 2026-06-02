@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { View, StyleSheet, SafeAreaView } from 'react-native';
 import {
   YaMap,
@@ -7,6 +8,7 @@ import {
   Polygon,
   Polyline,
 } from 'react-native-yamap-lite';
+import { ensureMapKitInitialized } from '../harness/ensureMapKitInit';
 import { markers } from './constants/markers';
 import {
   CIRCLE,
@@ -22,6 +24,22 @@ import { ControlPanel, SettingsBar, EventLog } from './components';
 const INITIAL_REGION = { lat: 55.7558, lon: 37.6173, zoom: 10 };
 
 export default function App() {
+  const [mapKitReady, setMapKitReady] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    ensureMapKitInitialized()
+      .then(() => {
+        if (!cancelled) setMapKitReady(true);
+      })
+      .catch((error) => {
+        console.warn('YamapUtils.init failed:', error);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const { events, log } = useEventLog();
   const {
     mapMode,
@@ -145,7 +163,7 @@ export default function App() {
       />
 
       <View style={styles.mapContainer}>
-        {mapMode === 'clustered' ? (
+        {!mapKitReady ? null : mapMode === 'clustered' ? (
           <ClusteredYamap
             {...sharedMapProps}
             clusterColor="#ff00ff"

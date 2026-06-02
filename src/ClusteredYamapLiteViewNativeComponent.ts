@@ -74,16 +74,11 @@ interface ClusteredNativeProps extends ViewProps {
   userLocationAccuracyStrokeColor?: string;
   /** @default 2 */
   userLocationAccuracyStrokeWidth?: Float;
-  /** @default true */
-  scrollGesturesEnabled?: boolean;
-  /** @default true */
-  zoomGesturesEnabled?: boolean;
-  /** @default true */
-  tiltGesturesEnabled?: boolean;
-  /** @default true */
-  rotateGesturesEnabled?: boolean;
-  /** @default true */
-  fastTapEnabled?: boolean;
+  scrollGesturesEnabled?: WithDefault<boolean, true>;
+  zoomGesturesEnabled?: WithDefault<boolean, true>;
+  tiltGesturesEnabled?: WithDefault<boolean, true>;
+  rotateGesturesEnabled?: WithDefault<boolean, true>;
+  fastTapEnabled?: WithDefault<boolean, true>;
   initialRegion?: InitialRegion;
   maxFps?: Float;
   mapType?: WithDefault<'map' | 'satellite' | 'hybrid', 'map'>;

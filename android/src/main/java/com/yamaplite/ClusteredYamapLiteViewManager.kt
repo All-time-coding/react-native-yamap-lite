@@ -12,6 +12,7 @@ import com.facebook.react.viewmanagers.ClusteredYamapLiteViewManagerDelegate
 import android.view.View
 import android.graphics.Color
 import com.yamaplite.components.ClusteredYamapLiteView
+import com.yamaplite.utils.PointParser
 
 class ClusteredYamapLiteViewManager : ViewGroupManager<ClusteredYamapLiteView>(), ClusteredYamapLiteViewManagerInterface<ClusteredYamapLiteView> {
   private val mDelegate: ViewManagerDelegate<ClusteredYamapLiteView>
@@ -24,6 +25,11 @@ class ClusteredYamapLiteViewManager : ViewGroupManager<ClusteredYamapLiteView>()
 
   override fun createViewInstance(context: ThemedReactContext): ClusteredYamapLiteView {
     return ClusteredYamapLiteView(context)
+  }
+
+  override fun onDropViewInstance(view: ClusteredYamapLiteView) {
+    view.onDropViewInstance()
+    super.onDropViewInstance(view)
   }
 
   override fun addView(parent: ClusteredYamapLiteView, child: View, index: Int) {
@@ -40,8 +46,11 @@ class ClusteredYamapLiteViewManager : ViewGroupManager<ClusteredYamapLiteView>()
   }
 
   override fun removeViewAt(parent: ClusteredYamapLiteView, index: Int) {
-    parent.removeChild(index)
-    super.removeViewAt(parent, index)
+    val childCount = parent.getReactChildCount()
+    if (index >= 0 && index < childCount) {
+      parent.removeChild(index)
+      super.removeViewAt(parent, index)
+    }
   }
 
   override fun getName() = "ClusteredYamapLiteView"
@@ -157,7 +166,7 @@ class ClusteredYamapLiteViewManager : ViewGroupManager<ClusteredYamapLiteView>()
 
   @ReactProp(name = "clusteredMarkers")
   override fun setClusteredMarkers(view: ClusteredYamapLiteView, points: ReadableArray?) {
-    view.setClusteredMarkers(points?.toArrayList()?.filterNotNull() as ArrayList<Any>)
+    view.setClusteredMarkers(PointParser.parsePoints(points))
   }
 
   @ReactProp(name = "clusterColor")

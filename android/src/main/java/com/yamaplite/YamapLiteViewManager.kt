@@ -1,17 +1,17 @@
 package com.yamaplite
 
+import android.view.View
 import com.facebook.react.bridge.ReadableMap
-import com.facebook.react.module.annotations.ReactModule
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.ViewGroupManager
-import com.facebook.react.uimanager.annotations.ReactProp
 import com.facebook.react.uimanager.ViewManagerDelegate
-import com.facebook.react.viewmanagers.YamapLiteViewManagerInterface
+import com.facebook.react.uimanager.annotations.ReactProp
 import com.facebook.react.viewmanagers.YamapLiteViewManagerDelegate
+import com.facebook.react.viewmanagers.YamapLiteViewManagerInterface
 import com.yamaplite.components.YamapLiteView
-import android.view.View
 
-class YamapLiteViewManager : ViewGroupManager<YamapLiteView>(), YamapLiteViewManagerInterface<YamapLiteView> {
+class YamapLiteViewManager :
+        ViewGroupManager<YamapLiteView>(), YamapLiteViewManagerInterface<YamapLiteView> {
   private val mDelegate: ViewManagerDelegate<YamapLiteView>
 
   init {
@@ -24,12 +24,21 @@ class YamapLiteViewManager : ViewGroupManager<YamapLiteView>(), YamapLiteViewMan
     return YamapLiteView(context)
   }
 
+  override fun onDropViewInstance(view: YamapLiteView) {
+    view.onDropViewInstance()
+    super.onDropViewInstance(view)
+  }
+
   override fun addView(parent: YamapLiteView, child: View, index: Int) {
     parent.addReactChild(child, index)
+    super.addView(parent, child, index)
   }
 
   override fun getChildAt(parent: YamapLiteView, index: Int): View {
-    return parent.getReactChildAt(index) ?: throw IndexOutOfBoundsException("Index $index is out of bounds for child count ${parent.getReactChildCount()}")
+    return parent.getReactChildAt(index)
+            ?: throw IndexOutOfBoundsException(
+                    "Index $index is out of bounds for child count ${parent.getReactChildCount()}"
+            )
   }
 
   override fun getChildCount(parent: YamapLiteView): Int {
@@ -40,6 +49,7 @@ class YamapLiteViewManager : ViewGroupManager<YamapLiteView>(), YamapLiteViewMan
     val childCount = parent.getReactChildCount()
     if (index >= 0 && index < childCount) {
       parent.removeReactChildAt(index)
+      super.removeViewAt(parent, index)
     }
   }
 
@@ -71,28 +81,28 @@ class YamapLiteViewManager : ViewGroupManager<YamapLiteView>(), YamapLiteViewMan
   }
 
   @ReactProp(name = "scrollGesturesEnabled")
-  override fun setScrollGesturesEnabled(view: YamapLiteView, value: Boolean) {
-    view.setScrollGesturesEnabled(value)
+  override fun setScrollGesturesEnabled(view: YamapLiteView, _value: Boolean) {
+    view.setScrollGesturesEnabled(_value)
   }
 
   @ReactProp(name = "zoomGesturesEnabled")
-  override fun setZoomGesturesEnabled(view: YamapLiteView, value: Boolean) {
-    view.setZoomGesturesEnabled(value)
+  override fun setZoomGesturesEnabled(view: YamapLiteView, _value: Boolean) {
+    view.setZoomGesturesEnabled(_value)
   }
 
   @ReactProp(name = "tiltGesturesEnabled")
-  override fun setTiltGesturesEnabled(view: YamapLiteView, value: Boolean) {
-    view.setTiltGesturesEnabled(value)
+  override fun setTiltGesturesEnabled(view: YamapLiteView, _value: Boolean) {
+    view.setTiltGesturesEnabled(_value)
   }
 
   @ReactProp(name = "rotateGesturesEnabled")
-  override fun setRotateGesturesEnabled(view: YamapLiteView, value: Boolean) {
-    view.setRotateGesturesEnabled(value)
+  override fun setRotateGesturesEnabled(view: YamapLiteView, _value: Boolean) {
+    view.setRotateGesturesEnabled(_value)
   }
 
   @ReactProp(name = "fastTapEnabled")
-  override fun setFastTapEnabled(view: YamapLiteView, value: Boolean) {
-    view.setFastTapEnabled(value)
+  override fun setFastTapEnabled(view: YamapLiteView, _value: Boolean) {
+    view.setFastTapEnabled(_value)
   }
 
   @ReactProp(name = "initialRegion")
@@ -109,53 +119,58 @@ class YamapLiteViewManager : ViewGroupManager<YamapLiteView>(), YamapLiteViewMan
   }
 
   @ReactProp(name = "maxFps")
-  override fun setMaxFps(view: YamapLiteView, value: Float) {
-    view.setMaxFps(value)
+  override fun setMaxFps(view: YamapLiteView, _value: Float) {
+    view.setMaxFps(_value)
   }
 
   @ReactProp(name = "mapType")
-  override fun setMapType(view: YamapLiteView, value: String?) {
-    view.setMapType(value)
+  override fun setMapType(view: YamapLiteView, _value: String?) {
+    view.setMapType(_value)
   }
 
   @ReactProp(name = "logoPosition")
-  override fun setLogoPosition(view: YamapLiteView, value: ReadableMap?) {
-    if (value != null) {
+  override fun setLogoPosition(view: YamapLiteView, _value: ReadableMap?) {
+    if (_value != null) {
       val position = mutableMapOf<String, Any>()
-      if (value.hasKey("vertical")) position["vertical"] = value.getString("vertical") ?: "bottom"
-      if (value.hasKey("horizontal")) position["horizontal"] = value.getString("horizontal") ?: "left"
+      if (_value.hasKey("vertical")) position["vertical"] = _value.getString("vertical") ?: "bottom"
+      if (_value.hasKey("horizontal"))
+              position["horizontal"] = _value.getString("horizontal") ?: "left"
       view.setLogoPosition(position)
     }
   }
 
   @ReactProp(name = "logoPadding")
-  override fun setLogoPadding(view: YamapLiteView, value: ReadableMap?) {
-    if (value != null) {
+  override fun setLogoPadding(view: YamapLiteView, _value: ReadableMap?) {
+    if (_value != null) {
       val horizontalPadding =
-        if ((value.hasKey("horizontal") && !value.isNull("horizontal"))) value.getInt("horizontal") else 0
+              if ((_value.hasKey("horizontal") && !_value.isNull("horizontal")))
+                      _value.getInt("horizontal")
+              else 0
       val verticalPadding =
-        if ((value.hasKey("vertical") && !value.isNull("vertical"))) value.getInt("vertical") else 0
+              if ((_value.hasKey("vertical") && !_value.isNull("vertical")))
+                      _value.getInt("vertical")
+              else 0
       view.setLogoPadding(horizontalPadding, verticalPadding)
     }
   }
 
   @ReactProp(name = "userLocationAccuracyFillColor")
-  override fun setUserLocationAccuracyFillColor(view: YamapLiteView, value: String?) {
-    view.setUserLocationAccuracyFillColor(value)
+  override fun setUserLocationAccuracyFillColor(view: YamapLiteView, _value: String?) {
+    view.setUserLocationAccuracyFillColor(_value)
   }
 
   @ReactProp(name = "userLocationAccuracyStrokeColor")
-  override fun setUserLocationAccuracyStrokeColor(view: YamapLiteView, value: String?) {
-    view.setUserLocationAccuracyStrokeColor(value)
+  override fun setUserLocationAccuracyStrokeColor(view: YamapLiteView, _value: String?) {
+    view.setUserLocationAccuracyStrokeColor(_value)
   }
 
   @ReactProp(name = "userLocationAccuracyStrokeWidth")
-  override fun setUserLocationAccuracyStrokeWidth(view: YamapLiteView, value: Float) {
-    view.setUserLocationAccuracyStrokeWidth(value)
+  override fun setUserLocationAccuracyStrokeWidth(view: YamapLiteView, _value: Float) {
+    view.setUserLocationAccuracyStrokeWidth(_value)
   }
 
   @ReactProp(name = "followUser")
-  override fun setFollowUser(view: YamapLiteView, value: Boolean) {
-    view.setFollowUser(value)
+  override fun setFollowUser(view: YamapLiteView, _value: Boolean) {
+    view.setFollowUser(_value)
   }
 }

@@ -93,7 +93,7 @@ export const ClusteredYamap = forwardRef(
           duration?: number,
           animation?: 'LINEAR' | 'SMOOTH'
         ) => {
-          return YamapUtils.setZoom(
+          await YamapUtils.setZoom(
             findNodeHandle(nativeRef.current)!,
             zoom,
             duration ?? 500,
@@ -108,7 +108,7 @@ export const ClusteredYamap = forwardRef(
           duration?: number,
           animation?: 'LINEAR' | 'SMOOTH'
         ) => {
-          return YamapUtils.setCenter(
+          await YamapUtils.setCenter(
             findNodeHandle(nativeRef.current)!,
             center.lat,
             center.lon,
@@ -120,10 +120,15 @@ export const ClusteredYamap = forwardRef(
           );
         },
         fitAllMarkers: async () => {
-          return YamapUtils.fitAllMarkers(findNodeHandle(nativeRef.current)!);
+          await YamapUtils.fitAllMarkers(findNodeHandle(nativeRef.current)!);
         },
         fitMarkers: async (_markers: any[]) => {
-          return YamapUtils.fitAllMarkers(findNodeHandle(nativeRef.current)!);
+          await YamapUtils.fitAllMarkers(findNodeHandle(nativeRef.current)!);
+        },
+        getMapObjectCount: async () => {
+          return YamapUtils.getMapObjectCount(
+            findNodeHandle(nativeRef.current)!
+          );
         },
         setTrafficVisible: (_visible: boolean) => {
           // Traffic layer is not available in lite SDK

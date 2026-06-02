@@ -1,4 +1,6 @@
-export const YAMAP_API_KEY = process.env.YAMAP_API_KEY ?? '';
+import { YAMAP_API_KEY as ENV_API_KEY } from '@env';
+
+export const YAMAP_API_KEY = ENV_API_KEY ?? '';
 
 export const MOSCOW = {
   lat: 55.751244,

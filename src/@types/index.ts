@@ -31,6 +31,7 @@ export type YaMapRef = {
   fitMarkers: (markers: any[]) => Promise<void>;
   /** No-op — traffic layer is not available in lite SDK */
   setTrafficVisible: (visible: boolean) => void;
+  getMapObjectCount: () => Promise<number>;
 };
 
 export type MarkerRef = {

@@ -4343,6 +4343,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-native-harness/ui@npm:1.2.0":
+  version: 1.2.0
+  resolution: "@react-native-harness/ui@npm:1.2.0"
+  dependencies:
+    "@react-native-harness/runtime": 1.2.0
+    tslib: ^2.3.0
+  peerDependencies:
+    react-native: "*"
+  checksum: 43730e67b23314ad9a412b688fa852fc735659fddcfb06fbf0f67a7345e560a4293e638374ab36424f6468e60af6697bfb86ce098d1d03e4220133e2521023e4
+  languageName: node
+  linkType: hard
+
 "@react-native/assets-registry@npm:0.79.2":
   version: 0.79.2
   resolution: "@react-native/assets-registry@npm:0.79.2"
@@ -7383,6 +7395,13 @@ __metadata:
   dependencies:
     type-fest: ^4.18.2
   checksum: a53425ed992f136db3c591b06bcf94f46fed7136b81703121e446c961043684e8996b9ce8f87b24d2859d82c8b14c18c3b1905352bb3a1ccc5e373153f43bf48
+  languageName: node
+  linkType: hard
+
+"dotenv@npm:^16.4.5":
+  version: 16.6.1
+  resolution: "dotenv@npm:16.6.1"
+  checksum: e8bd63c9a37f57934f7938a9cf35de698097fadf980cb6edb61d33b3e424ceccfe4d10f37130b904a973b9038627c2646a3365a904b4406514ea94d7f1816b69
   languageName: node
   linkType: hard
 
@@ -12839,6 +12858,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-dotenv@npm:^3.4.11":
+  version: 3.4.11
+  resolution: "react-native-dotenv@npm:3.4.11"
+  dependencies:
+    dotenv: ^16.4.5
+  peerDependencies:
+    "@babel/runtime": ^7.20.6
+  checksum: 3ebac2c2ed79dd7e4920fd3fc2da9187413b7190231618e4858b46c47833677838b96d531afe7bd5c4b0a60454dba40cb8708722210df5d522e30aefbf41da05
+  languageName: node
+  linkType: hard
+
 "react-native-harness@npm:1.2.0":
   version: 1.2.0
   resolution: "react-native-harness@npm:1.2.0"
@@ -12890,6 +12920,7 @@ __metadata:
     "@react-native-harness/jest": 1.2.0
     "@react-native-harness/platform-android": 1.2.0
     "@react-native-harness/platform-apple": 1.2.0
+    "@react-native-harness/ui": 1.2.0
     "@react-native/babel-preset": 0.79.2
     "@react-native/metro-config": 0.79.2
     "@react-native/typescript-config": 0.79.2
@@ -12897,6 +12928,7 @@ __metadata:
     react: 19.0.0
     react-native: 0.79.2
     react-native-builder-bob: ^0.40.11
+    react-native-dotenv: ^3.4.11
     react-native-harness: 1.2.0
     react-native-monorepo-config: ^0.1.9
     react-native-yamap-lite: "link:.."
