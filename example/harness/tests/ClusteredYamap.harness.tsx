@@ -12,7 +12,7 @@ import {
   Marker,
   type ClusteredYamapProps,
   type YaMapRef,
-} from 'react-native-yamap-lite';
+} from '@atc/react-native-yamap-lite';
 import { CAMERA_ANIMATION_TIMEOUT, INITIAL_REGION, MOSCOW } from '../constants';
 import { ensureMapKitInitialized } from '../ensureMapKitInit';
 import { waitForMapReady, expectNear } from '../helpers';

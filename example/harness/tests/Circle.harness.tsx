@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'react-native-harness';
-import { Circle } from 'react-native-yamap-lite';
+import { Circle } from '@atc/react-native-yamap-lite';
 import { MOSCOW } from '../constants';
 import { renderMapWithOverlays, renderUpdatingOverlays } from '../helpers';
 

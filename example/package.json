@@ -13,9 +13,9 @@
     "test:harness:android": "NODE_OPTIONS='--experimental-require-module' react-native-harness --harnessRunner android"
   },
   "dependencies": {
+    "@atc/react-native-yamap-lite": "link:..",
     "react": "19.0.0",
-    "react-native": "0.79.2",
-    "react-native-yamap-lite": "link:.."
+    "react-native": "0.79.2"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

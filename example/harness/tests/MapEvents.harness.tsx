@@ -12,7 +12,7 @@ import {
   type YaMapRef,
   type CameraPosition,
   type MapLoaded,
-} from 'react-native-yamap-lite';
+} from '@atc/react-native-yamap-lite';
 import {
   INITIAL_REGION,
   MOSCOW,

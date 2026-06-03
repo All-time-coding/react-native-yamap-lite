@@ -1,6 +1,42 @@
-# React Native Yandex Maps Lite (Яндекс Карты Lite)
+<div align="center">
 
-Легковесная библиотека для интеграции Yandex Maps (Яндекс Карт) в React Native. Lite версия без маршрутов, геокодера и поиска.
+<img src="./images/banner.png" alt="@atc/react-native-yamap-lite" width="420" />
+
+# @atc/react-native-yamap-lite
+
+**Легковесная библиотека для интеграции Yandex Maps (Яндекс Карт) в React Native.**
+
+Yandex Maps · React Native · Fabric
+
+[![npm](https://img.shields.io/npm/v/@atc/react-native-yamap-lite.svg)](https://www.npmjs.com/package/@atc/react-native-yamap-lite)
+[![platforms](https://img.shields.io/badge/platforms-iOS%20%7C%20Android-blue.svg)](#требования)
+[![New Architecture](https://img.shields.io/badge/New%20Architecture-Fabric-success.svg)](#требования)
+[![tests](https://img.shields.io/badge/tests-Jest%20%2B%20Harness-brightgreen.svg)](#тесты)
+[![license](https://img.shields.io/npm/l/@atc/react-native-yamap-lite.svg)](./LICENSE)
+
+</div>
+
+---
+
+Lite-обёртка над [Yandex MapKit SDK](https://yandex.ru/dev/maps/mapkit/) — карты, маркеры,
+круги, полигоны, полилинии и кластеризация без лишнего веса: в ней нет маршрутов,
+геокодера и поиска, только то, что нужно для отображения карты в приложении.
+
+Библиотека собрана целиком на **новой архитектуре React Native** (**Fabric** +
+**TurboModules**), что даёт нативную скорость рендеринга на iOS и Android.
+
+## ✨ Возможности
+
+- 🗺️ **Карты Yandex** — типы `map` / `satellite` / `hybrid`, ночной режим, кастомные стили MapKit.
+- 📍 **Маркеры** — локальные (`require`) и удалённые (`{ uri }`) изображения, якорь, масштаб, z-index.
+- ⭕ **Круги, полигоны, полилинии** — оверлеи с настраиваемыми цветами заливки и обводки.
+- 🔗 **Кластеризация** — компонент `ClusteredYamap` для автоматической группировки маркеров.
+- 📱 **Позиция пользователя** — отслеживание геолокации, кастомная иконка и зона точности.
+- 🎯 **Управление камерой** — `setCenter`, `setZoom`, `fitAllMarkers`, чтение позиции и видимой области через `ref`.
+- 🎨 **Жесты и UI** — гибкая настройка жестов, частоты кадров и позиции логотипа Яндекса.
+
+> 💡 Знакомы с [`react-native-yamap`](https://github.com/volga-volga/react-native-yamap)?
+> API близок по духу — миграция требует минимальных изменений.
 
 ## Требования
 
@@ -11,13 +47,13 @@
 ## Установка
 
 ```sh
-yarn add react-native-yamap-lite
+yarn add @atc/react-native-yamap-lite
 ```
 
 или
 
 ```sh
-npm install react-native-yamap-lite --save
+npm install @atc/react-native-yamap-lite --save
 ```
 
 ### iOS
@@ -30,64 +66,35 @@ cd ios && pod install && cd ..
 
 ## Инициализация карт
 
-### iOS
+Инициализация выполняется **полностью из JavaScript** — не нужно править
+`AppDelegate.swift` или `MainApplication`. Достаточно один раз вызвать
+`YamapUtils.init(apiKey)` до того, как карта отрендерится (например, в `index.js`
+или в корне `App.tsx`). Этот вызов сам устанавливает API-ключ и запускает MapKit
+на обеих платформах.
 
-**Обязательно** инициализировать MapKit в функции `didFinishLaunchingWithOptions` в `AppDelegate.swift`:
+```js
+// index.js
+import { AppRegistry } from 'react-native';
+import { YamapUtils } from '@atc/react-native-yamap-lite';
+import App from './App';
+import { name as appName } from './app.json';
 
-```swift
-import YandexMapsMobile
+// Замените на ваш API-ключ от Yandex MapKit
+YamapUtils.init('YOUR_API_KEY').catch((error) => {
+  console.warn('YamapUtils.init failed:', error);
+});
 
-func application(
-  _ application: UIApplication,
-  didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
-) -> Bool {
+// (необязательно) язык интерфейса карты
+YamapUtils.setLocale('ru_RU');
 
-  reactNativeDelegate = delegate
-  reactNativeFactory = factory
-
-  // Инициализуйте SDK Yandex Maps перед стартом React Native
-  YMKMapKit.setLocale("ru_RU")
-  YMKMapKit.setApiKey("YOUR_API_KEY")
-  YMKMapKit.initialize()
-  
-  window = UIWindow(frame: UIScreen.main.bounds)
-
-  // ... остальной код инициализации
-  
-  return true
-}
+AppRegistry.registerComponent(appName, () => App);
 ```
 
-### Android
+> 💡 `init` возвращает `Promise` — карту можно рендерить сразу, она дождётся
+> завершения инициализации. Метод идемпотентен: повторные вызовы безопасны.
 
-Инициализируйте MapKit в методе `onCreate` класса `MainApplication`:
-
-**ВАЖНО:** Замените `YOUR_API_KEY` на ваш API ключ от Yandex MapKit.
-
-```kotlin
-import com.yandex.mapkit.MapKitFactory
-
-class MainApplication : Application() {
-  override fun onCreate() {
-    super.onCreate()
-    
-    MapKitFactory.setLocale("ru_RU")
-    MapKitFactory.setApiKey("YOUR_API_KEY")
-    MapKitFactory.initialize(applicationContext)
-    
-    // ... остальной код инициализации
-  }
-}
-```
-
-Добавьте в вашем проекте зависимость в `android/app/build.gradle`
-
-```gradle
-dependencies {
-  implementation('com.yandex.android:maps.mobile:4.24.0-lite')
-  ...
-}
-```
+> ℹ️ Android-зависимость MapKit (`com.yandex.android:maps.mobile`) уже входит в
+> библиотеку — добавлять её в `android/app/build.gradle` вручную не нужно.
 
 ## Использование
 
@@ -95,7 +102,7 @@ dependencies {
 
 ```jsx
 import React from 'react';
-import { YaMap, Marker, Circle } from 'react-native-yamap-lite';
+import { YaMap, Marker, Circle } from '@atc/react-native-yamap-lite';
 
 const Map = () => {
   return (
@@ -232,6 +239,10 @@ interface YaMapRef {
     animation?: 'LINEAR' | 'SMOOTH'
   ) => void;
   fitAllMarkers: () => void;
+  getMapObjectCount: () => Promise<number>;
+  getVisibleRegion: () => Promise<VisibleRegion>;
+  getScreenPoints: (points: Point[]) => Promise<ScreenPoint[]>;
+  getWorldPoints: (points: ScreenPoint[]) => Promise<Point[]>;
 }
 ```
 
@@ -239,7 +250,7 @@ interface YaMapRef {
 
 ```jsx
 import React, { useRef } from 'react';
-import { YaMap } from 'react-native-yamap-lite';
+import { YaMap } from '@atc/react-native-yamap-lite';
 
 const Map = () => {
   const mapRef = useRef(null);
@@ -341,7 +352,7 @@ const Map = () => {
 Компонент для отображения кластеризованных маркеров:
 
 ```jsx
-import { ClusteredYamap, Marker } from 'react-native-yamap-lite';
+import { ClusteredYamap, Marker } from '@atc/react-native-yamap-lite';
 
 <ClusteredYamap
   clusterColor="#ff00ff"
@@ -391,6 +402,35 @@ yarn android
 После сборки можно запускать приложение как обычно используя `yarn ios` или `yarn android`.
 
 **Примечание:** Все методы и примеры использования карты можно запустить и посмотреть в папке `example` проекта.
+
+## Тесты
+
+Библиотека покрыта тестами на двух уровнях:
+
+- **Jest** — модульные тесты JS-слоя (компоненты, парсинг пропсов, преобразование
+  координат, мосты к нативным модулям). Запускаются без устройства/эмулятора:
+
+  ```sh
+  yarn test
+  ```
+
+- **Harness** — интеграционные тесты, которые гоняют реальные нативные Fabric-компоненты
+  на **iOS и Android** через [`react-native-harness`](https://github.com/callstack/react-native-harness).
+  Покрыты `YaMap`, `Marker`, `Circle`, `Polygon`, `Polyline`, `ClusteredYamap`,
+  события карты, методы `YamapUtils` и набор регрессионных сценариев
+  (см. `example/harness/tests`):
+
+  ```sh
+  # обе платформы
+  yarn test:harness
+
+  # по отдельности
+  yarn test:harness:ios
+  yarn test:harness:android
+  ```
+
+Так нативный код проверяется на настоящих картах, а не на моках, — это покрывает баги,
+которые JS-тесты увидеть не могут.
 
 ## Важные замечания
 
