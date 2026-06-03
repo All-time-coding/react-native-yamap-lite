@@ -17,7 +17,7 @@ import {
   YaMap,
   YamapUtils,
   type YaMapRef,
-} from 'react-native-yamap-lite';
+} from '@atc/react-native-yamap-lite';
 import {
   CAMERA_ANIMATION_TIMEOUT,
   INITIAL_REGION,

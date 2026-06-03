@@ -6,7 +6,7 @@ import {
   afterEach,
 } from 'react-native-harness';
 import { Platform } from 'react-native';
-import { YamapUtils } from 'react-native-yamap-lite';
+import { YamapUtils } from '@atc/react-native-yamap-lite';
 import { YAMAP_API_KEY } from '../constants';
 
 describe('YamapUtils', () => {

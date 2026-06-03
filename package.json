@@ -1,6 +1,6 @@
 {
-  "name": "react-native-yamap-lite",
-  "version": "1.0.1",
+  "name": "@atc/react-native-yamap-lite",
+  "version": "1.0.0",
   "description": "A lightweight wrapper for the Yandex MapKit SDK",
   "main": "./src/index.tsx",
   "types": "./src/index.tsx",
@@ -70,7 +70,8 @@
   },
   "homepage": "https://github.com/hydromoll/react-native-yamap-lite#readme",
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
   },
   "devDependencies": {
     "@commitlint/config-conventional": "^19.6.0",

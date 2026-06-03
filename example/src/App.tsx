@@ -7,7 +7,7 @@ import {
   Circle,
   Polygon,
   Polyline,
-} from 'react-native-yamap-lite';
+} from '@atc/react-native-yamap-lite';
 import { ensureMapKitInitialized } from '../harness/ensureMapKitInit';
 import { markers } from './constants/markers';
 import {
