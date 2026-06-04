@@ -1,18 +1,18 @@
 <div align="center">
 
-<img src="./images/banner.png" alt="@atc/react-native-yamap-lite" width="420" />
+<img src="./images/banner.png" alt="@exterio/react-native-yamap-lite" width="420" />
 
-# @atc/react-native-yamap-lite
+# @exterio/react-native-yamap-lite
 
 **Легковесная библиотека для интеграции Yandex Maps (Яндекс Карт) в React Native.**
 
 Yandex Maps · React Native · Fabric
 
-[![npm](https://img.shields.io/npm/v/@atc/react-native-yamap-lite.svg)](https://www.npmjs.com/package/@atc/react-native-yamap-lite)
+[![npm](https://img.shields.io/npm/v/@exterio/react-native-yamap-lite.svg)](https://www.npmjs.com/package/@exterio/react-native-yamap-lite)
 [![platforms](https://img.shields.io/badge/platforms-iOS%20%7C%20Android-blue.svg)](#требования)
 [![New Architecture](https://img.shields.io/badge/New%20Architecture-Fabric-success.svg)](#требования)
 [![tests](https://img.shields.io/badge/tests-Jest%20%2B%20Harness-brightgreen.svg)](#тесты)
-[![license](https://img.shields.io/npm/l/@atc/react-native-yamap-lite.svg)](./LICENSE)
+[![license](https://img.shields.io/npm/l/@exterio/react-native-yamap-lite.svg)](./LICENSE)
 
 </div>
 
@@ -47,13 +47,13 @@ Lite-обёртка над [Yandex MapKit SDK](https://yandex.ru/dev/maps/mapkit
 ## Установка
 
 ```sh
-yarn add @atc/react-native-yamap-lite
+yarn add @exterio/react-native-yamap-lite
 ```
 
 или
 
 ```sh
-npm install @atc/react-native-yamap-lite --save
+npm install @exterio/react-native-yamap-lite --save
 ```
 
 ### iOS
@@ -75,7 +75,7 @@ cd ios && pod install && cd ..
 ```js
 // index.js
 import { AppRegistry } from 'react-native';
-import { YamapUtils } from '@atc/react-native-yamap-lite';
+import { YamapUtils } from '@exterio/react-native-yamap-lite';
 import App from './App';
 import { name as appName } from './app.json';
 
@@ -102,7 +102,7 @@ AppRegistry.registerComponent(appName, () => App);
 
 ```jsx
 import React from 'react';
-import { YaMap, Marker, Circle } from '@atc/react-native-yamap-lite';
+import { YaMap, Marker, Circle } from '@exterio/react-native-yamap-lite';
 
 const Map = () => {
   return (
@@ -250,7 +250,7 @@ interface YaMapRef {
 
 ```jsx
 import React, { useRef } from 'react';
-import { YaMap } from '@atc/react-native-yamap-lite';
+import { YaMap } from '@exterio/react-native-yamap-lite';
 
 const Map = () => {
   const mapRef = useRef(null);
@@ -352,7 +352,7 @@ const Map = () => {
 Компонент для отображения кластеризованных маркеров:
 
 ```jsx
-import { ClusteredYamap, Marker } from '@atc/react-native-yamap-lite';
+import { ClusteredYamap, Marker } from '@exterio/react-native-yamap-lite';
 
 <ClusteredYamap
   clusterColor="#ff00ff"

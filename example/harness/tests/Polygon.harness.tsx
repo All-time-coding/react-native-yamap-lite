@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'react-native-harness';
-import { Polygon } from '@atc/react-native-yamap-lite';
+import { Polygon } from '@exterio/react-native-yamap-lite';
 import { MOSCOW } from '../constants';
 import { renderMapWithOverlays, renderUpdatingOverlays } from '../helpers';
 

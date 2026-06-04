@@ -4,7 +4,7 @@ import {
   YaMap,
   type MarkerRef,
   type YaMapRef,
-} from '@atc/react-native-yamap-lite';
+} from '@exterio/react-native-yamap-lite';
 import { StyleSheet, View } from 'react-native';
 import { INITIAL_REGION, MOSCOW } from '../constants';
 import { ensureMapKitInitialized } from '../ensureMapKitInit';

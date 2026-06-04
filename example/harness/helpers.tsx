@@ -7,7 +7,7 @@ import {
   type InitialRegion,
   type YaMapProps,
   type YaMapRef,
-} from '@atc/react-native-yamap-lite';
+} from '@exterio/react-native-yamap-lite';
 import { INITIAL_REGION, MAP_LOAD_TIMEOUT } from './constants';
 import { ensureMapKitInitialized } from './ensureMapKitInit';
 
