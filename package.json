@@ -61,7 +61,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hydromoll/react-native-yamap-lite.git"
+    "url": "git+https://github.com/All-time-coding/react-native-yamap-lite.git"
   },
   "author": "hydromoll <hydromoll@mail.ru> (https://github.com/hydromoll)",
   "contributors": [
@@ -69,9 +69,9 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/hydromoll/react-native-yamap-lite/issues"
+    "url": "https://github.com/All-time-coding/react-native-yamap-lite/issues"
   },
-  "homepage": "https://github.com/hydromoll/react-native-yamap-lite#readme",
+  "homepage": "https://github.com/All-time-coding/react-native-yamap-lite#readme",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",
     "access": "public"
