@@ -2,7 +2,7 @@
   "compilerOptions": {
     "rootDir": ".",
     "paths": {
-      "@atc/react-native-yamap-lite": ["./src/index"]
+      "@exterio/react-native-yamap-lite": ["./src/index"]
     },
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,

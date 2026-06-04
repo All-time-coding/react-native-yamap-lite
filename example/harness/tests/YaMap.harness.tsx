@@ -7,7 +7,7 @@ import {
 } from 'react-native-harness';
 import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { YaMap, type YaMapRef } from '@atc/react-native-yamap-lite';
+import { YaMap, type YaMapRef } from '@exterio/react-native-yamap-lite';
 import { CAMERA_ANIMATION_TIMEOUT, INITIAL_REGION, MOSCOW } from '../constants';
 import { ensureMapKitInitialized } from '../ensureMapKitInit';
 import { expectNear, renderMap, waitForMapReady } from '../helpers';

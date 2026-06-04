@@ -1,4 +1,4 @@
-import { YamapUtils } from '@atc/react-native-yamap-lite';
+import { YamapUtils } from '@exterio/react-native-yamap-lite';
 import { YAMAP_API_KEY } from './constants';
 
 /** @type {Promise<void> | null} */
