@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Point, PolylineProps } from '../@types';
 import { type NativeSyntheticEvent } from 'react-native';
-import YamapLitePolylineView from '../YamapPolylineViewNativeComponents';
+import YamapLitePolylineView from '../YamapPolylineViewNativeComponent';
 
 export const Polyline: React.FC<PolylineProps> = ({
   onPress,

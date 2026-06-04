@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Point, PolygonProps } from '../@types';
 import { type NativeSyntheticEvent } from 'react-native';
-import YamapLitePolygonView from '../YamapPolygonViewNativeComponents';
+import YamapLitePolygonView from '../YamapPolygonViewNativeComponent';
 
 export const Polygon: React.FC<PolygonProps> = ({
   onPress,

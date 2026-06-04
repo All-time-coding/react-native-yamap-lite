@@ -661,7 +661,7 @@ describe('Marker', () => {
       );
     });
     const native = instance.root.findByType(
-      require('../YamapMarkerViewNativeComponents').default
+      require('../YamapMarkerViewNativeComponent').default
     );
     act(() => {
       native.props.onMarkerPress({ nativeEvent: { lat: 55.75, lon: 37.61 } });
@@ -675,7 +675,7 @@ describe('Marker', () => {
       instance = renderer.create(<Marker point={{ lat: 55.75, lon: 37.61 }} />);
     });
     const native = instance.root.findByType(
-      require('../YamapMarkerViewNativeComponents').default
+      require('../YamapMarkerViewNativeComponent').default
     );
     expect(() => {
       act(() => {
@@ -695,7 +695,7 @@ describe('Marker', () => {
       );
     });
     const native = instance.root.findByType(
-      require('../YamapMarkerViewNativeComponents').default
+      require('../YamapMarkerViewNativeComponent').default
     );
     expect(typeof native.props.source).toBe('string');
   });
@@ -705,7 +705,7 @@ describe('Marker', () => {
     act(() => {
       instance = renderer.create(<Marker point={{ lat: 55.75, lon: 37.61 }} />);
     });
-    const native = findNative(instance, '../YamapMarkerViewNativeComponents');
+    const native = findNative(instance, '../YamapMarkerViewNativeComponent');
     expect(native.props.source).toBe('');
   });
 
@@ -719,11 +719,11 @@ describe('Marker', () => {
       withoutZ = renderer.create(<Marker point={{ lat: 55.75, lon: 37.61 }} />);
     });
     expect(
-      findNative(withZ, '../YamapMarkerViewNativeComponents').props.zInd
+      findNative(withZ, '../YamapMarkerViewNativeComponent').props.zInd
     ).toBe(8);
     // Marker defaults zInd to 1 when zIndex is omitted (zIndex ?? 1)
     expect(
-      findNative(withoutZ, '../YamapMarkerViewNativeComponents').props.zInd
+      findNative(withoutZ, '../YamapMarkerViewNativeComponent').props.zInd
     ).toBe(1);
   });
 
@@ -741,7 +741,7 @@ describe('Marker', () => {
     });
 
     const native = instance.root.findByType(
-      require('../YamapMarkerViewNativeComponents').default
+      require('../YamapMarkerViewNativeComponent').default
     );
     expect(native.props.point).toEqual(newPoint);
   });
@@ -765,7 +765,7 @@ describe('Marker', () => {
     });
 
     const native = instance.root.findByType(
-      require('../YamapMarkerViewNativeComponents').default
+      require('../YamapMarkerViewNativeComponent').default
     );
     expect(native.props.point).toEqual({ lat: 60.0, lon: 31.0 });
   });
@@ -808,7 +808,7 @@ describe('Circle', () => {
     act(() => {
       instance = renderer.create(<Circle {...defaults} zIndex={7} />);
     });
-    const native = findNative(instance, '../YamapCircleViewNativeComponents');
+    const native = findNative(instance, '../YamapCircleViewNativeComponent');
     expect(native.props.zInd).toBe(7);
   });
 
@@ -819,7 +819,7 @@ describe('Circle', () => {
       instance = renderer.create(<Circle {...defaults} onPress={onPress} />);
     });
     const native = instance.root.findByType(
-      require('../YamapCircleViewNativeComponents').default
+      require('../YamapCircleViewNativeComponent').default
     );
     act(() => {
       native.props.onCirclePress({ nativeEvent: { lat: 55.75, lon: 37.61 } });
@@ -833,7 +833,7 @@ describe('Circle', () => {
       instance = renderer.create(<Circle {...defaults} />);
     });
     const native = instance.root.findByType(
-      require('../YamapCircleViewNativeComponents').default
+      require('../YamapCircleViewNativeComponent').default
     );
     expect(() => {
       act(() => {
@@ -878,7 +878,7 @@ describe('Polygon', () => {
     act(() => {
       instance = renderer.create(<Polygon points={pts} zIndex={9} />);
     });
-    const native = findNative(instance, '../YamapPolygonViewNativeComponents');
+    const native = findNative(instance, '../YamapPolygonViewNativeComponent');
     expect(native.props.zInd).toBe(9);
   });
 
@@ -889,7 +889,7 @@ describe('Polygon', () => {
       instance = renderer.create(<Polygon points={pts} onPress={onPress} />);
     });
     const native = instance.root.findByType(
-      require('../YamapPolygonViewNativeComponents').default
+      require('../YamapPolygonViewNativeComponent').default
     );
     act(() => {
       native.props.onPolygonPress({ nativeEvent: { lat: 55.75, lon: 37.61 } });
@@ -903,7 +903,7 @@ describe('Polygon', () => {
       instance = renderer.create(<Polygon points={pts} />);
     });
     const native = instance.root.findByType(
-      require('../YamapPolygonViewNativeComponents').default
+      require('../YamapPolygonViewNativeComponent').default
     );
     expect(() => {
       act(() => {
@@ -956,7 +956,7 @@ describe('Polyline', () => {
     act(() => {
       instance = renderer.create(<Polyline points={pts} zIndex={5} />);
     });
-    const native = findNative(instance, '../YamapPolylineViewNativeComponents');
+    const native = findNative(instance, '../YamapPolylineViewNativeComponent');
     expect(native.props.zInd).toBe(5);
   });
 
@@ -967,7 +967,7 @@ describe('Polyline', () => {
       instance = renderer.create(<Polyline points={pts} onPress={onPress} />);
     });
     const native = instance.root.findByType(
-      require('../YamapPolylineViewNativeComponents').default
+      require('../YamapPolylineViewNativeComponent').default
     );
     act(() => {
       native.props.onPolylinePress({ nativeEvent: { lat: 55.75, lon: 37.62 } });
@@ -981,7 +981,7 @@ describe('Polyline', () => {
       instance = renderer.create(<Polyline points={pts} />);
     });
     const native = instance.root.findByType(
-      require('../YamapPolylineViewNativeComponents').default
+      require('../YamapPolylineViewNativeComponent').default
     );
     expect(() => {
       act(() => {

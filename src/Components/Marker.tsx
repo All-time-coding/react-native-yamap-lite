@@ -7,7 +7,7 @@ import {
 } from 'react';
 import type { MarkerProps, MarkerRef, Point } from '../@types';
 import { Image, type NativeSyntheticEvent } from 'react-native';
-import YamapLiteMarkerView from '../YamapMarkerViewNativeComponents';
+import YamapLiteMarkerView from '../YamapMarkerViewNativeComponent';
 
 export const Marker = forwardRef<MarkerRef, MarkerProps>(
   ({ onPress, source, zIndex, point: pointProp, ...props }, ref) => {
