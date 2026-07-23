@@ -8,11 +8,11 @@ import com.yandex.mapkit.geometry.Point
 class PressEvent(
         surfaceId: Int,
         viewTag: Int,
-        private val eventName: String,
+        private val name: String,
         private val point: Point,
 ) : Event<PressEvent>(surfaceId, viewTag) {
 
-    override fun getEventName(): String = eventName
+    override fun getEventName(): String = name
 
     override fun getEventData(): WritableMap =
             Arguments.createMap().apply {

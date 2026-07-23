@@ -9,13 +9,13 @@ import com.yandex.mapkit.map.CameraUpdateReason
 class CameraPositionChangeEvent(
         surfaceId: Int,
         viewTag: Int,
-        private val eventName: String,
+        private val name: String,
         private val cameraPosition: CameraPosition,
         private val reason: CameraUpdateReason,
         private val finished: Boolean,
 ) : Event<CameraPositionChangeEvent>(surfaceId, viewTag) {
 
-    override fun getEventName(): String = eventName
+    override fun getEventName(): String = name
 
     override fun getEventData(): WritableMap =
             Arguments.createMap().apply {
