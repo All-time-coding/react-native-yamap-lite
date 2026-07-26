@@ -8,7 +8,11 @@
 #import <React/RCTBridge.h>
 #import <React/RCTUIManager.h>
 
+#if __has_include("YamapLite/YamapLite-Swift.h")
+#import "YamapLite/YamapLite-Swift.h"
+#else
 #import "YamapLite-Swift.h"
+#endif
 #import <YandexMapsMobile/YMKMapKitFactory.h>
 #import <YandexMapsMobile/YRTI18nManager.h>
 

@@ -17,7 +17,11 @@
 #import <react/renderer/components/YamapLiteViewSpec/RCTComponentViewHelpers.h>
 
 #import "RCTFabricComponentsPlugins.h"
+#if __has_include("YamapLite/YamapLite-Swift.h")
+#import "YamapLite/YamapLite-Swift.h"
+#else
 #import "YamapLite-Swift.h"
+#endif
 
 using namespace facebook::react;
 

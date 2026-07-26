@@ -8,7 +8,11 @@
 #import <React/RCTConversions.h>
 
 #import "RCTFabricComponentsPlugins.h"
+#if __has_include("YamapLite/YamapLite-Swift.h")
+#import "YamapLite/YamapLite-Swift.h"
+#else
 #import "YamapLite-Swift.h"
+#endif
 #import <react/renderer/components/YamapLiteViewSpec/ComponentDescriptors.h>
 #import <react/renderer/components/YamapLiteViewSpec/EventEmitters.h>
 #import <react/renderer/components/YamapLiteViewSpec/Props.h>
