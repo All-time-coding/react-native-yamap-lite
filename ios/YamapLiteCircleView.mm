@@ -13,7 +13,11 @@
 #import <react/renderer/graphics/Color.h>
 
 #import "RCTFabricComponentsPlugins.h"
+#if __has_include("YamapLite/YamapLite-Swift.h")
+#import "YamapLite/YamapLite-Swift.h"
+#else
 #import "YamapLite-Swift.h"
+#endif
 
 using namespace facebook::react;
 

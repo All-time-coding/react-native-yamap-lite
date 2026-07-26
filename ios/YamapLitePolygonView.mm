@@ -14,7 +14,11 @@
 
 #import "RCTFabricComponentsPlugins.h"
 #import "Utils/PointsEqual.h"
+#if __has_include("YamapLite/YamapLite-Swift.h")
+#import "YamapLite/YamapLite-Swift.h"
+#else
 #import "YamapLite-Swift.h"
+#endif
 #import <YandexMapsMobile/YMKMapKitFactory.h>
 
 using namespace facebook::react;
